@@ -1,0 +1,21 @@
+.layout-container {
+    display: flex;
+  }
+  
+  .sidebar-content {
+    width: 250px;
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    background-color: #2c3e50;
+    height: 100vh;
+    z-index: 1000;
+  }
+  
+  .main-content {
+    margin-left: 250px; 
+    padding: 20px;
+    width: calc(100% - 250px);
+    min-height: 80vh;
+  }
+  

@@ -1,8 +1,7 @@
-// Table.js
-import React, {  } from 'react';
+import React from 'react';
 import { useTable } from 'react-table';
 import { FaEdit, FaTrashAlt } from 'react-icons/fa';
-import "./table.css"
+import './table.css';
 
 const TableOne = ({ columns, data, handleDelete, handleEdit }) => {
     const {
@@ -17,38 +16,46 @@ const TableOne = ({ columns, data, handleDelete, handleEdit }) => {
     });
 
     return (
-        <table {...getTableProps()} className="table">
-            <thead>
-                {headerGroups.map(headerGroup => (
-                    <tr {...headerGroup.getHeaderGroupProps()}>
-                        {headerGroup.headers.map(column => (
-                            <th {...column.getHeaderProps()}>{column.render('Header')}</th>
-                        ))}
-                        <th>Actions</th>
-                    </tr>
-                ))}
-            </thead>
-            <tbody {...getTableBodyProps()}>
-                {rows.map(row => {
-                    prepareRow(row);
-                    return (
-                        <tr {...row.getRowProps()}>
-                            {row.cells.map(cell => (
-                                <td {...cell.getCellProps()}>{cell.render('Cell')}</td>
+        <div className="table-container">
+            <table {...getTableProps()} className="table">
+                <thead>
+                    {headerGroups.map(headerGroup => (
+                        <tr {...headerGroup.getHeaderGroupProps()} className="table-header-row">
+                            {headerGroup.headers.map(column => (
+                                <th {...column.getHeaderProps()} className="table-header">
+                                    {column.render('Header')}
+                                </th>
                             ))}
-                            <td>
-                                <button onClick={() => handleEdit(row.original)}>
-                                    <FaEdit />
-                                </button>
-                                <button onClick={() => handleDelete(row.original)}>
-                                    <FaTrashAlt />
-                                </button>
-                            </td>
+                            <th className="table-header">Actions</th>
                         </tr>
-                    );
-                })}
-            </tbody>
-        </table>
+                    ))}
+                </thead>
+                <tbody {...getTableBodyProps()}>
+                    {rows.map(row => {
+                        prepareRow(row);
+                        return (
+                            <tr {...row.getRowProps()} className="table-row">
+                                {row.cells.map(cell => (
+                                    <td {...cell.getCellProps()} className="table-cell">
+                                        {cell.render('Cell')}
+                                    </td>
+                                ))}
+                                <td className="table-cell">
+                                    <div className='tablebutton'>
+                                    <button className="btn-edit" onClick={() => handleEdit(row.original)}>
+                                        <FaEdit />
+                                    </button>
+                                    <button className="btn-delete" onClick={() => handleDelete(row.original)}>
+                                        <FaTrashAlt />
+                                    </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        );
+                    })}
+                </tbody>
+            </table>
+        </div>
     );
 };
 

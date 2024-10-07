@@ -2,7 +2,8 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    padding: 5rem 1rem;
+    /* padding: 5rem 1rem; */
+    height: 90vh;
 }
 
 .user-auth .form {

@@ -1,16 +1,16 @@
-// Layout.js
-import React from 'react';
-import SidebarComponent from './Sidebar';
+import React from "react";
+import SidebarComponent from "./Sidebar";
+import "./layout.css";
 
 const Layout = ({ children }) => {
-    return (
-        <div style={{ display: 'flex' }}>
-            <SidebarComponent />
-            <div style={{ flex: 1, padding: '20px' }}>
-                {children}
-            </div>
-        </div>
-    );
+  return (
+    <div className="layout-container">
+      <SidebarComponent /> 
+      <div className="main-content">
+        {children} 
+      </div>
+    </div>
+  );
 };
 
 export default Layout;
