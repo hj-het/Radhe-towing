@@ -1,0 +1,34 @@
+/* Table.css */
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+    /* margin-left: 20%; */
+}
+
+.table th,
+.table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+}
+
+.table th {
+    background-color: #f4f4f4;
+    text-align: left;
+}
+
+.table .form {
+    margin: 20px 0;
+}
+
+.table .form input {
+    padding: 10px;
+    margin: 5px;
+    width: 200px;
+}
+
+button {
+    padding: 10px 20px;
+    margin: 10px 0;
+    cursor: pointer;
+}
