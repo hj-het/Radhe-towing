@@ -1,6 +1,53 @@
-.maindash{
+.dashboard-container {
+    padding: 20px;
+  }
+  
+  h1 {
+    font-size: 24px;
+    margin-bottom: 20px;
+  }
+  
+  .dashboard-content {
     display: flex;
-    justify-content: center;
-    align-items: center;
+    gap: 20px;
+  }
+  
+  .chart-container {
+    width: 65%;
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+  
+  .info-cards {
+    width: 30%;
+    display: flex;
     flex-direction: column;
-}
+    gap: 20px;
+  }
+  
+  .info-card {
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+  
+  .info-card h3 {
+    margin-bottom: 10px;
+    font-size: 18px;
+  }
+  
+  .info-card h2 {
+    margin-bottom: 10px;
+    font-size: 28px;
+  }
+  
+  .growth {
+    color: green;
+    font-size: 18px;
+    margin-left: 10px;
+  }
+  
+  

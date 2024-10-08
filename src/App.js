@@ -11,27 +11,103 @@ import Employees from './Components/Employees';
 import Vehicle from './Components/Vehicle';
 import Login from './Auth/Login';
 import Layout from './Sidebar/Layout';
+import { AuthProvider } from './Context/AuthContext'; // Import AuthProvider
+import ProtectedRoute from './Context/ProtectedRoute';
 
 function App() {
     return (
-        <Router>
-            <Routes>
-                {/* Login page without sidebar */}
-                <Route path="/" element={<Login />} />
+        <AuthProvider>
+            <Router>
+                <Routes>
+                    {/* Login page without sidebar */}
+                    <Route path="/" element={<Login />} />
 
-                {/* Pages with sidebar */}
-                <Route path="/dashboard" element={<Layout><Dashboard /></Layout>} />
-                <Route path="/member" element={<Layout><Member /></Layout>} />
-                <Route path="/employees" element={<Layout><Employees /></Layout>} />
-                <Route path="/vehicle" element={<Layout><Vehicle /></Layout>} />
-                <Route path="/plan" element={<Layout><Plan /></Layout>} />
-                <Route path="/payment" element={<Layout><Payment /></Layout>} />
-                <Route path="/service" element={<Layout><Service /></Layout>} />
-                <Route path="/city" element={<Layout><City /></Layout>} />
-                <Route path="/state" element={<Layout><State /></Layout>} />
-                <Route path="/country" element={<Layout><Country /></Layout>} />
-            </Routes>
-        </Router>
+                    {/* Pages accessible to both admin and employee */}
+                    <Route 
+                        path="/dashboard" 
+                        element={
+                            <ProtectedRoute allowedRoles={['admin', 'employee']}>
+                                <Layout><Dashboard /></Layout>
+                            </ProtectedRoute>
+                        } 
+                    />
+                    <Route 
+                        path="/member" 
+                        element={
+                            <ProtectedRoute allowedRoles={['admin', 'employee']}>
+                                <Layout><Member /></Layout>
+                            </ProtectedRoute>
+                        } 
+                    />
+                    <Route 
+                        path="/vehicle" 
+                        element={
+                            <ProtectedRoute allowedRoles={['admin', 'employee']}>
+                                <Layout><Vehicle /></Layout>
+                            </ProtectedRoute>
+                        } 
+                    />
+                    <Route 
+                        path="/payment" 
+                        element={
+                            <ProtectedRoute allowedRoles={['admin', 'employee']}>
+                                <Layout><Payment /></Layout>
+                            </ProtectedRoute>
+                        } 
+                    />
+
+                    {/* Pages accessible only to admin */}
+                    <Route 
+                        path="/employees" 
+                        element={
+                            <ProtectedRoute allowedRoles={['admin']}>
+                                <Layout><Employees /></Layout>
+                            </ProtectedRoute>
+                        } 
+                    />
+                    <Route 
+                        path="/plan" 
+                        element={
+                            <ProtectedRoute allowedRoles={['admin']}>
+                                <Layout><Plan /></Layout>
+                            </ProtectedRoute>
+                        } 
+                    />
+                    <Route 
+                        path="/service" 
+                        element={
+                            <ProtectedRoute allowedRoles={['admin']}>
+                                <Layout><Service /></Layout>
+                            </ProtectedRoute>
+                        } 
+                    />
+                    <Route 
+                        path="/city" 
+                        element={
+                            <ProtectedRoute allowedRoles={['admin']}>
+                                <Layout><City /></Layout>
+                            </ProtectedRoute>
+                        } 
+                    />
+                    <Route 
+                        path="/state" 
+                        element={
+                            <ProtectedRoute allowedRoles={['admin']}>
+                                <Layout><State /></Layout>
+                            </ProtectedRoute>
+                        } 
+                    />
+                    <Route 
+                        path="/country" 
+                        element={
+                            <ProtectedRoute allowedRoles={['admin']}>
+                                <Layout><Country /></Layout>
+                            </ProtectedRoute>
+                        } 
+                    />
+                </Routes>
+            </Router>
+        </AuthProvider>
     );
 }
 

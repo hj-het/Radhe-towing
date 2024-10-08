@@ -1,13 +1,12 @@
 import React, { useState, useContext } from 'react';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import axios from 'axios';
 import { AuthContext } from '../Context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import "./../Auth/user-auth.css";
 
 const Login = () => {
-    const auth = useContext(AuthContext);
+    const auth = useContext(AuthContext); // Use AuthContext for login and role
     const [username, setUsername] = useState(""); // Username input only
     const [password, setPassword] = useState("");
     const navigate = useNavigate();
@@ -15,41 +14,50 @@ const Login = () => {
     const onSubmit = async (event) => {
         event.preventDefault();
 
-        const payload = {
-            username,
-            password,
+        // Create payload for fetch request
+        const payload = JSON.stringify({
+            Username: username, // API expects keys 'Username' and 'Password'
+            Password: password
+        });
+
+        // Fetch API options
+        const requestOptions = {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: payload,
+            redirect: "follow"
         };
 
         try {
-            const response = await axios.post('https://dev.finnovationz.com:3250/api/admin/login', payload);
-            const user = response.data.data.user; // User info
+            const response = await fetch('https://panel.radhetowing.com/api/login', requestOptions);
+            const result = await response.json(); // Parse JSON response
 
-            if (!user) {
-                toast.error("Invalid login credentials");
+            if (!result.success) {
+                toast.error(result.message || "Invalid login credentials");
                 return;
             }
 
+            const { role, Username, id } = result.data; // Extract user data from response
+
             // Login and store user info and role in context
-            const userRole = user.role; // Assuming 'role' is part of user data (either 'Admin' or 'Employee')
-            auth.login(user, userRole);
+            auth.login({ username: Username, id }, role);
 
             // Display success toast
             toast.success("Login successful");
 
-            // Navigate based on user role
-            if (userRole === "Admin") {
-                navigate('/admin/dashboard'); // Navigate to admin dashboard
-            } else if (userRole === "Employee") {
-                navigate('/employee/dashboard'); // Navigate to employee dashboard
+            // Navigate based on role
+            if (role === "admin") {
+                navigate('/dashboard'); // Navigate to admin dashboard
+            } else if (role === "employee") {
+                navigate('/member'); // Navigate to member page for employee
             } else {
                 toast.error("Unknown role");
             }
         } catch (error) {
-            if (axios.isAxiosError(error)) {
-                toast.error('Login failed: ' + (error.response?.data?.message || error.message));
-            } else {
-                toast.error('An unexpected error occurred.');
-            }
+            console.error(error);
+            toast.error('Login failed: ' + error.message);
         }
     };
 
@@ -59,7 +67,7 @@ const Login = () => {
             <form className="form" onSubmit={onSubmit}>
                 <h1 className="heading">Login</h1>
 
-                {/* Single input field for username */}
+                {/* Input field for username */}
                 <input
                     type="text"
                     placeholder="Username"
@@ -68,6 +76,7 @@ const Login = () => {
                     onChange={(e) => setUsername(e.target.value)}
                 />
 
+                {/* Input field for password */}
                 <input
                     type="password"
                     placeholder="Password"
@@ -76,6 +85,7 @@ const Login = () => {
                     onChange={(e) => setPassword(e.target.value)}
                 />
 
+                {/* Submit button */}
                 <button className="btn" disabled={!username || !password}>
                     Login
                 </button>
