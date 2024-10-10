@@ -4,15 +4,28 @@ import Modal from "react-modal";
 import { FaPlus } from "react-icons/fa";
 import TableOne from "../Table/TableOne";
 import "./../Style/employees.css";
+import {
+  FaUser,
+  FaLock,
+  FaCalendarAlt,
+  FaPhoneAlt,
+  FaEnvelope,
+  FaEye,
+  FaEyeSlash,
+} from "react-icons/fa";
 
-
-Modal.setAppElement("#root"); 
+Modal.setAppElement("#root");
 
 const Employees = () => {
-  const [employees, setEmployees] = useState([]); 
-  const [editingEmployee, setEditingEmployee] = useState(null); 
+  const [employees, setEmployees] = useState([]);
+  const [editingEmployee, setEditingEmployee] = useState(null);
+  const [deleteEmployeeId, setDeleteEmployeeId] = useState(null); // For delete confirmation
+  const [deleteEmployeeName, setDeleteEmployeeName] = useState("");
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const [newEmployee, setNewEmployee] = useState({
     Username: "",
+    Password: "",
     FirstName: "",
     LastName: "",
     DOB: "",
@@ -32,6 +45,7 @@ const Employees = () => {
         const employeeData = response.data.data.map((emp) => ({
           id: emp.id,
           Username: emp.Username,
+          Password: emp.Password,
           FirstName: emp.FirstName,
           LastName: emp.LastName,
           DOB: emp.DOB,
@@ -40,6 +54,7 @@ const Employees = () => {
           Email: emp.Email,
         }));
         setEmployees(employeeData);
+        console.log("employeeData-->", employeeData);
       } catch (error) {
         console.error("Error fetching employee data:", error);
       }
@@ -49,35 +64,43 @@ const Employees = () => {
   }, []);
 
   // Handle delete operation
-  const handleDelete = (employee) => {
-    setEmployees(employees.filter((e) => e.id !== employee.id));
+  const handleDelete = async (employeeId) => {
+    try {
+      const response = await axios.delete(
+        `https://panel.radhetowing.com/api/employee/delete/${employeeId}`
+      );
+
+      if (response.data.success) {
+        setEmployees(employees.filter((e) => e.id !== employeeId));
+        setShowDeleteModal(false);
+      } else {
+        console.error("Error deleting employee:", response.data.message);
+      }
+    } catch (error) {
+      console.error("Error deleting employee:", error);
+    }
+  };
+
+  // Trigger delete confirmation modal
+  const triggerDeleteModal = (employeeId, employeeName) => {
+    setDeleteEmployeeId(employeeId);
+    setDeleteEmployeeName(employeeName);
+    setShowDeleteModal(true);
   };
 
   // Handle edit operation
-const handleEdit = (employee) => {
+  const handleEdit = (employee) => {
     setEditingEmployee(employee);
-    setNewEmployee(employee); // Populate the form with the selected employee's data
+    setNewEmployee(employee); // Populate the form with employee data
     setModalIsOpen(true);
-};
-  // Handle form submission for both adding and updating employees
-  const handleSave = () => {
-    if (editingEmployee) {
-      setEmployees(
-        employees.map((e) =>
-          e.id === editingEmployee.id ? editingEmployee : e
-        )
-      );
-      setEditingEmployee(null);
-    } else {
-      const newId = employees.length
-        ? employees[employees.length - 1].id + 1
-        : 1;
-      setEmployees([...employees, { id: newId, ...newEmployee }]);
-    }
+  };
 
-    // Reset the form
+  // Handle opening the "Add Employee" modal
+  const handleOpenAddModal = () => {
+    // Reset the form for adding a new employee
     setNewEmployee({
       Username: "",
+      Password: "",
       FirstName: "",
       LastName: "",
       DOB: "",
@@ -85,101 +108,282 @@ const handleEdit = (employee) => {
       Contact: "",
       Email: "",
     });
-    setModalIsOpen(false); // Close the modal after saving
+    setEditingEmployee(null); // Ensure that we're not editing any employee
+    setModalIsOpen(true); // Open modal
+  };
+
+  // Function to Add a New Employee
+  const addEmployee = async () => {
+    const payload = {
+      Username: newEmployee.Username,
+      Password: newEmployee.Password,
+      FirstName: newEmployee.FirstName,
+      LastName: newEmployee.LastName,
+      DOB: newEmployee.DOB,
+      DOJ: newEmployee.DOJ,
+      Contact: newEmployee.Contact,
+      Email: newEmployee.Email,
+    };
+
+    try {
+      const response = await axios.post(
+        "https://panel.radhetowing.com/api/employee/add",
+        payload
+      );
+
+      if (response.data.success) {
+        // Add the new employee to the list
+        const newId = employees.length
+          ? employees[employees.length - 1].id + 1
+          : 1;
+        setEmployees([...employees, { id: newId, ...newEmployee }]);
+
+        // Reset the form
+        setNewEmployee({
+          Username: "",
+          Password: "",
+          FirstName: "",
+          LastName: "",
+          DOB: "",
+          DOJ: "",
+          Contact: "",
+          Email: "",
+        });
+
+        // Close the modal
+        setModalIsOpen(false);
+      } else {
+        console.error("Error adding employee:", response.data.message);
+      }
+    } catch (error) {
+      console.error("Error adding employee:", error);
+    }
+  };
+
+  // Function to Edit/Update an Employee
+  const editEmployee = async () => {
+    const payload = {
+      Username: newEmployee.Username,
+      Password: newEmployee.Password,
+      FirstName: newEmployee.FirstName,
+      LastName: newEmployee.LastName,
+      DOB: newEmployee.DOB,
+      DOJ: newEmployee.DOJ,
+      Contact: newEmployee.Contact,
+      Email: newEmployee.Email,
+    };
+
+    try {
+      const response = await axios.put(
+        `https://panel.radhetowing.com/api/employee/update/${editingEmployee.id}`,
+        payload
+      );
+
+      if (response.data.success) {
+        setEmployees(
+          employees.map((e) =>
+            e.id === editingEmployee.id ? { id: e.id, ...payload } : e
+          )
+        );
+        setEditingEmployee(null);
+        setModalIsOpen(false);
+      } else {
+        console.error("Error updating employee:", response.data.message);
+      }
+    } catch (error) {
+      console.error("Error updating employee:", error);
+    }
+  };
+
+  const handleSave = () => {
+    if (editingEmployee) {
+      editEmployee(); // Call the edit function if we are editing
+    } else {
+      addEmployee(); // Call the add function if we are adding a new employee
+    }
+  };
+
+  // Function to format date in 'DD-MM-YYYY' format
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    const day = String(date.getDate()).padStart(2, "0"); // Get day and pad with 0 if needed
+    const month = String(date.getMonth() + 1).padStart(2, "0"); // Get month (0-indexed) and pad with 0
+    const year = date.getFullYear(); // Get year
+    return `${day}-${month}-${year}`; // Return in 'DD-MM-YYYY' format
   };
 
   // Table columns
   const columns = [
-    { Header: "ID", accessor: "id" },
+    {
+      Header: "ID",
+      accessor: (row, index) => index + 1, // Use index as row number
+      id: "index", // Optional: Set an ID for the column
+    },
     { Header: "Username", accessor: "Username" },
+    // { Header: "Password", accessor: "Password" },
     { Header: "First Name", accessor: "FirstName" },
     { Header: "Last Name", accessor: "LastName" },
-    { Header: "DOB", accessor: "DOB" },
-    { Header: "DOJ", accessor: "DOJ" },
+    { Header: "DOB", accessor: (row) => formatDate(row.DOB) }, // Format DOB
+    { Header: "DOJ", accessor: (row) => formatDate(row.DOJ) }, // Format DOJ
     { Header: "Contact", accessor: "Contact" },
     { Header: "Email", accessor: "Email" },
   ];
 
   return (
     <div className="employees-page">
-      <h1>Employees Management</h1>
+      <h1>Employees </h1>
 
       {/* Add Employee Button */}
       <div className="AddButton">
-      <button onClick={() => setModalIsOpen(true)} className="add-btn">
-        <FaPlus /> Add Employee
-      </button>
-       </div>
-
-   
+        <button onClick={handleOpenAddModal} className="add-btn">
+          <FaPlus /> Add Employee
+        </button>
+      </div>
 
       {/* Add/Edit Modal */}
       <Modal
         isOpen={modalIsOpen}
         onRequestClose={() => setModalIsOpen(false)}
-        contentLabel="Add/Edit Member"
+        contentLabel="Add/Edit Employee"
         className="modal"
         overlayClassName="modal-overlay"
       >
         <h2>{editingEmployee ? "Edit Employee" : "Add New Employee"}</h2>
-        
+
         <div className="form">
-          <input
-            type="text"
-            placeholder="Username"
-            value={newEmployee.Username}
-            onChange={(e) =>
-              setNewEmployee({ ...newEmployee, Username: e.target.value })
-            }
-          />
-          <input
-            type="text"
-            placeholder="First Name"
-            value={newEmployee.FirstName}
-            onChange={(e) =>
-              setNewEmployee({ ...newEmployee, FirstName: e.target.value })
-            }
-          />
-          <input
-            type="text"
-            placeholder="Last Name"
-            value={newEmployee.LastName}
-            onChange={(e) =>
-              setNewEmployee({ ...newEmployee, LastName: e.target.value })
-            }
-          />
-          <input
-            type="date"
-            placeholder="Date of Birth"
-            value={newEmployee.DOB}
-            onChange={(e) =>
-              setNewEmployee({ ...newEmployee, DOB: e.target.value })
-            }
-          />
-          <input
-            type="date"
-            placeholder="Date of Joining"
-            value={newEmployee.DOJ}
-            onChange={(e) =>
-              setNewEmployee({ ...newEmployee, DOJ: e.target.value })
-            }
-          />
-          <input
-            type="text"
-            placeholder="Contact"
-            value={newEmployee.Contact}
-            onChange={(e) =>
-              setNewEmployee({ ...newEmployee, Contact: e.target.value })
-            }
-          />
-          <input
-            type="email"
-            placeholder="Email"
-            value={newEmployee.Email}
-            onChange={(e) =>
-              setNewEmployee({ ...newEmployee, Email: e.target.value })
-            }
-          />
+          {/* Username Input with Icon */}
+          <div className="input-with-icon">
+            <FaUser className="input-icon" />
+            <input
+              type="text"
+              placeholder="Username"
+              value={newEmployee.Username}
+              onChange={(e) =>
+                setNewEmployee({ ...newEmployee, Username: e.target.value })
+              }
+            />
+          </div>
+
+          {/* Password Input with Icon */}
+          <div className="input-with-icon">
+            <FaLock className="input-icon" />
+
+            <input
+              type={showPassword ? "text" : "password"} // Toggle input type between text and password
+              placeholder="Password"
+              value={newEmployee.Password || ""}
+              onChange={(e) =>
+                setNewEmployee({ ...newEmployee, Password: e.target.value })
+              }
+            />
+
+            <span
+              className="eye-icon"
+              onClick={() => setShowPassword(!showPassword)} // Toggle password visibility
+              style={{
+                position: "absolute",
+                right: "10px",
+                cursor: "pointer",
+                color: "#888",
+              }}
+            >
+              {showPassword ? <FaEyeSlash /> : <FaEye />}
+            </span>
+          </div>
+         
+          <div className="namefield">
+            {/* First Name Input with Icon */}
+            <div className="input-with-icon">
+              <FaUser className="input-icon" />
+              <input
+                type="text"
+                placeholder="First Name"
+                value={newEmployee.FirstName}
+                onChange={(e) =>
+                  setNewEmployee({ ...newEmployee, FirstName: e.target.value })
+                }
+              />
+            </div>
+
+            {/* Last Name Input with Icon */}
+            <div className="input-with-icon">
+              <FaUser className="input-icon" />
+              <input
+                type="text"
+                placeholder="Last Name"
+                value={newEmployee.LastName}
+                onChange={(e) =>
+                  setNewEmployee({ ...newEmployee, LastName: e.target.value })
+                }
+              />
+            </div>
+          </div>
+          <div className="datefield">
+            {/* Date of Birth Input with Icon */}
+            <div className="input-with-icon">
+              <FaCalendarAlt className="input-icon" />
+              <input
+                type="text"
+                onFocus={(e) => (e.target.type = "date")}
+                onBlur={(e) =>
+                  e.target.value === ""
+                    ? (e.target.type = "text")
+                    : (e.target.type = "date")
+                }
+                placeholder="Date of Birth"
+                value={newEmployee.DOB ? formatDate(newEmployee.DOB) : ""}
+                onChange={(e) =>
+                  setNewEmployee({ ...newEmployee, DOB: e.target.value })
+                }
+              />
+            </div>
+
+            {/* Date of Joining Input with Icon */}
+            <div className="input-with-icon">
+              <FaCalendarAlt className="input-icon" />
+              <input
+                type="text"
+                onFocus={(e) => (e.target.type = "date")}
+                onBlur={(e) =>
+                  e.target.value === ""
+                    ? (e.target.type = "text")
+                    : (e.target.type = "date")
+                }
+                placeholder="Date of Joining"
+                value={newEmployee.DOJ ? formatDate(newEmployee.DOJ) : ""}
+                onChange={(e) =>
+                  setNewEmployee({ ...newEmployee, DOJ: e.target.value })
+                }
+              />
+            </div>
+          </div>
+
+          {/* Contact Input with Icon */}
+          <div className="input-with-icon">
+            <FaPhoneAlt className="input-icon" />
+            <input
+              type="text"
+              placeholder="Contact"
+              value={newEmployee.Contact}
+              onChange={(e) =>
+                setNewEmployee({ ...newEmployee, Contact: e.target.value })
+              }
+            />
+          </div>
+
+          {/* Email Input with Icon */}
+          <div className="input-with-icon">
+            <FaEnvelope className="input-icon" />
+            <input
+              type="email"
+              placeholder="Email"
+              value={newEmployee.Email}
+              onChange={(e) =>
+                setNewEmployee({ ...newEmployee, Email: e.target.value })
+              }
+            />
+          </div>
+
           <div className="modelbutton">
             <button onClick={handleSave} className="btn-editmodel">
               {editingEmployee ? "Update Employee" : "Add Employee"}
@@ -195,11 +399,47 @@ const handleEdit = (employee) => {
         </div>
       </Modal>
 
+      {/* Delete Confirmation Modal */}
+      {showDeleteModal && (
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <h3>Confirm Delete</h3>
+            <p>
+              Are you sure you want to delete{" "}
+              <span style={{ fontWeight: 700, color: "#ee5757" }}>
+                {deleteEmployeeName}
+              </span>
+              ?
+            </p>
+
+            <div className="modal-buttons">
+              <button
+                className="btn-confirm"
+                onClick={() => handleDelete(deleteEmployeeId)}
+              >
+                Yes, Delete
+              </button>
+              <button
+                className="btn-cancel"
+                onClick={() => setShowDeleteModal(false)}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Employees Table */}
       <TableOne
         columns={columns}
         data={employees}
-        handleDelete={handleDelete}
+        handleDelete={(employee) =>
+          triggerDeleteModal(
+            employee.id,
+            `${employee.FirstName} ${employee.LastName}`
+          )
+        }
         handleEdit={handleEdit}
       />
     </div>

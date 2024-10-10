@@ -60,10 +60,13 @@ const Header = () => {
         </div>
 
         <div className="header-right">
-          {/* Profile Section: clicking the img toggles the dropdown */}
           <div className="profile-section" onClick={toggleDropdown}>
             <img
-              src="https://via.placeholder.com/40" // Replace with your profile pic
+              src={
+                localStorage.getItem("role") === "admin"
+                  ? "/images/admin.png" 
+                  : "/images/user.png" 
+              }
               alt="Profile"
               className="profile-pic"
             />
@@ -75,7 +78,8 @@ const Header = () => {
               <ul>
                 <li>My Profile</li>
                 <li>Change Password</li>
-                <li onClick={handleLogoutClick}>Logout</li> {/* Handle logout click */}
+                <li onClick={handleLogoutClick}>Logout</li>{" "}
+                {/* Handle logout click */}
               </ul>
             </div>
           )}

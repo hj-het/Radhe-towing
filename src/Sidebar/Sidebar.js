@@ -8,8 +8,8 @@ import {
   FaMoneyBillAlt,
   FaWrench,
   FaCity,
-  FaFlag,
-  FaGlobe,
+  // FaFlag,
+  // FaGlobe,
 } from "react-icons/fa";
 import { AiOutlineTeam } from "react-icons/ai";
 import { AuthContext } from "../Context/AuthContext"; 
@@ -87,7 +87,7 @@ const SidebarComponent = () => {
                     <FaCity /> City
                   </Link>
                 </li>
-                <li>
+                {/* <li>
                   <Link to="/state">
                     <FaFlag /> State
                   </Link>
@@ -96,7 +96,7 @@ const SidebarComponent = () => {
                   <Link to="/country">
                     <FaGlobe /> Country
                   </Link>
-                </li>
+                </li> */}
               </>
             )}
           </ul>
