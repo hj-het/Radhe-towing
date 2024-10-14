@@ -23,6 +23,7 @@ const Employees = () => {
   const [deleteEmployeeName, setDeleteEmployeeName] = useState("");
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [errors, setErrors] = useState({}); // To track validation errors
   const [newEmployee, setNewEmployee] = useState({
     Username: "",
     Password: "",
@@ -63,6 +64,31 @@ const Employees = () => {
     fetchEmployees();
   }, []);
 
+  // Validation function to check form inputs
+  const validateForm = () => {
+    const newErrors = {};
+
+    if (!newEmployee.Username) newErrors.Username = "Username is required";
+    if (!newEmployee.Password) newErrors.Password = "Password is required";
+    if (!newEmployee.FirstName) newErrors.FirstName = "First Name is required";
+    if (!newEmployee.LastName) newErrors.LastName = "Last Name is required";
+    if (!newEmployee.DOB) newErrors.DOB = "Date of Birth is required";
+    if (!newEmployee.DOJ) newErrors.DOJ = "Date of Joining is required";
+    if (!newEmployee.Contact) newErrors.Contact = "Contact number is required";
+    else if (!/^\d+$/.test(newEmployee.Contact))
+      newErrors.Contact = "Contact should only contain numbers";
+    else if (newEmployee.Contact.length < 10 || newEmployee.Contact.length > 15)
+      newErrors.Contact = "Contact should be between 10-15 digits";
+    if (!newEmployee.Email) newErrors.Email = "Email is required";
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(newEmployee.Email))
+      newErrors.Email = "Email is invalid";
+
+    setErrors(newErrors);
+
+    // Return true if no errors
+    return Object.keys(newErrors).length === 0;
+  };
+
   // Handle delete operation
   const handleDelete = async (employeeId) => {
     try {
@@ -91,7 +117,7 @@ const Employees = () => {
   // Handle edit operation
   const handleEdit = (employee) => {
     setEditingEmployee(employee);
-    setNewEmployee(employee); // Populate the form with employee data
+    setNewEmployee(employee); 
     setModalIsOpen(true);
   };
 
@@ -110,6 +136,7 @@ const Employees = () => {
     });
     setEditingEmployee(null); // Ensure that we're not editing any employee
     setModalIsOpen(true); // Open modal
+    setErrors({}); // Reset errors when opening modal
   };
 
   // Function to Add a New Employee
@@ -196,10 +223,12 @@ const Employees = () => {
   };
 
   const handleSave = () => {
-    if (editingEmployee) {
-      editEmployee(); // Call the edit function if we are editing
-    } else {
-      addEmployee(); // Call the add function if we are adding a new employee
+    if (validateForm()) {
+      if (editingEmployee) {
+        editEmployee(); // Call the edit function if we are editing
+      } else {
+        addEmployee(); // Call the add function if we are adding a new employee
+      }
     }
   };
 
@@ -252,113 +281,157 @@ const Employees = () => {
 
         <div className="form">
           {/* Username Input with Icon */}
-          <div className="input-with-icon">
-            <FaUser className="input-icon" />
-            <input
-              type="text"
-              placeholder="Username"
-              value={newEmployee.Username}
-              onChange={(e) =>
-                setNewEmployee({ ...newEmployee, Username: e.target.value })
-              }
-            />
+          <div className="input-error">
+            <div className="input-with-icon">
+              <FaUser className="input-icon" />
+              <input
+                type="text"
+                placeholder="Username"
+                value={newEmployee.Username}
+                onChange={(e) =>
+                  setNewEmployee({ ...newEmployee, Username: e.target.value })
+                }
+              />
+            </div>
+            <div className="error">
+              {errors.Username && (
+                <span className="error-text">{errors.Username}</span>
+              )}
+            </div>
           </div>
 
           {/* Password Input with Icon */}
-          <div className="input-with-icon">
-            <FaLock className="input-icon" />
-
-            <input
-              type={showPassword ? "text" : "password"} // Toggle input type between text and password
-              placeholder="Password"
-              value={newEmployee.Password || ""}
-              onChange={(e) =>
-                setNewEmployee({ ...newEmployee, Password: e.target.value })
-              }
-            />
-
-            <span
-              className="eye-icon"
-              onClick={() => setShowPassword(!showPassword)} // Toggle password visibility
-              style={{
-                position: "absolute",
-                right: "10px",
-                cursor: "pointer",
-                color: "#888",
-              }}
-            >
-              {showPassword ? <FaEyeSlash /> : <FaEye />}
-            </span>
-          </div>
-         
-          <div className="namefield">
-            {/* First Name Input with Icon */}
+          <div className="input-error">
             <div className="input-with-icon">
-              <FaUser className="input-icon" />
+              <FaLock className="input-icon" />
+
               <input
-                type="text"
-                placeholder="First Name"
-                value={newEmployee.FirstName}
+                type={showPassword ? "text" : "password"} // Toggle input type between text and password
+                placeholder="Password"
+                value={newEmployee.Password || ""}
                 onChange={(e) =>
-                  setNewEmployee({ ...newEmployee, FirstName: e.target.value })
+                  setNewEmployee({ ...newEmployee, Password: e.target.value })
                 }
               />
+
+              <span
+                className="eye-icon"
+                onClick={() => setShowPassword(!showPassword)} // Toggle password visibility
+                style={{
+                  position: "absolute",
+                  right: "10px",
+                  cursor: "pointer",
+                  color: "#888",
+                }}
+              >
+                {showPassword ? <FaEyeSlash /> : <FaEye />}
+              </span>
+            </div>
+            <div className="error">
+              {errors.Password && (
+                <span className="error-text">{errors.Password}</span>
+              )}
+            </div>
+          </div>
+
+          <div className="namefield">
+            {/* First Name Input with Icon */}
+            <div className="input-error">
+              <div className="input-with-icon">
+                <FaUser className="input-icon" />
+                <input
+                  type="text"
+                  placeholder="First Name"
+                  value={newEmployee.FirstName}
+                  onChange={(e) =>
+                    setNewEmployee({
+                      ...newEmployee,
+                      FirstName: e.target.value,
+                    })
+                  }
+                />
+              </div>
+              <div className="error">
+                {errors.FirstName && (
+                  <span className="error-text">{errors.FirstName}</span>
+                )}
+              </div>
             </div>
 
             {/* Last Name Input with Icon */}
-            <div className="input-with-icon">
-              <FaUser className="input-icon" />
-              <input
-                type="text"
-                placeholder="Last Name"
-                value={newEmployee.LastName}
-                onChange={(e) =>
-                  setNewEmployee({ ...newEmployee, LastName: e.target.value })
-                }
-              />
+            <div className="input-error">
+              <div className="input-with-icon">
+                <FaUser className="input-icon" />
+                <input
+                  type="text"
+                  placeholder="Last Name"
+                  value={newEmployee.LastName}
+                  onChange={(e) =>
+                    setNewEmployee({ ...newEmployee, LastName: e.target.value })
+                  }
+                />
+              </div>
+              <div className="error">
+                {errors.LastName && (
+                  <span className="error-text">{errors.LastName}</span>
+                )}
+              </div>
             </div>
           </div>
+
           <div className="datefield">
             {/* Date of Birth Input with Icon */}
-            <div className="input-with-icon">
-              <FaCalendarAlt className="input-icon" />
-              <input
-                type="text"
-                onFocus={(e) => (e.target.type = "date")}
-                onBlur={(e) =>
-                  e.target.value === ""
-                    ? (e.target.type = "text")
-                    : (e.target.type = "date")
-                }
-                placeholder="Date of Birth"
-                value={newEmployee.DOB ? formatDate(newEmployee.DOB) : ""}
-                onChange={(e) =>
-                  setNewEmployee({ ...newEmployee, DOB: e.target.value })
-                }
-              />
+            <div className="input-error">
+              <div className="input-with-icon">
+                <FaCalendarAlt className="input-icon" />
+                <input
+                  type="text"
+                  onFocus={(e) => (e.target.type = "date")}
+                  onBlur={(e) =>
+                    e.target.value === ""
+                      ? (e.target.type = "text")
+                      : (e.target.type = "date")
+                  }
+                  placeholder="Date of Birth"
+                  value={newEmployee.DOB ? formatDate(newEmployee.DOB) : ""}
+                  onChange={(e) =>
+                    setNewEmployee({ ...newEmployee, DOB: e.target.value })
+                  }
+                />
+              </div>
+              <div className="error">
+                {errors.DOB && <span className="error-text">{errors.DOB}</span>}
+              </div>
             </div>
 
             {/* Date of Joining Input with Icon */}
-            <div className="input-with-icon">
-              <FaCalendarAlt className="input-icon" />
-              <input
-                type="text"
-                onFocus={(e) => (e.target.type = "date")}
-                onBlur={(e) =>
-                  e.target.value === ""
-                    ? (e.target.type = "text")
-                    : (e.target.type = "date")
-                }
-                placeholder="Date of Joining"
-                value={newEmployee.DOJ ? formatDate(newEmployee.DOJ) : ""}
-                onChange={(e) =>
-                  setNewEmployee({ ...newEmployee, DOJ: e.target.value })
-                }
-              />
+            <div className="input-error">
+              <div className="input-with-icon">
+                <FaCalendarAlt className="input-icon" />
+                <input
+                  type="text"
+                  onFocus={(e) => (e.target.type = "date")}
+                  onBlur={(e) =>
+                    e.target.value === ""
+                      ? (e.target.type = "text")
+                      : (e.target.type = "date")
+                  }
+                  placeholder="Date of Joining"
+                  value={newEmployee.DOJ ? formatDate(newEmployee.DOJ) : ""}
+                  onChange={(e) =>
+                    setNewEmployee({ ...newEmployee, DOJ: e.target.value })
+                  }
+                />
+              </div>
+              <div className="error">
+                {errors.DOJ && <span className="error-text">{errors.DOJ}</span>}
+              </div>
             </div>
           </div>
 
           {/* Contact Input with Icon */}
+          <div className="input-error">
+
           <div className="input-with-icon">
             <FaPhoneAlt className="input-icon" />
             <input
@@ -369,9 +442,18 @@ const Employees = () => {
                 setNewEmployee({ ...newEmployee, Contact: e.target.value })
               }
             />
+    
+          </div>
+          <div className="erroe">
+          {errors.Contact && (
+              <span className="error-text">{errors.Contact}</span>
+            )}
+          </div>
           </div>
 
           {/* Email Input with Icon */}
+          <div className="input-error">
+
           <div className="input-with-icon">
             <FaEnvelope className="input-icon" />
             <input
@@ -382,6 +464,11 @@ const Employees = () => {
                 setNewEmployee({ ...newEmployee, Email: e.target.value })
               }
             />
+            
+          </div>
+          <div className="error" style={{marginBottom:'10px'}}>
+          {errors.Email && <span className="error-text">{errors.Email}</span>}
+          </div>
           </div>
 
           <div className="modelbutton">

@@ -1,0 +1,158 @@
+/* Status Container */
+.status-container {
+    position: relative;
+    display: inline-block;
+  }
+  
+  /* Status Label */
+  .status-label {
+    display: inline-block;
+    padding: 5px 10px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+  }
+  
+  .status-label.is-active {
+    background-color: #e6f7e9;
+    color: #4caf50;
+  }
+  
+  .status-label.is-inactive {
+    background-color: #f5f5f5;
+    color: #ff6464;
+  }
+  
+  .status-label.is-pending {
+    background-color: #fff7e6;
+    color: #ffc107;
+  }
+  
+  /* Status Circle (Before pseudo-element) */
+  .status-label::before {
+    content: "";
+    display: inline-block;
+    height: 10px;
+    width: 10px;
+    border-radius: 50%;
+    margin-right: 8px;
+  }
+  
+  .status-label.is-active::before {
+    background-color: #4caf50;
+  }
+  
+  .status-label.is-inactive::before {
+    background-color: #ff6c6c;
+  }
+  
+  .status-label.is-pending::before {
+    background-color: #ffc107;
+  }
+  
+  /* Dropdown */
+  .dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    z-index: 999;
+  }
+  
+  /* Dropdown Item */
+  .dropdown-item {
+    padding: 10px;
+    font-size: 14px;
+    cursor: pointer;
+  }
+  
+  .dropdown-item:hover {
+    background-color: #f0f0f0;
+  }
+  
+
+  /* status permission model */
+
+
+ /* Modal Overlay Styling */
+.modal-overlay-status {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+  }
+  
+  /* Modal Content Styling */
+  .confirm-model {
+    background-color: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    text-align: center;
+    max-width: 400px;
+    width: 100%;
+  }
+  
+  .confirm-model h2 {
+    font-size: 22px;
+    margin-bottom: 10px;
+  }
+  
+  .confirm-model p {
+    font-size: 16px;
+    margin-bottom: 20px;
+  }
+
+  .modelbutton-status {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+  
+  .modal-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 20px;
+  }
+  
+  /* Confirm Button */
+  .btn-confirm-status {
+    background-color: #4caf50;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+  }
+  
+  /* Confirm Button Hover */
+  .btn-confirm-status:hover {
+    background-color: #19501b;
+  }
+  
+  /* Cancel Button */
+  .btn-status {
+    background-color: #888;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+  }
+  
+  /* Cancel Button Hover */
+  .btn-status:hover {
+    background-color: #777;
+  }
+  
