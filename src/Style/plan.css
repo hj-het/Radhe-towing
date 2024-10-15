@@ -1,0 +1,61 @@
+.form-plan{
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.form-labels {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    margin-top: 10px;
+  }
+  
+  .form-labels label {
+    display: flex;
+    align-items: center;
+    font-size: 18px; 
+    margin-bottom: 15px;
+    width: 45%; 
+  }
+  
+  .form-labels input[type="checkbox"] {
+    width: 20px;
+    height: 20px; 
+    margin-right: 10px; 
+    cursor: pointer;
+  }
+  
+  .form-labels label:hover {
+    cursor: pointer;
+  }
+  
+  .input-combine{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: row;
+    gap: 10px;
+  }
+
+  .input-with-icon {
+    position: relative;
+  }
+  
+  .input-with-icon input {
+    width: 100%;
+    padding-left: 35px; 
+    height: 40px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+  }
+  
+  .input-with-icon i {
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #888;
+  }
+  

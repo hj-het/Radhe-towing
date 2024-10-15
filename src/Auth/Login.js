@@ -6,52 +6,42 @@ import { useNavigate } from 'react-router-dom';
 import "./../Auth/user-auth.css";
 
 const Login = () => {
-    const auth = useContext(AuthContext); // Use AuthContext for login and role
-    const [username, setUsername] = useState(""); // Username input only
+    const auth = useContext(AuthContext);
+    const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const navigate = useNavigate();
 
     const onSubmit = async (event) => {
         event.preventDefault();
-
-        // Create payload for fetch request
         const payload = JSON.stringify({
-            Username: username, // API expects keys 'Username' and 'Password'
+            Username: username,
             Password: password
         });
 
-        // Fetch API options
         const requestOptions = {
             method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
+            headers: { "Content-Type": "application/json" },
             body: payload,
             redirect: "follow"
         };
 
         try {
             const response = await fetch('https://panel.radhetowing.com/api/login', requestOptions);
-            const result = await response.json(); // Parse JSON response
+            const result = await response.json();
 
             if (!result.success) {
                 toast.error(result.message || "Invalid login credentials");
                 return;
             }
 
-            const { role, Username, id } = result.data; // Extract user data from response
-
-            // Login and store user info and role in context
+            const { role, Username, id } = result.data;
             auth.login({ username: Username, id }, role);
-
-            // Display success toast
             toast.success("Login successful");
 
-            // Navigate based on role
             if (role === "admin") {
-                navigate('/dashboard'); // Navigate to admin dashboard
+                navigate('/dashboard');
             } else if (role === "employee") {
-                navigate('/member'); // Navigate to member page for employee
+                navigate('/member');
             } else {
                 toast.error("Unknown role");
             }
@@ -62,34 +52,49 @@ const Login = () => {
     };
 
     return (
-        <div className="user-auth">
+        <div className="login-page">
             <ToastContainer />
-            <form className="form" onSubmit={onSubmit}>
-                <h1 className="heading">Login</h1>
+            <div className="login-container">
+                {/* Left Section with Image and Title */}
+                <div className="login-left">
+                    {/* <h2>Radhe Towing Service</h2> */}
+                    <div className="image-grid">
+                        <img src="/images/Radhe-B1.png" alt="Main" className="main-image" />
+                        {/* <div className="hexagon-images">
+                            <img src="/path-to-image1.jpg" alt="Small 1" className="hex-image" />
+                            <img src="/path-to-image2.jpg" alt="Small 2" className="hex-image" />
+                            <img src="/path-to-image3.jpg" alt="Small 3" className="hex-image" />
+                        </div> */}
+                    </div>
+                </div>
 
-                {/* Input field for username */}
-                <input
-                    type="text"
-                    placeholder="Username"
-                    className={`input ${username ? '' : 'error'}`}
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                />
-
-                {/* Input field for password */}
-                <input
-                    type="password"
-                    placeholder="Password"
-                    className="input"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                />
-
-                {/* Submit button */}
-                <button className="btn" disabled={!username || !password}>
-                    Login
-                </button>
-            </form>
+                {/* Right Section with Form */}
+                <div className="login-right">
+                    <form className="form" onSubmit={onSubmit}>
+                        <h1 className="heading">Login</h1>
+                        <input
+                            type="text"
+                            placeholder="Email or Phone Number"
+                            className={`input ${username ? '' : 'error'}`}
+                            value={username}
+                            onChange={(e) => setUsername(e.target.value)}
+                        />
+                        <input
+                            type="password"
+                            placeholder="Password"
+                            className="input"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                        />
+                        {/* <div className="link-wrapper">
+                            <a href="/reset-password">Reset Password?</a>
+                        </div> */}
+                        <button className="btn" disabled={!username || !password}>
+                            Login
+                        </button>
+                    </form>
+                </div>
+            </div>
         </div>
     );
 };

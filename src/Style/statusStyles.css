@@ -1,79 +1,83 @@
 /* Status Container */
 .status-container {
-    position: relative;
-    display: inline-block;
-  }
-  
-  /* Status Label */
-  .status-label {
-    display: inline-block;
-    padding: 5px 10px;
-    border-radius: 20px;
-    font-size: 14px;
-    font-weight: 500;
-    cursor: pointer;
-  }
-  
-  .status-label.is-active {
-    background-color: #e6f7e9;
-    color: #4caf50;
-  }
-  
-  .status-label.is-inactive {
-    background-color: #f5f5f5;
-    color: #ff6464;
-  }
-  
-  .status-label.is-pending {
-    background-color: #fff7e6;
-    color: #ffc107;
-  }
-  
-  /* Status Circle (Before pseudo-element) */
-  .status-label::before {
-    content: "";
-    display: inline-block;
-    height: 10px;
-    width: 10px;
-    border-radius: 50%;
-    margin-right: 8px;
-  }
-  
-  .status-label.is-active::before {
-    background-color: #4caf50;
-  }
-  
-  .status-label.is-inactive::before {
-    background-color: #ff6c6c;
-  }
-  
-  .status-label.is-pending::before {
-    background-color: #ffc107;
-  }
-  
-  /* Dropdown */
-  .dropdown {
-    position: absolute;
-    top: 100%;
-    left: 0;
-    background-color: white;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    z-index: 999;
-  }
-  
-  /* Dropdown Item */
-  .dropdown-item {
-    padding: 10px;
-    font-size: 14px;
-    cursor: pointer;
-  }
-  
-  .dropdown-item:hover {
-    background-color: #f0f0f0;
-  }
-  
+  position: relative;
+  display: inline-block;
+}
+
+/* Status Label */
+.status-label {
+  display: inline-block;
+  padding: 5px 10px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.status-label.is-active {
+  background-color: #e6f7e9;
+  color: #4caf50;
+}
+
+.status-label.is-inactive {
+  background-color: #f5f5f5;
+  color: #ff6464;
+}
+
+.status-label.is-pending {
+  background-color: #fff7e6;
+  color: #ffc107;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Status Circle (Before pseudo-element) */
+.status-label::before {
+  content: "";
+  display: inline-block;
+  height: 10px;
+  width: 10px;
+  border-radius: 50%;
+  margin-right: 8px;
+}
+
+.status-label.is-active::before {
+  background-color: #4caf50;
+}
+
+.status-label.is-inactive::before {
+  background-color: #ff6c6c;
+}
+
+.status-label.is-pending::before {
+  background-color: #ffc107;
+}
+
+/* Dropdown */
+.dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background-color: white;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  z-index: 1000; /* Increase the z-index to sit above the table */
+  overflow: visible;
+}
+
+/* Dropdown Item */
+.dropdown-item {
+  padding: 10px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.dropdown-item:hover {
+  background-color: #f0f0f0;
+}
+
 
   /* status permission model */
 

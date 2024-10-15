@@ -82,11 +82,11 @@ const SidebarComponent = () => {
                     <FaWrench /> Services
                   </Link>
                 </li>
-                <li>
+                {/* <li>
                   <Link to="/city">
                     <FaCity /> City
                   </Link>
-                </li>
+                </li> */}
                 {/* <li>
                   <Link to="/state">
                     <FaFlag /> State

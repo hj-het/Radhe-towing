@@ -6,7 +6,7 @@ import { FaPlus } from "react-icons/fa";
 import "./../Table/table.css";
 import "./../Style/allcomponent.css";
 // import styled from "styled-components";
-import "./../Style/statusStyles.css"
+import "./../Style/statusStyles.css";
 import {
   FaUser,
   FaLock,
@@ -27,9 +27,16 @@ const Member = () => {
   const [members, setMembers] = useState([]);
   const [editingMember, setEditingMember] = useState(null);
   const [showPassword, setShowPassword] = useState(false);
-  const [cities, setCities] = useState([]); 
+  const [cities, setCities] = useState([]);
   const [activeDropdown, setActiveDropdown] = useState(null);
-  const [statusChange, setStatusChange] = useState({ memberId: null, memberName: null, newStatus: null }); 
+  const [deleteMemberId, setDeleteMemberId] = useState(null); // For delete confirmation
+  const [deleteMemberName, setDeleteMemberName] = useState("");
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [statusChange, setStatusChange] = useState({
+    memberId: null,
+    memberName: null,
+    newStatus: null,
+  });
   const [showConfirmModal, setShowConfirmModal] = useState(false); // For confirmation modal
   const [newMember, setNewMember] = useState({
     username: "",
@@ -50,54 +57,67 @@ const Member = () => {
   });
   const [modalIsOpen, setModalIsOpen] = useState(false);
 
-// Fetch members from the API using axios
-useEffect(() => {
-  const fetchMembers = async () => {
-    try {
-      // Fetch cities first
-      const citiesResponse = await axios.get("https://panel.radhetowing.com/api/cities");
-      const cities = citiesResponse.data; // Store cities
+  // Fetch members from API and map them properly
+  useEffect(() => {
+    const fetchMembers = async () => {
+      try {
+        // Fetch cities first
+        const citiesResponse = await axios.get(
+          "https://panel.radhetowing.com/api/cities"
+        );
+        const cities = citiesResponse.data; // Store cities
 
-      // Fetch members
-      const membersResponse = await axios.get("https://panel.radhetowing.com/api/members");
-      const mappedMembers = membersResponse.data.map((member) => {
-        const city = cities.find((city) => city.id === member.city_id); 
-        return {
-          id: member.id,
-          username: member.username,
-          name: `${member.first_name} ${member.last_name}`,
-          dob: member.dob,
-          address: `${member.address_1}, `,
-          pincode: member.pincode,
-          phone: member.contact,
-          email: member.email,
-          city: city ? city.name : "Unknown", // Map city_id to city name
-          status: member.is_active,
-        };
-      });
+        // Fetch members
+        const membersResponse = await axios.get(
+          "https://panel.radhetowing.com/api/members"
+        );
+        const mappedMembers = membersResponse.data.map((member) => {
+          const city = cities.find((city) => city.id === member.city_id);
+          return {
+            id: member.id,
+            username: member.username,
+            first_name: member.first_name, // First Name
+            last_name: member.last_name, // Last Name
+            dob: member.dob,
+            address_1: member.address_1, // Address 1
+            address_2: member.address_2, // Address 2
+            pincode: member.pincode,
+            phone: member.contact,
+            email: member.email,
+            city: city ? city.name : "Unknown", // Map city_id to city name
+            status: member.is_active,
+            password:member.password,
+            // password_confirmation:member.password_confirmation,
+          };
+        });
 
-      setMembers(mappedMembers);
-    } catch (error) {
-      console.error("Error fetching members:", error);
-    }
-  };
+        setMembers(mappedMembers);
+      } catch (error) {
+        console.error("Error fetching members:", error);
+      }
+    };
 
-  fetchMembers();
-}, []);
+    fetchMembers();
+  }, []);
 
   // Handle status change confirmation and API call
   const handleStatusChange = async () => {
     const { memberId, newStatus } = statusChange;
     try {
-      const response = await axios.put(`https://panel.radhetowing.com/api/members/${memberId}/status`, {
-        status: newStatus,
-      });
+      const response = await axios.put(
+        `https://panel.radhetowing.com/api/members/${memberId}/status`,
+        {
+          status: newStatus,
+        }
+      );
       if (response.status === 200) {
         setMembers(
-          members.map((m) => (m.id === memberId ? { ...m, status: newStatus } : m))
+          members.map((m) =>
+            m.id === memberId ? { ...m, status: newStatus } : m
+          )
         );
-        setActiveDropdown(null); 
-        setShowConfirmModal(false); 
+        setActiveDropdown(null);
+        setShowConfirmModal(false);
       }
     } catch (error) {
       console.error("Error updating status:", error);
@@ -114,12 +134,33 @@ useEffect(() => {
     const getStatusLabel = () => {
       switch (status) {
         case "Y":
-          return <span className="status-label is-active" onClick={() => toggleDropdown(id)}>Active</span>;
+          return (
+            <span
+              className="status-label is-active"
+              onClick={() => toggleDropdown(id)}
+            >
+              Active
+            </span>
+          );
         case "N":
-          return <span className="status-label is-inactive" onClick={() => toggleDropdown(id)}>Inactive</span>;
+          return (
+            <span
+              className="status-label is-inactive"
+              onClick={() => toggleDropdown(id)}
+            >
+              Inactive
+            </span>
+          );
         case "P":
         default:
-          return <span className="status-label is-pending" onClick={() => toggleDropdown(id)}>Pending</span>;
+          return (
+            <span
+              className="status-label is-pending"
+              onClick={() => toggleDropdown(id)}
+            >
+              Pending
+            </span>
+          );
       }
     };
 
@@ -128,10 +169,30 @@ useEffect(() => {
         {getStatusLabel()}
         {activeDropdown === id && (
           <div className="dropdown">
-            <div className="dropdown-item" onClick={() => { setStatusChange({ memberId: id, memberName: name, newStatus: "Y" }); setShowConfirmModal(true); }}>
+            <div
+              className="dropdown-item"
+              onClick={() => {
+                setStatusChange({
+                  memberId: id,
+                  memberName: name,
+                  newStatus: "Y",
+                });
+                setShowConfirmModal(true);
+              }}
+            >
               Active
             </div>
-            <div className="dropdown-item" onClick={() => { setStatusChange({ memberId: id, memberName: name, newStatus: "N" }); setShowConfirmModal(true); }}>
+            <div
+              className="dropdown-item"
+              onClick={() => {
+                setStatusChange({
+                  memberId: id,
+                  memberName: name,
+                  newStatus: "N",
+                });
+                setShowConfirmModal(true);
+              }}
+            >
               Inactive
             </div>
           </div>
@@ -149,38 +210,64 @@ useEffect(() => {
   };
 
   const columns = [
+    {
+      Header: "ID",
+      accessor: (row, index) => index + 1, // Use index as row number
+      id: "index", // Optional: Set an ID for the column
+    },
     { Header: "Username", accessor: "username" },
-    { Header: "Name", accessor: "name" },
-    { Header: "Date of Birth",accessor: (row) => formatDate(row.dob)  },
-    { Header: "Address", accessor: "address" },
+    { Header: "First Name", accessor: "first_name" }, // First Name column
+    { Header: "Last Name", accessor: "last_name" }, // Last Name column
+    { Header: "Date of Birth", accessor: (row) => formatDate(row.dob) },
+    { Header: "Address 1", accessor: "address_1" }, // Address 1 column
+    { Header: "Address 2", accessor: "address_2" }, // Address 2 column
     { Header: "Pincode", accessor: "pincode" },
     { Header: "Phone", accessor: "phone" },
     { Header: "Email", accessor: "email" },
     { Header: "City", accessor: "city" },
-    { Header: "Status", accessor: "status", Cell: ({ row }) => renderStatus(row.original.status, row.original.id) },
-  
-
-    // { Header: "State", accessor: "state" },
-    // { Header: "Country", accessor: "country" },
+    {
+      Header: "Status",
+      accessor: "status",
+      Cell: ({ row }) => renderStatus(row.original.status, row.original.id),
+    },
   ];
 
-// Handle Delete
-const handleDelete = async (memberId) => {
-  try {
-    // Call the delete API
-    const response = await axios.delete(`https://panel.radhetowing.com/api/members/${memberId}`);
-    
-    if (response.status === 200) {
-      // If successful, update the state to remove the member
-      setMembers(members.filter((m) => m.id !== memberId));
-      console.log('Member deleted successfully.');
-    } else {
-      console.error('Failed to delete member:', response);
+  // Handle Delete
+  const handleDelete = async (memberId) => {
+    console.log('memberId-->',memberId)
+    try {
+      // Call the delete API
+      const response = await axios.delete(
+        `https://panel.radhetowing.com/api/members/${memberId}`
+      );
+
+      if (response.status === 200) {
+        // If successful, update the state to remove the member
+        setMembers(members.filter((m) => m.id !== memberId));
+        setShowDeleteModal(false);
+        console.log("Member deleted successfully.");
+      } else {
+        console.error("Failed to delete member:", response);
+      }
+    } catch (error) {
+      console.error("Error deleting member:", error);
     }
-  } catch (error) {
-    console.error('Error deleting member:', error);
+  };
+
+// Trigger delete confirmation modal
+const triggerDeleteModal = (memberId) => {
+  // Find the member by their ID
+  const member = members.find((m) => m.id === memberId);
+  if (member) {
+    const memberName = `${member.first_name} ${member.last_name}`;
+    setDeleteMemberId(memberId);
+    setDeleteMemberName(memberName); // Set the full name of the member
+    setShowDeleteModal(true); // Show the delete confirmation modal
+  } else {
+    console.error("Member not found!");
   }
 };
+
 
   // Handle Edit
   // const handleEdit = (member) => {
@@ -189,11 +276,12 @@ const handleDelete = async (memberId) => {
   //   setModalIsOpen(true); // Open modal for editing
   // };
 
-
   useEffect(() => {
     const fetchCities = async () => {
       try {
-        const response = await axios.get("https://panel.radhetowing.com/api/cities");
+        const response = await axios.get(
+          "https://panel.radhetowing.com/api/cities"
+        );
         setCities(response.data); // Save cities in state
       } catch (error) {
         console.error("Error fetching cities:", error);
@@ -203,162 +291,201 @@ const handleDelete = async (memberId) => {
     fetchCities();
   }, []);
 
-  // Handle Edit
+  // Function to reset form fields for adding a new member
+  const resetForm = () => {
+    setNewMember({
+      username: "",
+      password: "",
+      first_name: "",
+      last_name: "",
+      dob: "",
+      address_1: "",
+      address_2: "",
+      city_id: "", // Reset city_id
+      pincode: "",
+      contact: "",
+      email: "",
+      profile_pic: null,
+      is_active: "P",
+      password_confirmation: "",
+    });
+  };
+
+  // Handle Add Member (reset form and open modal)
+  const handleAddMember = () => {
+    resetForm(); // Clear form before opening modal
+    setEditingMember(null); // Clear editing state
+    setModalIsOpen(true); // Open modal
+  };
+
+  // Handle Edit Member (populate form with member data and open modal)
   const handleEdit = (member) => {
-    console.log("member-->",member)
-    setEditingMember(member);
+    console.log("Editing Member -->", member);
+    setEditingMember(member); // Set editing mode
     setNewMember({
       username: member.username,
-      password: member.password,
-      first_name: member.first_name,
-      last_name: member.last_name,
-      dob: member.dob,
-      address_1: member.address_1,
-      address_2: member.address_2,
-      city_id: member.city_id, 
-      pincode: member.pincode,
-      contact: member.contact,
-      email: member.email,
-      profile_pic: member.profile_pic,
-      is_active: member.is_active,
-      // password_confirmation: member.password_confirmation,
+      password:member.password, 
+      first_name: member.first_name || "",
+      last_name: member.last_name || "",
+      dob: member.dob
+        ? new Date(member.dob).toISOString().substring(0, 10)
+        : "",
+      address_1: member.address_1 || "",
+      address_2: member.address_2 || "",
+      city_id: member.city_id || "",
+      pincode: member.pincode || "",
+      contact: member.phone || "",
+      email: member.email || "",
+      profile_pic: member.profile_pic || "",
+      // is_active: member.is_active || "P",
+      password_confirmation: "",
+      // password: member.password,
+
     });
     setModalIsOpen(true); // Open modal for editing
   };
 
-// Handle Save (for Add and Update)
-const handleSave = async () => {
-  if (editingMember) {
-    // Update existing member via PUT request
-    try {
-      const response = await axios.put(
-        `https://panel.radhetowing.com/api/members/${editingMember.id}`,
-        {
-          username: newMember.username,
-          first_name: newMember.first_name,
-          last_name: newMember.last_name,
-          dob: newMember.dob,
-          address_1: newMember.address_1,
-          address_2: newMember.address_2,
-          city_id: newMember.city_id,
-          pincode: newMember.pincode,
-          contact: newMember.contact,
-          email: newMember.email,
-          profile_pic: newMember.profile_pic,
-          is_active: newMember.is_active,
-          password: newMember.password,
-          password_confirmation: newMember.password_confirmation, // Ensure both passwords match
-        }
-      );
+  // Handle Save (for Add and Update)
+  const handleSave = async () => {
+    if (!newMember.city_id) {
+      alert("Please select a city");
+      return;
+    }
 
-      // Check response status and update the member in local state
-      if (response.status === 200) {
-        const updatedMember = response.data;
-        const updatedCity = cities.find((city) => city.id === updatedMember.city_id)?.name || "Unknown";
-
-        // Update the member in the local state with correct city name
-        setMembers(
-          members.map((m) =>
-            m.id === editingMember.id
-              ? {
-                  ...updatedMember,
-                  city: updatedCity,
-                  name: `${updatedMember.first_name} ${updatedMember.last_name}`,
-                  dob: updatedMember.dob,
-                  address: `${updatedMember.address_1}`,
-                  pincode: updatedMember.pincode,
-                  phone: updatedMember.contact,
-                  email: updatedMember.email,
-                }
-              : m
-          )
+    if (editingMember) {
+      // Update existing member via PUT request
+      try {
+        const response = await axios.put(
+          `https://panel.radhetowing.com/api/members/${editingMember.id}`,
+          {
+            username: newMember.username,
+            first_name: newMember.first_name,
+            last_name: newMember.last_name,
+            dob: newMember.dob,
+            address_1: newMember.address_1,
+            address_2: newMember.address_2,
+            city_id: newMember.city_id, // Ensure city_id is included here
+            pincode: newMember.pincode,
+            contact: newMember.contact,
+            email: newMember.email,
+            profile_pic: newMember.profile_pic,
+            // is_active: newMember.is_active,
+            password: newMember.password,
+            password_confirmation: newMember.password_confirmation, // Ensure both passwords match
+          }
         );
-        setModalIsOpen(false); // Close modal after updating
-        setEditingMember(null); // Clear editing state
-      }
-    } catch (error) {
-      console.error("Error updating member:", error);
-    }
-  } else {
-    // Add new member via POST request (existing functionality)
-    try {
-      const response = await axios.post(
-        "https://panel.radhetowing.com/api/members",
-        {
-          username: newMember.username,
-          first_name: newMember.first_name,
-          last_name: newMember.last_name,
-          dob: newMember.dob,
-          address_1: newMember.address_1,
-          address_2: newMember.address_2,
-          city_id: newMember.city_id,
-          pincode: newMember.pincode,
-          contact: newMember.contact,
-          email: newMember.email,
-          profile_pic: newMember.profile_pic,
-          is_active: newMember.is_active,
-          password: newMember.password,
-          password_confirmation: newMember.password_confirmation,
+
+        // Check response status and update the member in local state
+        if (response.status === 200) {
+          const updatedMember = response.data;
+          const updatedCity =
+            cities.find((city) => city.id === updatedMember.city_id)?.name ||
+            "Unknown";
+
+          // Update the member in the local state with correct city name
+          setMembers(
+            members.map((m) =>
+              m.id === editingMember.id
+                ? {
+                    ...updatedMember,
+                    city: updatedCity,
+                    name: `${updatedMember.first_name} ${updatedMember.last_name}`,
+                    dob: updatedMember.dob,
+                    address: `${updatedMember.address_1}`,
+                    pincode: updatedMember.pincode,
+                    phone: updatedMember.contact,
+                    email: updatedMember.email,
+                  }
+                : m
+            )
+          );
+          setModalIsOpen(false); // Close modal after updating
+          setEditingMember(null); // Clear editing state
         }
-      );
+      } catch (error) {
+        console.error("Error updating member:", error);
+      }
+    } else {
+      // Add new member via POST request
+      try {
+        const response = await axios.post(
+          "https://panel.radhetowing.com/api/members",
+          {
+            username: newMember.username,
+            first_name: newMember.first_name,
+            last_name: newMember.last_name,
+            dob: newMember.dob,
+            address_1: newMember.address_1,
+            address_2: newMember.address_2,
+            city_id: newMember.city_id, // Ensure city_id is included here
+            pincode: newMember.pincode,
+            contact: newMember.contact,
+            email: newMember.email,
+            profile_pic: newMember.profile_pic,
+            is_active: newMember.is_active,
+            password: newMember.password,
+            password_confirmation: newMember.password_confirmation,
+          }
+        );
 
-      const addedMember = response.data;
-      const addedCity = cities.find((city) => city.id === addedMember.city_id)?.name || "Unknown";
+        const addedMember = response.data;
+        const addedCity =
+          cities.find((city) => city.id === addedMember.city_id)?.name ||
+          "Unknown";
 
-      // Add the newly created member to the list
-      setMembers([
-        ...members,
-        {
-          ...addedMember,
-          city: addedCity,
-          name: `${addedMember.first_name} ${addedMember.last_name}`,
-          dob: addedMember.dob,
-          address: `${addedMember.address_1}`,
-          pincode: addedMember.pincode,
-          phone: addedMember.contact,
-          email: addedMember.email,
-        },
-      ]);
-      setModalIsOpen(false); // Close modal after adding
-    } catch (error) {
-      console.error("Error adding member:", error);
+        // Add the newly created member to the list
+        setMembers([
+          ...members,
+          {
+            ...addedMember,
+            city: addedCity,
+            name: `${addedMember.first_name} ${addedMember.last_name}`,
+            dob: addedMember.dob,
+            address: `${addedMember.address_1}`,
+            pincode: addedMember.pincode,
+            phone: addedMember.contact,
+            email: addedMember.email,
+          },
+        ]);
+        setModalIsOpen(false); // Close modal after adding
+      } catch (error) {
+        console.error("Error adding member:", error);
+      }
     }
-  }
 
-  // Reset the form after saving
-  setNewMember({
-    username: "",
-    first_name: "",
-    last_name: "",
-    dob: "",
-    address_1: "",
-    address_2: "",
-    city_id: "1",
-    pincode: "",
-    contact: "",
-    email: "",
-    profile_pic: null,
-    is_active: "Y",
-    password: "",
-    password_confirmation: "",
-  });
-};
+    // Reset the form after saving
+    setNewMember({
+      username: "",
+      first_name: "",
+      last_name: "",
+      dob: "",
+      address_1: "",
+      address_2: "",
+      city_id: "", // Reset city_id
+      pincode: "",
+      contact: "",
+      email: "",
+      profile_pic: null,
+      is_active: "p",
+      password: "",
+      password_confirmation: "",
+    });
+  };
 
-  
   return (
     <div className="mainhead">
       <h1>Members </h1>
-
       <div className="AddButton">
-        <button className="btn-add" onClick={() => setModalIsOpen(true)}>
+        <button className="btn-add" onClick={handleAddMember}>
           <FaPlus /> Add Member
         </button>
       </div>
+
       {/* Members Table */}
       <TableOne
         columns={columns}
         data={members}
-        handleDelete={(member) => handleDelete(member.id)}
+        handleDelete={(member) => triggerDeleteModal(member.id)} 
         handleEdit={handleEdit}
       />
 
@@ -531,35 +658,38 @@ const handleSave = async () => {
               }
             />
           </div>
-       <div className="pincode-city">
-          {/* Pincode Input */}
-          <div className="input-with-iconm">
-            <FaMapPin className="input-icon" />
-            <input
-              type="text"
-              placeholder="Pincode"
-              value={newMember.pincode}
-              onChange={(e) =>
-                setNewMember({ ...newMember, pincode: e.target.value })
-              }
-            />
-          </div>
+          <div className="pincode-city">
+            {/* Pincode Input */}
+            <div className="input-with-iconm">
+              <FaMapPin className="input-icon" />
+              <input
+                type="text"
+                placeholder="Pincode"
+                value={newMember.pincode}
+                onChange={(e) =>
+                  setNewMember({ ...newMember, pincode: e.target.value })
+                }
+              />
+            </div>
 
-      {/* City Dropdown with Icon */}
-      <div className="input-with-iconm" >
-            <FaCity className="input-icon" />
-            <select className="city-drop"
-              value={newMember.city_id}
-              onChange={(e) => setNewMember({ ...newMember, city_id: e.target.value })}
-            >
-              <option value="">Select City</option>
-              {cities.map((city) => (
-                <option key={city.id} value={city.id}>
-                  {city.name}
-                </option>
-              ))}
-            </select>
-          </div>
+            {/* City Dropdown with Icon */}
+            <div className="input-with-iconm">
+              <FaCity className="input-icon" />
+              <select
+                className="city-drop"
+                value={newMember.city_id}
+                onChange={(e) =>
+                  setNewMember({ ...newMember, city_id: e.target.value })
+                } // Correctly bind the selected value
+              >
+                <option value="">Select City</option>
+                {cities.map((city) => (
+                  <option key={city.id} value={city.id}>
+                    {city.name}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
 
           <div className="modelbutton">
@@ -577,7 +707,6 @@ const handleSave = async () => {
         </div>
       </Modal>
 
-       
       {/* Confirmation Modal */}
       <Modal
         isOpen={showConfirmModal}
@@ -587,16 +716,54 @@ const handleSave = async () => {
         overlayClassName="modal-overlay-status"
       >
         <h2>Confirm Status Change</h2>
-        <p>Are you sure you want to change the status of {statusChange.memberName}?</p>
+        <p>
+          Are you sure you want to change the status of{" "}
+          {statusChange.memberName}?
+        </p>
         <div className="modelbutton-status">
           <button onClick={handleStatusChange} className="btn-confirm-status">
             Yes, Change Status
           </button>
-          <button onClick={() => setShowConfirmModal(false)} className="btn-status">
+          <button
+            onClick={() => setShowConfirmModal(false)}
+            className="btn-status"
+          >
             Cancel
           </button>
         </div>
       </Modal>
+
+   {/* Delete Confirmation Modal */}
+{showDeleteModal && (
+  <div className="modal-overlay">
+    <div className="modal-content">
+      <h3>Confirm Delete</h3>
+      <p>
+        Are you sure you want to delete{" "}
+        <span style={{ fontWeight: 700, color: "#ee5757" }}>
+          {deleteMemberName}
+        </span>
+        ?
+      </p>
+
+      <div className="modal-buttons">
+        <button
+          className="btn-confirm"
+          onClick={() => handleDelete(deleteMemberId)} // Use the stored member ID for deletion
+        >
+          Yes, Delete
+        </button>
+        <button
+          className="btn-cancel"
+          onClick={() => setShowDeleteModal(false)} // Close the modal
+        >
+          Cancel
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
     </div>
   );
 };
