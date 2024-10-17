@@ -70,7 +70,7 @@ const Login = () => {
 
                 {/* Right Section with Form */}
                 <div className="login-right">
-                    <form className="form" onSubmit={onSubmit}>
+                    <form className="form-login" onSubmit={onSubmit}>
                         <h1 className="heading">Login</h1>
                         <input
                             type="text"

@@ -1,9 +1,9 @@
 import React from 'react';
 import { useTable } from 'react-table';
-import { FaEdit, FaTrashAlt } from 'react-icons/fa';
+import { FaEdit, FaTrashAlt, FaKey } from 'react-icons/fa'; // Import the reset icon
 import './table.css';
 
-const TableOne = ({ columns, data, handleDelete, handleEdit }) => {
+const TableOne = ({ columns, data, handleDelete, handleEdit, handlePasswordReset, isEmployeeTable }) => {
     const {
         getTableProps,
         getTableBodyProps,
@@ -42,12 +42,18 @@ const TableOne = ({ columns, data, handleDelete, handleEdit }) => {
                                 ))}
                                 <td className="table-cell">
                                     <div className='tablebutton'>
-                                    <button className="btn-edit" onClick={() => handleEdit(row.original)}>
-                                        <FaEdit />
-                                    </button>
-                                    <button className="btn-delete" onClick={() => handleDelete(row.original)}>
-                                        <FaTrashAlt />
-                                    </button>
+                                    {isEmployeeTable && ( // Only show reset icon if it's the employee table
+                                            <button className="btn-reset" onClick={() => handlePasswordReset(row.original)}>
+                                                <FaKey /> {/* Password reset icon */}
+                                            </button>
+                                        )}
+                                        <button className="btn-edit" onClick={() => handleEdit(row.original)}>
+                                            <FaEdit />
+                                        </button>
+                                        <button className="btn-delete" onClick={() => handleDelete(row.original)}>
+                                            <FaTrashAlt />
+                                        </button>
+                                       
                                     </div>
                                 </td>
                             </tr>

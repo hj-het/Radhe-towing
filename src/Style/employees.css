@@ -176,3 +176,52 @@
     margin-top: 0; /* Remove margin above error text */
     margin-bottom: 10px; /* Add spacing between the error and the next input */
   }
+
+  .Generate-password{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .btn-generate {
+    background-color: #28a745; /* Green background */
+    color: white; /* White text */
+    padding: 10px 20px; /* Padding for the button */
+    border: none; /* Remove border */
+    border-radius: 5px; /* Rounded corners */
+    cursor: pointer; /* Pointer cursor on hover */
+    font-size: 16px; /* Font size */
+    margin-top: 15px; /* Add some space at the top */
+    transition: background-color 0.3s ease; /* Smooth background color transition */
+  }
+  
+  .btn-generate:hover {
+    background-color: #218838; /* Darker green on hover */
+  }
+  
+  .search-bar {
+    margin: 20px 0;
+  }
+  
+  .search-input-container {
+    position: relative;
+    width: 100%;
+  }
+  
+  .search-input-container input {
+    /* width: 100%; */
+    padding: 10px 40px; /* Add padding to make space for the icon */
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    margin-left: 20px;
+  }
+  
+  .search-icon {
+    position: absolute;
+    left: 34px; /* Position the icon inside the input field */
+    top: 50%;
+    transform: translateY(-50%);
+    color: #888;
+  }
+  

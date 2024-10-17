@@ -18,6 +18,7 @@ import {
   FaEye,
   FaCalendarAlt,
   FaMapPin,
+  FaSearch
 } from "react-icons/fa";
 
 // Set Modal app element
@@ -27,6 +28,8 @@ const Member = () => {
   const [members, setMembers] = useState([]);
   const [editingMember, setEditingMember] = useState(null);
   const [showPassword, setShowPassword] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+const [filteredMembers, setFilteredMembers] = useState([]);
   const [cities, setCities] = useState([]);
   const [activeDropdown, setActiveDropdown] = useState(null);
   const [deleteMemberId, setDeleteMemberId] = useState(null); // For delete confirmation
@@ -57,17 +60,15 @@ const Member = () => {
   });
   const [modalIsOpen, setModalIsOpen] = useState(false);
 
-  // Fetch members from API and map them properly
+  // Fetch members and cities from API
   useEffect(() => {
     const fetchMembers = async () => {
       try {
-        // Fetch cities first
         const citiesResponse = await axios.get(
           "https://panel.radhetowing.com/api/cities"
         );
-        const cities = citiesResponse.data; // Store cities
+        const cities = citiesResponse.data;
 
-        // Fetch members
         const membersResponse = await axios.get(
           "https://panel.radhetowing.com/api/members"
         );
@@ -76,22 +77,22 @@ const Member = () => {
           return {
             id: member.id,
             username: member.username,
-            first_name: member.first_name, // First Name
-            last_name: member.last_name, // Last Name
+            first_name: member.first_name,
+            last_name: member.last_name,
             dob: member.dob,
-            address_1: member.address_1, // Address 1
-            address_2: member.address_2, // Address 2
+            address_1: member.address_1,
+            address_2: member.address_2,
             pincode: member.pincode,
             phone: member.contact,
             email: member.email,
-            city: city ? city.name : "Unknown", // Map city_id to city name
+            city: city ? city.name : "Unknown",
             status: member.is_active,
-            password:member.password,
-            // password_confirmation:member.password_confirmation,
+            password: member.password,
           };
         });
 
         setMembers(mappedMembers);
+        setFilteredMembers(mappedMembers);
       } catch (error) {
         console.error("Error fetching members:", error);
       }
@@ -100,19 +101,22 @@ const Member = () => {
     fetchMembers();
   }, []);
 
-  // Handle status change confirmation and API call
+ // Handle status change
   const handleStatusChange = async () => {
     const { memberId, newStatus } = statusChange;
     try {
       const response = await axios.put(
         `https://panel.radhetowing.com/api/members/${memberId}/status`,
-        {
-          status: newStatus,
-        }
+        { status: newStatus }
       );
       if (response.status === 200) {
         setMembers(
           members.map((m) =>
+            m.id === memberId ? { ...m, status: newStatus } : m
+          )
+        );
+        setFilteredMembers(
+          filteredMembers.map((m) =>
             m.id === memberId ? { ...m, status: newStatus } : m
           )
         );
@@ -129,7 +133,7 @@ const Member = () => {
     setActiveDropdown(activeDropdown === id ? null : id);
   };
 
-  // Render the status with dropdown functionality
+  // Render status dropdown
   const renderStatus = (status, id, name) => {
     const getStatusLabel = () => {
       switch (status) {
@@ -231,21 +235,40 @@ const Member = () => {
       Cell: ({ row }) => renderStatus(row.original.status, row.original.id),
     },
   ];
+  
+ // Handle search
+ const handleSearchChange = (e) => {
+  const query = e.target.value.toLowerCase();
+  setSearchQuery(query);
 
-  // Handle Delete
+  if (query === "") {
+    setFilteredMembers(members);
+  } else {
+    const filtered = members.filter(
+      (member) =>
+        (member.username && member.username.toLowerCase().includes(query)) ||
+        (member.first_name &&
+          member.first_name.toLowerCase().includes(query)) ||
+        (member.last_name && member.last_name.toLowerCase().includes(query)) ||
+        (member.email && member.email.toLowerCase().includes(query)) ||
+        (member.phone && member.phone.includes(query))
+    );
+    setFilteredMembers(filtered);
+  }
+};
+  
+  
+
+  // Handle delete
   const handleDelete = async (memberId) => {
-    console.log('memberId-->',memberId)
     try {
-      // Call the delete API
       const response = await axios.delete(
         `https://panel.radhetowing.com/api/members/${memberId}`
       );
-
       if (response.status === 200) {
-        // If successful, update the state to remove the member
         setMembers(members.filter((m) => m.id !== memberId));
+        setFilteredMembers(filteredMembers.filter((m) => m.id !== memberId));
         setShowDeleteModal(false);
-        console.log("Member deleted successfully.");
       } else {
         console.error("Failed to delete member:", response);
       }
@@ -254,27 +277,15 @@ const Member = () => {
     }
   };
 
-// Trigger delete confirmation modal
-const triggerDeleteModal = (memberId) => {
-  // Find the member by their ID
-  const member = members.find((m) => m.id === memberId);
-  if (member) {
-    const memberName = `${member.first_name} ${member.last_name}`;
-    setDeleteMemberId(memberId);
-    setDeleteMemberName(memberName); // Set the full name of the member
-    setShowDeleteModal(true); // Show the delete confirmation modal
-  } else {
-    console.error("Member not found!");
-  }
-};
-
-
-  // Handle Edit
-  // const handleEdit = (member) => {
-  //   setEditingMember(member);
-  //   setNewMember(member);
-  //   setModalIsOpen(true); // Open modal for editing
-  // };
+   // Trigger delete confirmation modal
+   const triggerDeleteModal = (memberId) => {
+    const member = members.find((m) => m.id === memberId);
+    if (member) {
+      setDeleteMemberId(memberId);
+      setDeleteMemberName(`${member.first_name} ${member.last_name}`);
+      setShowDeleteModal(true);
+    }
+  };
 
   useEffect(() => {
     const fetchCities = async () => {
@@ -324,7 +335,7 @@ const triggerDeleteModal = (memberId) => {
     setEditingMember(member); // Set editing mode
     setNewMember({
       username: member.username,
-      password:member.password, 
+      password: member.password,
       first_name: member.first_name || "",
       last_name: member.last_name || "",
       dob: member.dob
@@ -340,137 +351,141 @@ const triggerDeleteModal = (memberId) => {
       // is_active: member.is_active || "P",
       password_confirmation: "",
       // password: member.password,
-
     });
     setModalIsOpen(true); // Open modal for editing
   };
 
-  // Handle Save (for Add and Update)
-  const handleSave = async () => {
-    if (!newMember.city_id) {
-      alert("Please select a city");
-      return;
-    }
+// Handle Save (for Add and Update)
+const handleSave = async () => {
+  if (!newMember.city_id) {
+    alert("Please select a city");
+    return;
+  }
 
-    if (editingMember) {
-      // Update existing member via PUT request
-      try {
-        const response = await axios.put(
-          `https://panel.radhetowing.com/api/members/${editingMember.id}`,
-          {
-            username: newMember.username,
-            first_name: newMember.first_name,
-            last_name: newMember.last_name,
-            dob: newMember.dob,
-            address_1: newMember.address_1,
-            address_2: newMember.address_2,
-            city_id: newMember.city_id, // Ensure city_id is included here
-            pincode: newMember.pincode,
-            contact: newMember.contact,
-            email: newMember.email,
-            profile_pic: newMember.profile_pic,
-            // is_active: newMember.is_active,
-            password: newMember.password,
-            password_confirmation: newMember.password_confirmation, // Ensure both passwords match
-          }
-        );
-
-        // Check response status and update the member in local state
-        if (response.status === 200) {
-          const updatedMember = response.data;
-          const updatedCity =
-            cities.find((city) => city.id === updatedMember.city_id)?.name ||
-            "Unknown";
-
-          // Update the member in the local state with correct city name
-          setMembers(
-            members.map((m) =>
-              m.id === editingMember.id
-                ? {
-                    ...updatedMember,
-                    city: updatedCity,
-                    name: `${updatedMember.first_name} ${updatedMember.last_name}`,
-                    dob: updatedMember.dob,
-                    address: `${updatedMember.address_1}`,
-                    pincode: updatedMember.pincode,
-                    phone: updatedMember.contact,
-                    email: updatedMember.email,
-                  }
-                : m
-            )
-          );
-          setModalIsOpen(false); // Close modal after updating
-          setEditingMember(null); // Clear editing state
+  if (editingMember) {
+    // Update existing member via PUT request
+    try {
+      const response = await axios.put(
+        `https://panel.radhetowing.com/api/members/${editingMember.id}`,
+        {
+          username: newMember.username,
+          first_name: newMember.first_name,
+          last_name: newMember.last_name,
+          dob: newMember.dob,
+          address_1: newMember.address_1,
+          address_2: newMember.address_2,
+          city_id: newMember.city_id,
+          pincode: newMember.pincode,
+          contact: newMember.contact,
+          email: newMember.email,
+          profile_pic: newMember.profile_pic,
+          password: newMember.password,
+          password_confirmation: newMember.password_confirmation,
         }
-      } catch (error) {
-        console.error("Error updating member:", error);
-      }
-    } else {
-      // Add new member via POST request
-      try {
-        const response = await axios.post(
-          "https://panel.radhetowing.com/api/members",
-          {
-            username: newMember.username,
-            first_name: newMember.first_name,
-            last_name: newMember.last_name,
-            dob: newMember.dob,
-            address_1: newMember.address_1,
-            address_2: newMember.address_2,
-            city_id: newMember.city_id, // Ensure city_id is included here
-            pincode: newMember.pincode,
-            contact: newMember.contact,
-            email: newMember.email,
-            profile_pic: newMember.profile_pic,
-            is_active: newMember.is_active,
-            password: newMember.password,
-            password_confirmation: newMember.password_confirmation,
-          }
+      );
+
+      // Get updated city name from cities list
+      const updatedCity = cities.find((city) => city.id === newMember.city_id)?.name || "Unknown";
+
+      if (response.status === 200) {
+        const updatedMember = response.data;
+
+        // Update the member in the local state with correct city name
+        setMembers(
+          members.map((m) =>
+            m.id === editingMember.id
+              ? { ...updatedMember, city: updatedCity }
+              : m
+          )
         );
-
-        const addedMember = response.data;
-        const addedCity =
-          cities.find((city) => city.id === addedMember.city_id)?.name ||
-          "Unknown";
-
-        // Add the newly created member to the list
-        setMembers([
-          ...members,
-          {
-            ...addedMember,
-            city: addedCity,
-            name: `${addedMember.first_name} ${addedMember.last_name}`,
-            dob: addedMember.dob,
-            address: `${addedMember.address_1}`,
-            pincode: addedMember.pincode,
-            phone: addedMember.contact,
-            email: addedMember.email,
-          },
-        ]);
-        setModalIsOpen(false); // Close modal after adding
-      } catch (error) {
-        console.error("Error adding member:", error);
+        setFilteredMembers(
+          filteredMembers.map((m) =>
+            m.id === editingMember.id
+              ? { ...updatedMember, city: updatedCity }
+              : m
+          )
+        );
+        setModalIsOpen(false); // Close modal after updating
+        setEditingMember(null); // Clear editing state
       }
+    } catch (error) {
+      console.error("Error updating member:", error);
     }
+  } else {
+    // Add new member via POST request
+    try {
+      const response = await axios.post(
+        "https://panel.radhetowing.com/api/members",
+        {
+          username: newMember.username,
+          first_name: newMember.first_name,
+          last_name: newMember.last_name,
+          dob: newMember.dob,
+          address_1: newMember.address_1,
+          address_2: newMember.address_2,
+          city_id: newMember.city_id, // Ensure city_id is included here
+          pincode: newMember.pincode,
+          contact: newMember.contact,
+          email: newMember.email,
+          profile_pic: newMember.profile_pic,
+          is_active: newMember.is_active,
+          password: newMember.password,
+          password_confirmation: newMember.password_confirmation,
+        }
+      );
 
-    // Reset the form after saving
-    setNewMember({
-      username: "",
-      first_name: "",
-      last_name: "",
-      dob: "",
-      address_1: "",
-      address_2: "",
-      city_id: "", // Reset city_id
-      pincode: "",
-      contact: "",
-      email: "",
-      profile_pic: null,
-      is_active: "p",
-      password: "",
-      password_confirmation: "",
-    });
-  };
+      const addedMemberId = response.data.id; // Get the newly created member's ID
+
+      // Now fetch the full data of the new member using the ID
+      const addedMemberResponse = await axios.get(
+        `https://panel.radhetowing.com/api/members/${addedMemberId}`
+      );
+      
+      const addedMember = addedMemberResponse.data; // Get full data of the added member
+
+      const addedCity = cities.find((city) => city.id === addedMember.city_id)?.name || "Unknown";
+
+      // Add the newly created member to the list with the correct city name
+      setMembers([
+        ...members,
+        {
+          ...addedMember,
+          city: addedCity, // Use the city name from the cities list
+        },
+      ]);
+      setFilteredMembers([
+        ...filteredMembers,
+        {
+          ...addedMember,
+          city: addedCity, // Use the city name from the cities list
+        },
+      ]);
+      setModalIsOpen(false); // Close modal after adding
+    } catch (error) {
+      console.error("Error adding member:", error);
+    }
+  }
+
+  // Reset the form after saving
+  setNewMember({
+    username: "",
+    first_name: "",
+    last_name: "",
+    dob: "",
+    address_1: "",
+    address_2: "",
+    city_id: "", // Reset city_id
+    pincode: "",
+    contact: "",
+    email: "",
+    profile_pic: null,
+    is_active: "p",
+    password: "",
+    password_confirmation: "",
+  });
+};
+
+
 
   return (
     <div className="mainhead">
@@ -481,11 +496,25 @@ const triggerDeleteModal = (memberId) => {
         </button>
       </div>
 
+      {/* Search Input */}
+      <div className="search-bar">
+        <div className="search-input-container">
+          <FaSearch className="search-icon" /> {/* Search Icon */}
+          <input
+            type="text"
+            placeholder="Search by name or email"
+            value={searchQuery}
+            onChange={handleSearchChange}
+          />
+        </div>
+      </div>
+
+
       {/* Members Table */}
       <TableOne
         columns={columns}
-        data={members}
-        handleDelete={(member) => triggerDeleteModal(member.id)} 
+        data={filteredMembers}
+        handleDelete={(member) => triggerDeleteModal(member.id)}
         handleEdit={handleEdit}
       />
 
@@ -496,6 +525,7 @@ const triggerDeleteModal = (memberId) => {
         contentLabel="Add/Edit Member"
         className="membermodel"
         overlayClassName="modal-overlay"
+        shouldCloseOnOverlayClick={false}
       >
         <h2>{editingMember ? "Edit Member" : "Add New Member"}</h2>
 
@@ -677,10 +707,10 @@ const triggerDeleteModal = (memberId) => {
               <FaCity className="input-icon" />
               <select
                 className="city-drop"
-                value={newMember.city_id}
+                value={newMember.city_id} // Correctly bind the selected value
                 onChange={(e) =>
                   setNewMember({ ...newMember, city_id: e.target.value })
-                } // Correctly bind the selected value
+                } // Handle change correctly
               >
                 <option value="">Select City</option>
                 {cities.map((city) => (
@@ -714,6 +744,8 @@ const triggerDeleteModal = (memberId) => {
         contentLabel="Confirm Status Change"
         className="confirm-model"
         overlayClassName="modal-overlay-status"
+        shouldCloseOnOverlayClick={false}
+
       >
         <h2>Confirm Status Change</h2>
         <p>
@@ -733,37 +765,36 @@ const triggerDeleteModal = (memberId) => {
         </div>
       </Modal>
 
-   {/* Delete Confirmation Modal */}
-{showDeleteModal && (
-  <div className="modal-overlay">
-    <div className="modal-content">
-      <h3>Confirm Delete</h3>
-      <p>
-        Are you sure you want to delete{" "}
-        <span style={{ fontWeight: 700, color: "#ee5757" }}>
-          {deleteMemberName}
-        </span>
-        ?
-      </p>
+      {/* Delete Confirmation Modal */}
+      {showDeleteModal && (
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <h3>Confirm Delete</h3>
+            <p>
+              Are you sure you want to delete{" "}
+              <span style={{ fontWeight: 700, color: "#ee5757" }}>
+                {deleteMemberName}
+              </span>
+              ?
+            </p>
 
-      <div className="modal-buttons">
-        <button
-          className="btn-confirm"
-          onClick={() => handleDelete(deleteMemberId)} // Use the stored member ID for deletion
-        >
-          Yes, Delete
-        </button>
-        <button
-          className="btn-cancel"
-          onClick={() => setShowDeleteModal(false)} // Close the modal
-        >
-          Cancel
-        </button>
-      </div>
-    </div>
-  </div>
-)}
-
+            <div className="modal-buttons">
+              <button
+                className="btn-confirm"
+                onClick={() => handleDelete(deleteMemberId)} // Use the stored member ID for deletion
+              >
+                Yes, Delete
+              </button>
+              <button
+                className="btn-cancel"
+                onClick={() => setShowDeleteModal(false)} // Close the modal
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

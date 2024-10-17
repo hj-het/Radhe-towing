@@ -7,7 +7,7 @@ import {
   FaRegCreditCard,
   FaMoneyBillAlt,
   FaWrench,
-  FaCity,
+  // FaCity,
   // FaFlag,
   // FaGlobe,
 } from "react-icons/fa";
