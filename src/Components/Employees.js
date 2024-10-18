@@ -85,11 +85,11 @@ const Employees = () => {
     if (!newEmployee.LastName) newErrors.LastName = "Last Name is required";
     if (!newEmployee.DOB) newErrors.DOB = "Date of Birth is required";
     if (!newEmployee.DOJ) newErrors.DOJ = "Date of Joining is required";
-    if (!newEmployee.Contact) newErrors.Contact = "Contact number is required";
-    else if (!/^\d+$/.test(newEmployee.Contact))
-      newErrors.Contact = "Contact should only contain numbers";
-    else if (newEmployee.Contact.length < 10 || newEmployee.Contact.length > 15)
-      newErrors.Contact = "Contact should be between 10-15 digits";
+    // if (!newEmployee.Contact) newErrors.Contact = "Contact number is required";
+    // else if (!/^\d+$/.test(newEmployee.Contact))
+    //   newErrors.Contact = "Contact should only contain numbers";
+    // else if (newEmployee.Contact.length = 10 )
+    //   newErrors.Contact = "Contact should be between 10 digits";
     if (!newEmployee.Email) newErrors.Email = "Email is required";
     else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(newEmployee.Email))
       newErrors.Email = "Email is invalid";
@@ -389,13 +389,15 @@ const editEmployee = async () => {
         </div>
       </div>
 
-      {/* Add/Edit Modal */}
-      <Modal
+    {/* Add/Edit Modal */}
+    <Modal
         isOpen={modalIsOpen}
         onRequestClose={() => setModalIsOpen(false)}
         contentLabel="Add/Edit Employee"
         className="modal"
         overlayClassName="modal-overlay"
+        shouldCloseOnOverlayClick={false}
+
       >
         <h2>{editingEmployee ? "Edit Employee" : "Add New Employee"}</h2>
 
@@ -411,6 +413,7 @@ const editEmployee = async () => {
                 onChange={(e) =>
                   setNewEmployee({ ...newEmployee, Username: e.target.value })
                 }
+                disabled={!!editingEmployee} // Disable the Username input when editing an employee
               />
             </div>
             <div className="error">
@@ -420,39 +423,39 @@ const editEmployee = async () => {
             </div>
           </div>
 
-          {/* Password Input with Icon */}
-          <div className="input-error">
-            <div className="input-with-icon">
-              <FaLock className="input-icon" />
-
-              <input
-                type={showPassword ? "text" : "password"} // Toggle input type between text and password
-                placeholder="Password"
-                value={newEmployee.Password || ""}
-                onChange={(e) =>
-                  setNewEmployee({ ...newEmployee, Password: e.target.value })
-                }
-              />
-
-              <span
-                className="eye-icon"
-                onClick={() => setShowPassword(!showPassword)} // Toggle password visibility
-                style={{
-                  position: "absolute",
-                  right: "10px",
-                  cursor: "pointer",
-                  color: "#888",
-                }}
-              >
-                {showPassword ? <FaEyeSlash /> : <FaEye />}
-              </span>
+          {/* Password Input with Icon (Show only when adding a new employee) */}
+          {!editingEmployee && (
+            <div className="input-error">
+              <div className="input-with-icon">
+                <FaLock className="input-icon" />
+                <input
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Password"
+                  value={newEmployee.Password || ""}
+                  onChange={(e) =>
+                    setNewEmployee({ ...newEmployee, Password: e.target.value })
+                  }
+                />
+                <span
+                  className="eye-icon"
+                  onClick={() => setShowPassword(!showPassword)}
+                  style={{
+                    position: "absolute",
+                    right: "10px",
+                    cursor: "pointer",
+                    color: "#888",
+                  }}
+                >
+                  {showPassword ? <FaEyeSlash /> : <FaEye />}
+                </span>
+              </div>
+              <div className="error">
+                {errors.Password && (
+                  <span className="error-text">{errors.Password}</span>
+                )}
+              </div>
             </div>
-            <div className="error">
-              {errors.Password && (
-                <span className="error-text">{errors.Password}</span>
-              )}
-            </div>
-          </div>
+          )}
 
           <div className="namefield">
             {/* First Name Input with Icon */}
@@ -499,6 +502,7 @@ const editEmployee = async () => {
             </div>
           </div>
 
+          {/* Date of Birth and Date of Joining */}
           <div className="datefield">
             {/* Date of Birth Input with Icon */}
             <div className="input-error">
@@ -562,7 +566,7 @@ const editEmployee = async () => {
                 }
               />
             </div>
-            <div className="erroe">
+            <div className="error">
               {errors.Contact && (
                 <span className="error-text">{errors.Contact}</span>
               )}

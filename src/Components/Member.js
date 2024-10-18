@@ -18,7 +18,7 @@ import {
   FaEye,
   FaCalendarAlt,
   FaMapPin,
-  FaSearch
+  FaSearch,
 } from "react-icons/fa";
 
 // Set Modal app element
@@ -29,12 +29,13 @@ const Member = () => {
   const [editingMember, setEditingMember] = useState(null);
   const [showPassword, setShowPassword] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-const [filteredMembers, setFilteredMembers] = useState([]);
+  const [filteredMembers, setFilteredMembers] = useState([]);
   const [cities, setCities] = useState([]);
   const [activeDropdown, setActiveDropdown] = useState(null);
   const [deleteMemberId, setDeleteMemberId] = useState(null); // For delete confirmation
   const [deleteMemberName, setDeleteMemberName] = useState("");
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [errors, setErrors] = useState({});
   const [statusChange, setStatusChange] = useState({
     memberId: null,
     memberName: null,
@@ -101,7 +102,7 @@ const [filteredMembers, setFilteredMembers] = useState([]);
     fetchMembers();
   }, []);
 
- // Handle status change
+  // Handle status change
   const handleStatusChange = async () => {
     const { memberId, newStatus } = statusChange;
     try {
@@ -235,29 +236,85 @@ const [filteredMembers, setFilteredMembers] = useState([]);
       Cell: ({ row }) => renderStatus(row.original.status, row.original.id),
     },
   ];
-  
- // Handle search
- const handleSearchChange = (e) => {
-  const query = e.target.value.toLowerCase();
-  setSearchQuery(query);
 
-  if (query === "") {
-    setFilteredMembers(members);
-  } else {
-    const filtered = members.filter(
-      (member) =>
-        (member.username && member.username.toLowerCase().includes(query)) ||
-        (member.first_name &&
-          member.first_name.toLowerCase().includes(query)) ||
-        (member.last_name && member.last_name.toLowerCase().includes(query)) ||
-        (member.email && member.email.toLowerCase().includes(query)) ||
-        (member.phone && member.phone.includes(query))
-    );
-    setFilteredMembers(filtered);
-  }
-};
-  
-  
+  // Handle search
+  const handleSearchChange = (e) => {
+    const query = e.target.value.toLowerCase();
+    setSearchQuery(query);
+
+    if (query === "") {
+      setFilteredMembers(members);
+    } else {
+      const filtered = members.filter(
+        (member) =>
+          (member.username && member.username.toLowerCase().includes(query)) ||
+          (member.first_name &&
+            member.first_name.toLowerCase().includes(query)) ||
+          (member.last_name &&
+            member.last_name.toLowerCase().includes(query)) ||
+          (member.email && member.email.toLowerCase().includes(query)) ||
+          (member.phone && member.phone.includes(query))
+      );
+      setFilteredMembers(filtered);
+    }
+  };
+
+  // Validation for form fields
+  const validateForm = () => {
+    const errors = {};
+
+    if (!newMember.username || newMember.username.length < 3) {
+      errors.username =
+        "Username is required and must be at least 3 characters long";
+    }
+
+    if (
+      !editingMember &&
+      (!newMember.password || newMember.password.length < 6)
+    ) {
+      errors.password =
+        "Password is required and must be at least 6 characters long";
+    }
+
+    if (newMember.password !== newMember.password_confirmation) {
+      errors.password_confirmation = "Passwords do not match";
+    }
+
+    if (!newMember.first_name) {
+      errors.first_name = "First name is required";
+    }
+
+    if (!newMember.last_name) {
+      errors.last_name = "Last name is required";
+    }
+
+    const dob = new Date(newMember.dob);
+    if (!newMember.dob || isNaN(dob.getTime()) || dob >= new Date()) {
+      errors.dob = "Date of Birth is required and must be in the past";
+    }
+
+    if (!newMember.address_1) {
+      errors.address_1 = "Address 1 is required";
+    }
+
+    if (!/^\d{6}$/.test(newMember.pincode)) {
+      errors.pincode = "Pincode must be exactly 6 digits";
+    }
+
+    if (!/^\d{10}$/.test(newMember.contact)) {
+      errors.contact = "Contact number must be exactly 10 digits";
+    }
+
+    if (!/^[^\s@]+@gmail\.com$/.test(newMember.email)) {
+      errors.email = "Email must be a valid @gmail.com address";
+    }
+
+    if (!newMember.city_id) {
+      errors.city_id = "City is required";
+    }
+
+    return errors;
+  };
 
   // Handle delete
   const handleDelete = async (memberId) => {
@@ -277,8 +334,8 @@ const [filteredMembers, setFilteredMembers] = useState([]);
     }
   };
 
-   // Trigger delete confirmation modal
-   const triggerDeleteModal = (memberId) => {
+  // Trigger delete confirmation modal
+  const triggerDeleteModal = (memberId) => {
     const member = members.find((m) => m.id === memberId);
     if (member) {
       setDeleteMemberId(memberId);
@@ -355,137 +412,141 @@ const [filteredMembers, setFilteredMembers] = useState([]);
     setModalIsOpen(true); // Open modal for editing
   };
 
-// Handle Save (for Add and Update)
-const handleSave = async () => {
-  if (!newMember.city_id) {
-    alert("Please select a city");
-    return;
-  }
+  // Handle Save (for Add and Update)
+  const handleSave = async () => {
+    const validationErrors = validateForm();
+    setErrors(validationErrors); // Set the validation errors in state
 
-  if (editingMember) {
-    // Update existing member via PUT request
-    try {
-      const response = await axios.put(
-        `https://panel.radhetowing.com/api/members/${editingMember.id}`,
-        {
-          username: newMember.username,
-          first_name: newMember.first_name,
-          last_name: newMember.last_name,
-          dob: newMember.dob,
-          address_1: newMember.address_1,
-          address_2: newMember.address_2,
-          city_id: newMember.city_id,
-          pincode: newMember.pincode,
-          contact: newMember.contact,
-          email: newMember.email,
-          profile_pic: newMember.profile_pic,
-          password: newMember.password,
-          password_confirmation: newMember.password_confirmation,
+    // if (Object.keys(validationErrors).length > 0) {
+    //   return; // Stop execution if there are validation errors
+    // }
+
+    if (editingMember) {
+      // Update existing member via PUT request
+      try {
+        const response = await axios.put(
+          `https://panel.radhetowing.com/api/members/${editingMember.id}`,
+          {
+            username: newMember.username,
+            first_name: newMember.first_name,
+            last_name: newMember.last_name,
+            dob: newMember.dob,
+            address_1: newMember.address_1,
+            address_2: newMember.address_2,
+            city_id: newMember.city_id,
+            pincode: newMember.pincode,
+            contact: newMember.contact,
+            email: newMember.email,
+            profile_pic: newMember.profile_pic,
+            password: newMember.password,
+            password_confirmation: newMember.password_confirmation,
+          }
+        );
+
+        // Get updated city name from cities list
+        const updatedCity =
+          cities.find((city) => city.id === newMember.city_id)?.name ||
+          "Unknown";
+
+        if (response.status === 200) {
+          const updatedMember = response.data;
+
+          // Update the member in the local state with correct city name
+          setMembers(
+            members.map((m) =>
+              m.id === editingMember.id
+                ? { ...updatedMember, city: updatedCity }
+                : m
+            )
+          );
+          setFilteredMembers(
+            filteredMembers.map((m) =>
+              m.id === editingMember.id
+                ? { ...updatedMember, city: updatedCity }
+                : m
+            )
+          );
+          setModalIsOpen(false); // Close modal after updating
+          setEditingMember(null); // Clear editing state
         }
-      );
-
-      // Get updated city name from cities list
-      const updatedCity = cities.find((city) => city.id === newMember.city_id)?.name || "Unknown";
-
-      if (response.status === 200) {
-        const updatedMember = response.data;
-
-        // Update the member in the local state with correct city name
-        setMembers(
-          members.map((m) =>
-            m.id === editingMember.id
-              ? { ...updatedMember, city: updatedCity }
-              : m
-          )
-        );
-        setFilteredMembers(
-          filteredMembers.map((m) =>
-            m.id === editingMember.id
-              ? { ...updatedMember, city: updatedCity }
-              : m
-          )
-        );
-        setModalIsOpen(false); // Close modal after updating
-        setEditingMember(null); // Clear editing state
+      } catch (error) {
+        console.error("Error updating member:", error);
       }
-    } catch (error) {
-      console.error("Error updating member:", error);
+    } else {
+      // Add new member via POST request
+      try {
+        const response = await axios.post(
+          "https://panel.radhetowing.com/api/members",
+          {
+            username: newMember.username,
+            first_name: newMember.first_name,
+            last_name: newMember.last_name,
+            dob: newMember.dob,
+            address_1: newMember.address_1,
+            address_2: newMember.address_2,
+            city_id: newMember.city_id, // Ensure city_id is included here
+            pincode: newMember.pincode,
+            contact: newMember.contact,
+            email: newMember.email,
+            profile_pic: newMember.profile_pic,
+            is_active: newMember.is_active,
+            password: newMember.password,
+            password_confirmation: newMember.password_confirmation,
+          }
+        );
+
+        const addedMemberId = response.data.id; // Get the newly created member's ID
+
+        // Now fetch the full data of the new member using the ID
+        const addedMemberResponse = await axios.get(
+          `https://panel.radhetowing.com/api/members/${addedMemberId}`
+        );
+
+        const addedMember = addedMemberResponse.data; // Get full data of the added member
+
+        const addedCity =
+          cities.find((city) => city.id === addedMember.city_id)?.name ||
+          "Unknown";
+
+        // Add the newly created member to the list with the correct city name
+        setMembers([
+          ...members,
+          {
+            ...addedMember,
+            city: addedCity, // Use the city name from the cities list
+          },
+        ]);
+        setFilteredMembers([
+          ...filteredMembers,
+          {
+            ...addedMember,
+            city: addedCity, // Use the city name from the cities list
+          },
+        ]);
+        setModalIsOpen(false); // Close modal after adding
+      } catch (error) {
+        console.error("Error adding member:", error);
+      }
     }
-  } else {
-    // Add new member via POST request
-    try {
-      const response = await axios.post(
-        "https://panel.radhetowing.com/api/members",
-        {
-          username: newMember.username,
-          first_name: newMember.first_name,
-          last_name: newMember.last_name,
-          dob: newMember.dob,
-          address_1: newMember.address_1,
-          address_2: newMember.address_2,
-          city_id: newMember.city_id, // Ensure city_id is included here
-          pincode: newMember.pincode,
-          contact: newMember.contact,
-          email: newMember.email,
-          profile_pic: newMember.profile_pic,
-          is_active: newMember.is_active,
-          password: newMember.password,
-          password_confirmation: newMember.password_confirmation,
-        }
-      );
 
-      const addedMemberId = response.data.id; // Get the newly created member's ID
-
-      // Now fetch the full data of the new member using the ID
-      const addedMemberResponse = await axios.get(
-        `https://panel.radhetowing.com/api/members/${addedMemberId}`
-      );
-      
-      const addedMember = addedMemberResponse.data; // Get full data of the added member
-
-      const addedCity = cities.find((city) => city.id === addedMember.city_id)?.name || "Unknown";
-
-      // Add the newly created member to the list with the correct city name
-      setMembers([
-        ...members,
-        {
-          ...addedMember,
-          city: addedCity, // Use the city name from the cities list
-        },
-      ]);
-      setFilteredMembers([
-        ...filteredMembers,
-        {
-          ...addedMember,
-          city: addedCity, // Use the city name from the cities list
-        },
-      ]);
-      setModalIsOpen(false); // Close modal after adding
-    } catch (error) {
-      console.error("Error adding member:", error);
-    }
-  }
-
-  // Reset the form after saving
-  setNewMember({
-    username: "",
-    first_name: "",
-    last_name: "",
-    dob: "",
-    address_1: "",
-    address_2: "",
-    city_id: "", // Reset city_id
-    pincode: "",
-    contact: "",
-    email: "",
-    profile_pic: null,
-    is_active: "p",
-    password: "",
-    password_confirmation: "",
-  });
-};
-
-
+    // Reset the form after saving
+    setNewMember({
+      username: "",
+      first_name: "",
+      last_name: "",
+      dob: "",
+      address_1: "",
+      address_2: "",
+      city_id: "", // Reset city_id
+      pincode: "",
+      contact: "",
+      email: "",
+      profile_pic: null,
+      is_active: "p",
+      password: "",
+      password_confirmation: "",
+    });
+  };
 
   return (
     <div className="mainhead">
@@ -509,7 +570,6 @@ const handleSave = async () => {
         </div>
       </div>
 
-
       {/* Members Table */}
       <TableOne
         columns={columns}
@@ -531,149 +591,220 @@ const handleSave = async () => {
 
         <div className="form-member">
           {/* Username Input with Icon */}
-          <div className="input-with-iconm">
-            <FaUser className="input-icon" />
-            <input
-              type="text"
-              placeholder="Username"
-              value={newMember.username}
-              onChange={(e) =>
-                setNewMember({ ...newMember, username: e.target.value })
-              }
-            />
+          <div className="input-error">
+            <div className="input-with-iconm">
+              <FaUser className="input-icon" />
+              <input
+                type="text"
+                placeholder="Username"
+                value={newMember.username}
+                onChange={(e) =>
+                  setNewMember({ ...newMember, username: e.target.value })
+                }
+                disabled={!!editingMember}
+              />
+            </div>
+            <div className="error">
+              {errors.username && (
+                <span className="error-text">{errors.username}</span>
+              )}
+            </div>
           </div>
 
           {/* First and Last Name Input with Icon */}
+
           <div className="namefield">
-            <div className="input-with-iconm">
-              <FaUser className="input-icon" />
-              <input
-                type="text"
-                placeholder="First Name"
-                value={newMember.first_name}
-                onChange={(e) =>
-                  setNewMember({ ...newMember, first_name: e.target.value })
-                }
-              />
+            <div className="input-error">
+              <div className="input-with-iconm">
+                <FaUser className="input-icon" />
+                <input
+                  type="text"
+                  placeholder="First Name"
+                  value={newMember.first_name}
+                  onChange={(e) =>
+                    setNewMember({ ...newMember, first_name: e.target.value })
+                  }
+                />
+              </div>
+              <div className="error">
+                {errors.first_name && (
+                  <span className="error-text">{errors.first_name}</span>
+                )}
+              </div>
             </div>
 
-            <div className="input-with-iconm">
-              <FaUser className="input-icon" />
-              <input
-                type="text"
-                placeholder="Last Name"
-                value={newMember.last_name}
-                onChange={(e) =>
-                  setNewMember({ ...newMember, last_name: e.target.value })
-                }
-              />
+            <div className="input-error">
+              <div className="input-with-iconm">
+                <FaUser className="input-icon" />
+                <input
+                  type="text"
+                  placeholder="Last Name"
+                  value={newMember.last_name}
+                  onChange={(e) =>
+                    setNewMember({ ...newMember, last_name: e.target.value })
+                  }
+                />
+              </div>
+              <div className="error">
+                {errors.last_name && (
+                  <span className="error-text">{errors.last_name}</span>
+                )}
+              </div>
             </div>
           </div>
 
           {/* Password Input with Icon and Toggle */}
-          <div className="passwordfeildm">
-            <div className="input-with-iconm">
-              <FaLock className="input-icon" />
-              <input
-                type={showPassword ? "text" : "password"}
-                placeholder="Password"
-                value={newMember.password}
-                onChange={(e) =>
-                  setNewMember({ ...newMember, password: e.target.value })
-                }
-              />
-              <span
-                className="eye-icon"
-                onClick={() => setShowPassword(!showPassword)}
-              >
-                {showPassword ? <FaEyeSlash /> : <FaEye />}
-              </span>
-            </div>
+          {!editingMember && (
+            <div className="passwordfeildm">
+              <div className="input-error">
+                <div className="input-with-iconm">
+                  <FaLock className="input-icon" />
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    placeholder="Password"
+                    value={newMember.password}
+                    onChange={(e) =>
+                      setNewMember({ ...newMember, password: e.target.value })
+                    }
+                  />
+                  <span
+                    className="eye-icon"
+                    onClick={() => setShowPassword(!showPassword)}
+                  >
+                    {showPassword ? <FaEyeSlash /> : <FaEye />}
+                  </span>
+                </div>
+                <div className="error">
+                  {errors.password && (
+                    <span className="error-text">{errors.password}</span>
+                  )}
+                </div>
+              </div>
 
-            {/* Confirm Password Input with Icon and Toggle */}
-            <div className="input-with-iconm">
-              <FaLock className="input-icon" />
-              <input
-                type={showPassword ? "text" : "password"}
-                placeholder="Confirm Password"
-                value={newMember.password_confirmation}
-                onChange={(e) =>
-                  setNewMember({
-                    ...newMember,
-                    password_confirmation: e.target.value,
-                  })
-                }
-              />
-              <span
-                className="eye-icon"
-                onClick={() => setShowPassword(!showPassword)}
-              >
-                {showPassword ? <FaEyeSlash /> : <FaEye />}
-              </span>
+              {/* Confirm Password Input with Icon and Toggle */}
+              <div className="input-error">
+                <div className="input-with-iconm">
+                  <FaLock className="input-icon" />
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    placeholder="Confirm Password"
+                    value={newMember.password_confirmation}
+                    onChange={(e) =>
+                      setNewMember({
+                        ...newMember,
+                        password_confirmation: e.target.value,
+                      })
+                    }
+                  />
+                  <span
+                    className="eye-icon"
+                    onClick={() => setShowPassword(!showPassword)}
+                  >
+                    {showPassword ? <FaEyeSlash /> : <FaEye />}
+                  </span>
+                </div>
+                <div className="error">
+                  {errors.password_confirmation && (
+                    <span className="error-text">
+                      {errors.password_confirmation}
+                    </span>
+                  )}
+                </div>
+              </div>
             </div>
-          </div>
-
+          )}
           {/* Date of Birth Input with Icon */}
           <div className="date-phone">
-            <div className="input-with-iconm">
-              <FaCalendarAlt className="input-icon" />
-              <input
-                type="text"
-                onFocus={(e) => (e.target.type = "date")}
-                onBlur={(e) =>
-                  e.target.value === ""
-                    ? (e.target.type = "text")
-                    : (e.target.type = "date")
-                }
-                placeholder="Date of Birth"
-                value={
-                  newMember.dob
-                    ? new Date(newMember.dob).toISOString().substring(0, 10)
-                    : ""
-                }
-                onChange={(e) =>
-                  setNewMember({ ...newMember, dob: e.target.value })
-                }
-              />
+            <div className="input-error">
+              <div className="input-with-iconm">
+                <FaCalendarAlt className="input-icon" />
+                <input
+                  type="text"
+                  onFocus={(e) => (e.target.type = "date")}
+                  onBlur={(e) =>
+                    e.target.value === ""
+                      ? (e.target.type = "text")
+                      : (e.target.type = "date")
+                  }
+                  placeholder="Date of Birth"
+                  value={
+                    newMember.dob
+                      ? new Date(newMember.dob).toISOString().substring(0, 10)
+                      : ""
+                  }
+                  onChange={(e) =>
+                    setNewMember({ ...newMember, dob: e.target.value })
+                  }
+                />
+              </div>
+              <div className="error">
+                {errors.dob && <span className="error-text">{errors.dob}</span>}
+              </div>
             </div>
             {/* Phone Input with Icon */}
-            <div className="input-with-iconm">
-              <FaPhoneAlt className="input-icon" />
-              <input
-                type="text"
-                placeholder="Phone"
-                value={newMember.contact}
-                onChange={(e) =>
-                  setNewMember({ ...newMember, contact: e.target.value })
-                }
-              />
-            </div>{" "}
+            <div className="input-error">
+              <div className="input-with-iconm">
+                <FaPhoneAlt className="input-icon" />
+                <input
+                  type="number"
+                  placeholder="Phone"
+                  value={newMember.contact}
+                  onChange={(e) => {
+                    // Ensure only numeric input and restrict to 10 digits
+                    const input = e.target.value;
+                    if (/^\d*$/.test(input) && input.length <= 10) {
+                      setNewMember({ ...newMember, contact: input });
+                    }
+                  }}
+                  maxLength="10"
+                />
+              </div>{" "}
+              <div className="error">
+                {errors.contact && (
+                  <span className="error-text">{errors.contact}</span>
+                )}
+              </div>
+            </div>
           </div>
 
           {/* Email Input with Icon */}
-          <div className="input-with-iconm">
-            <FaEnvelope className="input-icon" />
-            <input
-              type="email"
-              placeholder="Email"
-              value={newMember.email}
-              onChange={(e) =>
-                setNewMember({ ...newMember, email: e.target.value })
-              }
-            />
+          <div className="input-error">
+            <div className="input-with-iconm">
+              <FaEnvelope className="input-icon" />
+              <input
+                type="email"
+                placeholder="Email"
+                value={newMember.email}
+                onChange={(e) =>
+                  setNewMember({ ...newMember, email: e.target.value })
+                }
+              />
+            </div>
+            <div className="error">
+              {errors.email && (
+                <span className="error-text">{errors.email}</span>
+              )}
+            </div>
           </div>
 
           {/* Address 1 Input with Icon */}
-          <div className="input-with-iconm">
-            <FaHome className="input-icon" />
-            <input
-              type="text"
-              placeholder="Address 1"
-              value={newMember.address_1}
-              onChange={(e) =>
-                setNewMember({ ...newMember, address_1: e.target.value })
-              }
-            />
+          <div className="input-error">
+            <div className="input-with-iconm">
+              <FaHome className="input-icon" />
+              <input
+                type="text"
+                placeholder="Address 1"
+                value={newMember.address_1}
+                onChange={(e) =>
+                  setNewMember({ ...newMember, address_1: e.target.value })
+                }
+              />
+            </div>
+            <div className="error">
+              {errors.address_1 && (
+                <span className="error-text">{errors.address_1}</span>
+              )}
+            </div>
           </div>
 
           {/* Address 2 Input with Icon */}
@@ -690,35 +821,49 @@ const handleSave = async () => {
           </div>
           <div className="pincode-city">
             {/* Pincode Input */}
-            <div className="input-with-iconm">
-              <FaMapPin className="input-icon" />
-              <input
-                type="text"
-                placeholder="Pincode"
-                value={newMember.pincode}
-                onChange={(e) =>
-                  setNewMember({ ...newMember, pincode: e.target.value })
-                }
-              />
+            <div className="input-error">
+              <div className="input-with-iconm">
+                <FaMapPin className="input-icon" />
+                <input
+                  type="number"
+                  placeholder="Pincode"
+                  value={newMember.pincode}
+                  onChange={(e) =>
+                    setNewMember({ ...newMember, pincode: e.target.value })
+                  }
+                />
+              </div>
+              <div className="error">
+                {errors.pincode && (
+                  <span className="error-text">{errors.pincode}</span>
+                )}
+              </div>
             </div>
 
             {/* City Dropdown with Icon */}
-            <div className="input-with-iconm">
-              <FaCity className="input-icon" />
-              <select
-                className="city-drop"
-                value={newMember.city_id} // Correctly bind the selected value
-                onChange={(e) =>
-                  setNewMember({ ...newMember, city_id: e.target.value })
-                } // Handle change correctly
-              >
-                <option value="">Select City</option>
-                {cities.map((city) => (
-                  <option key={city.id} value={city.id}>
-                    {city.name}
-                  </option>
-                ))}
-              </select>
+            <div className="input-error">
+              <div className="input-with-iconm">
+                <FaCity className="input-icon" />
+                <select
+                  className="city-drop"
+                  value={newMember.city_id} // Correctly bind the selected value
+                  onChange={(e) =>
+                    setNewMember({ ...newMember, city_id: e.target.value })
+                  } // Handle change correctly
+                >
+                  <option value="">Select City</option>
+                  {cities.map((city) => (
+                    <option key={city.id} value={city.id}>
+                      {city.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="error">
+                {errors.city_id && (
+                  <span className="error-text">{errors.city_id}</span>
+                )}
+              </div>
             </div>
           </div>
 
@@ -745,7 +890,6 @@ const handleSave = async () => {
         className="confirm-model"
         overlayClassName="modal-overlay-status"
         shouldCloseOnOverlayClick={false}
-
       >
         <h2>Confirm Status Change</h2>
         <p>

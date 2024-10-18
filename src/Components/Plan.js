@@ -4,6 +4,8 @@ import Modal from "react-modal";
 import { FaPlus } from "react-icons/fa";
 import TableOne from "../Table/TableOne";
 import "./../Style/plan.css";
+import { TextField, MenuItem, InputAdornment } from "@mui/material";
+
 import {
   FaFileAlt,
   // FaDollarSign,
@@ -276,6 +278,7 @@ const Plan = () => {
         contentLabel="Add/Edit Plan"
         className="modal"
         overlayClassName="modal-overlay"
+        shouldCloseOnOverlayClick={false}
       >
         <h2>{editingPlan ? "Edit Plan" : "Add New Plan"}</h2>
 
@@ -308,7 +311,8 @@ const Plan = () => {
             )}
 
             <div className="input-with-icon">
-              <MdOutlineCurrencyRupee className="input-icon" /> {/* Icon for price */}
+              <MdOutlineCurrencyRupee className="input-icon" />{" "}
+              {/* Icon for price */}
               <input
                 type="number"
                 placeholder="Price (₹)"
@@ -337,21 +341,34 @@ const Plan = () => {
               <span className="error-text">{errors.value_of_car}</span>
             )}
 
-            <div className="input-with-icon">
-              <FaGasPump className="input-icon" /> {/* Icon for fuel type */}
-              <input
-                type="text"
-                placeholder="Fuel Type"
+            {/* <div className="input-with-icon"> */}
+              <TextField
+                select
+                label="Fuel Type"
                 value={newPlan.fuel_type}
                 onChange={(e) =>
                   setNewPlan({ ...newPlan, fuel_type: e.target.value })
                 }
-              />
+                variant="outlined"
+                fullWidth
+                error={!!errors.fuel_type} // Handle error
+                helperText={errors.fuel_type || ""} // Show error message
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <FaGasPump />
+                    </InputAdornment>
+                  ),
+                }}
+              >
+                <MenuItem value="Petrol">Petrol</MenuItem>
+                <MenuItem value="Diesel">Diesel</MenuItem>
+                <MenuItem value="CNG">CNG</MenuItem>
+                <MenuItem value="Electric">Electric</MenuItem>
+                <MenuItem value="Hybrid">Hybrid</MenuItem>
+              </TextField>
             </div>
-            {errors.fuel_type && (
-              <span className="error-text">{errors.fuel_type}</span>
-            )}
-          </div>
+          {/* </div> */}
 
           {/* Additional input fields with icons */}
           <div className="input-combine">

@@ -15,6 +15,9 @@ const Header = () => {
     setDropdownOpen(!dropdownOpen);
   };
 
+  const userData = JSON.parse(localStorage.getItem("user"));
+  const username = userData?.username || "Guest"; // Fallback to 'Guest' if no user is found
+
   // Close the dropdown when clicking outside
   const handleClickOutside = (event) => {
     if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -61,6 +64,7 @@ const Header = () => {
 
         <div className="header-right">
           <div className="profile-section" onClick={toggleDropdown}>
+          <span className="username">Hello  {username},</span> {/* Display username */}
             <img
               src={
                 localStorage.getItem("role") === "admin"

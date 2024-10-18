@@ -106,3 +106,15 @@
     cursor: pointer;
   }
   
+  /* Styling for the username text */
+.header-right .username {
+  font-size: 16px; /* Adjust font size */
+  color: #ffffff; /* Adjust color */
+  font-weight: 600; /* Bold or semi-bold text */
+  margin-right: 15px; /* Space between the username and the dropdown */
+}
+
+.header-right .username:hover {
+  color: #007bff; /* Optional: Change color on hover */
+  transition: color 0.3s ease; /* Smooth transition on hover */
+}
