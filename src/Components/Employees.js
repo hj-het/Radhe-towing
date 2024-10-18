@@ -413,7 +413,7 @@ const editEmployee = async () => {
                 onChange={(e) =>
                   setNewEmployee({ ...newEmployee, Username: e.target.value })
                 }
-                disabled={!!editingEmployee} // Disable the Username input when editing an employee
+                disabled={!!editingEmployee} 
               />
             </div>
             <div className="error">
