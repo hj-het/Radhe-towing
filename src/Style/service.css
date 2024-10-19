@@ -1,0 +1,45 @@
+.form-service{
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.input-error select,
+.input-error input,
+.input-error textarea {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 1rem;
+  outline: none;
+  transition: border-color 0.3s;
+}
+
+.input-error select:focus,
+.input-error input:focus,
+.input-error textarea:focus {
+  border-color: #5b9bd5;
+}
+
+textarea {
+  resize: vertical;
+  width: 100%;
+}
+
+.member-vehicle{
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+}
+.input-error{
+    display: flex;
+    justify-content: left;
+    align-items: center;
+}
+
+.date-location{
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+
+}
