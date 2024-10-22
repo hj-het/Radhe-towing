@@ -1,55 +1,117 @@
-.form-service{
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
+
+.form-service {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
 }
 
-
-.input-error input {
-  padding-left: 35px;
-  width: 80%;
-  height: 30px;
-  border-radius: 4px;
-  font-size: 1rem;
-  border: 1px solid #ccc;
+.input-error {
+  position: relative;
 }
 
-.input-error select,
-/* .input-error input, */
-.input-error textarea {
-  padding: 10px;
+.input-error select {
+  width: 100%;
+  padding: 10px 15px;
+  padding-left: 40px; /* Space for the icon */
   border: 1px solid #ccc;
   border-radius: 5px;
-  font-size: 1rem;
   outline: none;
-  transition: border-color 0.3s;
+  transition: border-color 0.2s ease-in-out;
+  font-size: 14px;
+}
+
+.input-error-location{
+  position: relative;
+}
+
+.input-error-location input{
+  width: 89%;
+  padding: 10px 15px;
+  padding-left: 40px; /* Space for the icon */
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  outline: none;
+  transition: border-color 0.2s ease-in-out;
+  font-size: 14px;
+}
+
+.input-error-comment textarea{
+  width: 89%;
+  padding: 10px 15px;
+  padding-left: 40px; /* Space for the icon */
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  outline: none;
+  transition: border-color 0.2s ease-in-out;
+  font-size: 14px;
+}
+
+/* .input-error-comment .icon{
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 16px;
+  color: #888;
+} */
+
+.input-error-location .icon {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 16px;
+  color: #888;
 }
 
 .input-error select:focus,
 .input-error input:focus,
 .input-error textarea:focus {
-  border-color: #5b9bd5;
+  border-color: #007bff;
+}
+
+.input-error .icon {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 16px;
+  color: #888;
 }
 
 textarea {
-  resize: vertical;
-  width: 100%;
+  min-height: 100px;
+  resize: none;
 }
 
-.member-vehicle{
-    display: flex;
-    justify-content: space-between;
-    gap: 20px;
+.modelbutton {
+  display: flex;
+  justify-content: space-between;
 }
-/* .input-error{
-    display: flex;
-    justify-content: left;
-    align-items: center;
-} */
 
-.date-location{
-    display: flex;
-    justify-content: space-between;
-    gap: 10px;
+.btn-editmodel,
+.btn-closemodel {
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.3s ease;
+}
 
+.btn-editmodel {
+  background-color: #007bff;
+  color: white;
+}
+
+.btn-editmodel:hover {
+  background-color: #0056b3;
+}
+
+.btn-closemodel {
+  background-color: #f44336;
+  color: white;
+}
+
+.btn-closemodel:hover {
+  background-color: #d32f2f;
 }

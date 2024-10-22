@@ -103,8 +103,8 @@ const Payments = () => {
       formData.append("PM_M_id", newPayment.PM_M_id);
       formData.append("PM_V_id", newPayment.PM_V_id);
       formData.append("PM_P_id", newPayment.PM_P_id);
-      formData.append("PM_plan_startdate", newPayment.PM_plan_startdate);
-      formData.append("PM_expiredate", newPayment.PM_expiredate);
+      // formData.append("PM_plan_startdate", newPayment.PM_plan_startdate);
+      // formData.append("PM_expiredate", newPayment.PM_expiredate);
       formData.append("PM_Amount", newPayment.PM_Amount);
       formData.append(
         "PM_payment_recived_by",
@@ -225,8 +225,11 @@ const Payments = () => {
     },
     { Header: "Plan Name", accessor: (row) => row.plan?.P_name || "Unknown" },
     { Header: "Amount", accessor: "PM_Amount" },
-    { Header: "Start Date", accessor: "PM_plan_startdate" },
-    { Header: "Expire Date", accessor: "PM_expiredate" },
+    // { Header: "Start Date", accessor: "PM_plan_startdate" },
+    {
+      Header: "Expire Date",
+      accessor: (row) => new Date(row.PM_expiredate).toLocaleDateString(), // Format the expire date to only show date
+    },
     { Header: "Received By", accessor: "PM_payment_recived_by" },
     {
       Header: "Status",
@@ -339,7 +342,7 @@ const Payments = () => {
           </div>
 
           {/* Start Date */}
-          <div className="date-payment">
+          {/* <div className="date-payment">
             <div className="input-error-payment ">
               <div className="input-payment">
                 <FaCalendarAlt className="icon" />
@@ -357,7 +360,7 @@ const Payments = () => {
             </div>
 
             {/* Expire Date */}
-            <div className="input-error-payment">
+            {/* <div className="input-error-payment">
               <div className="input-payment">
                 <FaCalendarAlt className="icon" />
                 <input
@@ -372,7 +375,7 @@ const Payments = () => {
                 />
               </div>
             </div>
-          </div>
+          </div> */} 
 
           {/* Amount */}
           <div className="input-error-payment">

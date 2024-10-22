@@ -1,7 +1,14 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import Modal from "react-modal";
-import { FaPlus, FaSearch } from "react-icons/fa";
+import { FaPlus, FaSearch,  FaUser,
+  FaCar,
+  FaFileAlt,
+  FaCalendarAlt,
+  FaLocationArrow,
+  FaCommentAlt,
+  FaExclamationCircle,
+  FaClipboardCheck, } from "react-icons/fa";
 import TableOne from "../Table/TableOne";
 import "./../Style/employees.css"; // Reuse employees CSS for styling
 import { ToastContainer, toast } from "react-toastify";
@@ -96,7 +103,7 @@ const Services = () => {
     const newErrors = {};
     if (!newService.member_id) newErrors.member_id = "Member is required";
     if (!newService.vehicle_id) newErrors.vehicle_id = "Vehicle is required";
-    if (!newService.datetime) newErrors.datetime = "Date and Time are required";
+    // if (!newService.datetime) newErrors.datetime = "Date and Time are required";
     if (!newService.location) newErrors.location = "Location is required";
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -230,11 +237,11 @@ const Services = () => {
           row.original.status === "P"
             ? "orange"
             : row.original.status === "A"
-            ? "green"
+            ? "blue"
             : row.original.status === "D"
             ? "red"
             : row.original.status === "C"
-            ? "blue"
+            ? "green"
             : "grey";
 
         return (
@@ -272,136 +279,135 @@ const Services = () => {
 
       {/* Add/Edit Modal */}
       <Modal
-        isOpen={modalIsOpen}
-        onRequestClose={() => setModalIsOpen(false)}
-        contentLabel="Add/Edit Service"
-        className="modal"
-        overlayClassName="modal-overlay"
-        shouldCloseOnOverlayClick={false}
+  isOpen={modalIsOpen}
+  onRequestClose={() => setModalIsOpen(false)}
+  contentLabel="Add/Edit Service"
+  className="modal"
+  overlayClassName="modal-overlay"
+  shouldCloseOnOverlayClick={false}
+>
+  <h2>{editingService ? "Edit Service" : "Add New Service"}</h2>
+
+  <div className="form-service">
+    {/* Member Dropdown */}
+    <div className="input-error">
+      <FaUser className="icon" />
+      <select
+        value={newService.member_id}
+        onChange={handleMemberChange} // Handle member change
       >
-        <h2>{editingService ? "Edit Service" : "Add New Service"}</h2>
+        <option value="">Select Member</option>
+        {members.map((member) => (
+          <option key={member.id} value={member.id}>
+            {member.username}
+          </option>
+        ))}
+      </select>
+      {errors.member_id && (
+        <span className="error-text">{errors.member_id}</span>
+      )}
+    </div>
 
-        <div className="form-service">
-          {/* Member Dropdown */}
-          <div className="member-vehicle">
-            <div className="input-error">
-              <select
-                value={newService.member_id}
-                onChange={handleMemberChange} // Handle member change
-              >
-                <option value="">Select Member</option>
-                {members.map((member) => (
-                  <option key={member.id} value={member.id}>
-                    {member.username}
-                  </option>
-                ))}
-              </select>
-              <div className="error">
-                {errors.member_id && (
-                  <span className="error-text">{errors.member_id}</span>
-                )}
-              </div>
-            </div>
+    {/* Vehicle Dropdown */}
+    <div className="input-error">
+      <FaCar className="icon" />
+      <select
+        value={newService.vehicle_id}
+        onChange={(e) =>
+          setNewService({ ...newService, vehicle_id: e.target.value })
+        }
+        disabled={!selectedMember} // Disable if no member is selected
+      >
+        <option value="">Select Vehicle</option>
+        {vehicles.map((vehicle) => (
+          <option key={vehicle.id} value={vehicle.id}>
+            {vehicle.vehicle_number}
+          </option>
+        ))}
+      </select>
+      {errors.vehicle_id && (
+        <span className="error-text">{errors.vehicle_id}</span>
+      )}
+    </div>
 
-            {/* Vehicle Dropdown */}
-            <div className="input-error">
-              <select
-                value={newService.vehicle_id}
-                onChange={(e) =>
-                  setNewService({ ...newService, vehicle_id: e.target.value })
-                }
-                disabled={!selectedMember} // Disable if no member is selected
-              >
-                <option value="">Select Vehicle</option>
-                {vehicles.map((vehicle) => (
-                  <option key={vehicle.id} value={vehicle.id}>
-                    {vehicle.vehicle_number}
-                  </option>
-                ))}
-              </select>
-              <div className="error">
-                {errors.vehicle_id && (
-                  <span className="error-text">{errors.vehicle_id}</span>
-                )}
-              </div>
-            </div>
-          </div>
+    {/* Date and Location */}
+    <div className="date-location">
+      {/* Date */}
+      {/* <div className="input-error">
+        <FaCalendarAlt className="icon" />
+        <input
+          type="datetime-local"
+          value={newService.datetime}
+          onChange={(e) =>
+            setNewService({ ...newService, datetime: e.target.value })
+          }
+        />
+        {errors.datetime && (
+          <span className="error-text">{errors.datetime}</span>
+        )}
+      </div> */}
 
-          <div className="date-location">
-            {/* Date and Time */}
-            <div className="input-error">
-              <input
-                type="datetime-local"
-                value={newService.datetime}
-                onChange={(e) =>
-                  setNewService({ ...newService, datetime: e.target.value })
-                }
-              />
-              <div className="error">
-                {errors.datetime && (
-                  <span className="error-text">{errors.datetime}</span>
-                )}
-              </div>
-            </div>
+      {/* Location */}
+      <div className="input-error-location">
+        <FaLocationArrow className="icon" />
+        <input
+          type="text"
+          placeholder="Location"
+          value={newService.location}
+          onChange={(e) =>
+            setNewService({ ...newService, location: e.target.value })
+          }
+        />
+        {errors.location && (
+          <span className="error-text">{errors.location}</span>
+        )}
+      </div>
+    </div>
 
-            {/* Location Input */}
-            <div className="input-error">
-              <input
-                type="text"
-                placeholder="Location"
-                value={newService.location}
-                onChange={(e) =>
-                  setNewService({ ...newService, location: e.target.value })
-                }
-              />
-              <div className="error">
-                {errors.location && (
-                  <span className="error-text">{errors.location}</span>
-                )}
-              </div>
-            </div>
-          </div>
-          {/* Status Dropdown */}
-          <div className="input-error">
-            <select
-              value={newService.status}
-              onChange={(e) =>
-                setNewService({ ...newService, status: e.target.value })
-              }
-            >
-              <option value="R">Request</option>
-              <option value="A">Accept</option>
-              <option value="D">Decline</option>
-              <option value="P">Processing</option>
-              <option value="C">Complete</option>
-            </select>
-          </div>
+    {/* Status Dropdown */}
+    <div className="input-error">
+      <FaExclamationCircle className="icon" />
+      <select
+        value={newService.status}
+        onChange={(e) =>
+          setNewService({ ...newService, status: e.target.value })
+        }
+      >
+        <option value="R">Request</option>
+        <option value="A">Accept</option>
+        <option value="D">Decline</option>
+        <option value="P">Processing</option>
+        <option value="C">Complete</option>
+      </select>
+    </div>
 
-          {/* Comments */}
-          <div className="input-error">
-            <textarea
-              placeholder="Comments"
-              value={newService.comments}
-              onChange={(e) =>
-                setNewService({ ...newService, comments: e.target.value })
-              }
-            />
-          </div>
+    {/* Comments */}
+    <div className="input-error-comment">
+      {/* <FaCommentAlt className="icon" /> */}
+      <textarea
+        placeholder="Comments"
+        value={newService.comments}
+        onChange={(e) =>
+          setNewService({ ...newService, comments: e.target.value })
+        }
+      />
+    </div>
 
-          <div className="modelbutton">
-            <button onClick={handleSave} className="btn-editmodel">
-              {editingService ? "Update Service" : "Add Service"}
-            </button>
-            <button
-              className="btn-closemodel"
-              onClick={() => setModalIsOpen(false)}
-            >
-              Close
-            </button>
-          </div>
-        </div>
-      </Modal>
 
+
+    <div className="modelbutton">
+      <button onClick={handleSave} className="btn-editmodel">
+        {editingService ? "Update Service" : "Add Service"}
+      </button>
+      <button
+        className="btn-closemodel"
+        onClick={() => setModalIsOpen(false)}
+      >
+        Close
+      </button>
+    </div>
+  </div>
+</Modal>
       {/* Delete Confirmation Modal */}
       {showDeleteModal && (
         <div className="modal-overlay">
