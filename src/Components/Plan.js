@@ -16,6 +16,7 @@ import {
   FaCalendarCheck,
 } from "react-icons/fa";
 import { MdOutlineCurrencyRupee } from "react-icons/md";
+import { toast } from "react-toastify";
 
 Modal.setAppElement("#root");
 
@@ -40,6 +41,7 @@ const Plan = () => {
     service_24x7: false,
     is_customized: false,
     created_by: "Admin",
+    isActive:"0"
   });
 
   // Fetch plans data from the API
@@ -138,6 +140,7 @@ const Plan = () => {
       service_24x7: false,
       is_customized: false,
       created_by: "Admin",
+      isActive:"0"
     });
     setEditingPlan(null);
     setModalIsOpen(true);
@@ -159,6 +162,7 @@ const Plan = () => {
       service_24x7: newPlan.service_24x7,
       is_customized: newPlan.is_customized,
       created_by: "Admin",
+      isActive:"0"
     };
 
     try {
@@ -169,6 +173,7 @@ const Plan = () => {
 
       if (response.status === 201) {
         setPlans([...plans, { id: response.data.id, ...newPlan }]);
+       toast.success("Plan Added ")
         setModalIsOpen(false);
       } else {
         console.error("Error adding plan:", response.data.message);
@@ -193,6 +198,7 @@ const Plan = () => {
       service_24x7: newPlan.service_24x7,
       is_customized: newPlan.is_customized,
       created_by: "Admin",
+      isActive:"0"
     };
 
     try {

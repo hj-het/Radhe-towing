@@ -2,24 +2,18 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import Modal from "react-modal";
 import { FaPlus, FaSearch } from "react-icons/fa";
-import TableOne from "../Table/TableOne";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import "./../Style/payment.css"; // Reuse service CSS for styling
-import {
-  FaUser,
-  FaCar,
-  FaFileAlt,
-  FaCalendarAlt,
-  FaRupeeSign,
-  FaImage,
-} from "react-icons/fa";
+import "./../Style/payment.css";
+import { FaUser, FaCar, FaFileAlt, FaRupeeSign, FaImage } from "react-icons/fa";
+import { MdOutlinePendingActions } from "react-icons/md";
+import TableOne from "../Table/TableOne";
 
 Modal.setAppElement("#root");
 
 const Payments = () => {
   const [payments, setPayments] = useState([]);
-  const [members, setMembers] = useState([]);
+  const [members, setMembers] = useState([]); // Store members data
   const [vehicles, setVehicles] = useState([]);
   const [plans, setPlans] = useState([]);
   const [filteredPayments, setFilteredPayments] = useState([]);
@@ -28,7 +22,6 @@ const Payments = () => {
   const [deletePaymentId, setDeletePaymentId] = useState(null);
   const [deletePaymentName, setDeletePaymentName] = useState("");
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [errors, setErrors] = useState({});
   const [newPayment, setNewPayment] = useState({
     PM_M_id: "",
     PM_V_id: "",
@@ -40,10 +33,9 @@ const Payments = () => {
     PM_payment_recived_by: "",
     PM_isCreateby: "",
     PM_comment: "",
-    Status: "P", // Default to 'Pending'
+    Status: "",
   });
   const [modalIsOpen, setModalIsOpen] = useState(false);
-  const [selectedMember, setSelectedMember] = useState(null);
 
   // Fetch all payments from the API
   const fetchPayments = async () => {
@@ -53,7 +45,6 @@ const Payments = () => {
       );
       setPayments(response.data);
       setFilteredPayments(response.data); // Initialize filteredPayments with full list of payments
-      extractMembers(response.data); // Extract members from payments
     } catch (error) {
       console.error("Error fetching payments:", error);
     }
@@ -61,40 +52,56 @@ const Payments = () => {
 
   useEffect(() => {
     fetchPayments();
+    fetchPlans(); // Fetch all plans on component mount
   }, []);
 
-  // Extract unique members from payments data
-  const extractMembers = (payments) => {
-    const uniqueMembers = payments
-      .map((payment) => payment.member)
-      .filter(
-        (member, index, self) =>
-          self.findIndex((m) => m.M_id === member.M_id) === index
-      ); // Filter unique members
-    setMembers(uniqueMembers);
+  // Fetch members from the API
+  const fetchMembers = async () => {
+    try {
+      const response = await axios.get(
+        "https://panel.radhetowing.com/api/members"
+      );
+      setMembers(response.data); // Store the member data in state
+    } catch (error) {
+      console.error("Error fetching members:", error);
+    }
   };
 
-  // Handle member change, and update vehicles and plans based on member selection
-  const handleMemberChange = (memberId) => {
+  // Fetch plans from the API
+  const fetchPlans = async () => {
+    try {
+      const response = await axios.get("https://panel.radhetowing.com/api/plans");
+      setPlans(response.data.plans); // Store all plans in state
+    } catch (error) {
+      console.error("Error fetching plans:", error);
+    }
+  };
+
+// Handle member change, fetch vehicles based on the selected member ID
+const handleMemberChange = async (memberId) => {
+  try {
+    setVehicles([]);
     setNewPayment({ ...newPayment, PM_M_id: memberId });
 
-    const memberPayments = payments.filter(
-      (p) => p.PM_M_id === parseInt(memberId)
+    const response = await axios.get(
+      `https://panel.radhetowing.com/api/vehicles/member/${memberId}`
     );
 
-    // Extract unique vehicles based on the selected member
-    const uniqueVehicles = [
-      ...new Set(memberPayments.map((p) => p.vehicle.V_id)),
-    ].map((id) => memberPayments.find((p) => p.vehicle.V_id === id).vehicle);
+    // Check if the API returns success or not
+    if (response.data.error) {
+      toast.error(response.data.message || "No vehicles found for this member.");
+      return;
+    }
 
-    // Extract unique plans based on the selected member
-    const uniquePlans = [
-      ...new Set(memberPayments.map((p) => p.plan.P_id)),
-    ].map((id) => memberPayments.find((p) => p.plan.P_id === id).plan);
+    const memberVehicles = response.data.data;
+    setVehicles(memberVehicles); // Update vehicles for dropdown
 
-    setVehicles(uniqueVehicles); // Update vehicles for dropdown
-    setPlans(uniquePlans); // Update plans for dropdown
-  };
+  } catch (error) {
+    console.error("Error fetching vehicles for member:", error);
+    toast.error("Error fetching vehicles. Please try again.");
+  }
+};
+
 
   // Handle save for new or edit payment
   const handleSavePayment = async () => {
@@ -103,8 +110,6 @@ const Payments = () => {
       formData.append("PM_M_id", newPayment.PM_M_id);
       formData.append("PM_V_id", newPayment.PM_V_id);
       formData.append("PM_P_id", newPayment.PM_P_id);
-      // formData.append("PM_plan_startdate", newPayment.PM_plan_startdate);
-      // formData.append("PM_expiredate", newPayment.PM_expiredate);
       formData.append("PM_Amount", newPayment.PM_Amount);
       formData.append(
         "PM_payment_recived_by",
@@ -115,7 +120,7 @@ const Payments = () => {
       formData.append("Status", newPayment.Status);
 
       if (newPayment.PM_payment_ss_image) {
-        formData.append("PM_payment_ss_image", newPayment.PM_payment_ss_image); // Add file to FormData
+        formData.append("PM_payment_ss_image", newPayment.PM_payment_ss_image);
       }
 
       if (editingPayment) {
@@ -159,14 +164,13 @@ const Payments = () => {
       PM_comment: "",
       Status: "P", // Default to 'Pending'
     });
-    setEditingPayment(null);
-    setVehicles([]);
-    setPlans([]);
+    setVehicles([]); // Reset vehicles when form is reset
   };
 
   // Handle opening modal for adding a new payment
   const handleOpenAddModal = () => {
     resetForm();
+    fetchMembers(); // Fetch members when opening the modal
     setModalIsOpen(true);
   };
 
@@ -201,7 +205,6 @@ const Payments = () => {
     const query = e.target.value.toLowerCase();
     setSearchQuery(query);
 
-    // Filter payments based on the search query
     const filtered = payments.filter((payment) =>
       payment.member?.M_username.toLowerCase().includes(query)
     );
@@ -209,11 +212,24 @@ const Payments = () => {
     setFilteredPayments(filtered); // Update the filtered payments state
   };
 
+  // Handle Plan Change: set price in amount field when a plan is selected
+  const handlePlanChange = (planId) => {
+    const selectedPlan = plans.find((plan) => plan.id === parseInt(planId));
+    if (selectedPlan) {
+      setNewPayment({
+        ...newPayment,
+        PM_P_id: planId,
+        PM_Amount: selectedPlan.price, // Set the plan price in the amount field
+      });
+    }
+  };
+
   // Table columns
   const columns = [
     {
       Header: "ID",
-      accessor: "PM_id",
+      accessor: (row, index) => index + 1,
+      id: "index",
     },
     {
       Header: "Member Username",
@@ -225,10 +241,9 @@ const Payments = () => {
     },
     { Header: "Plan Name", accessor: (row) => row.plan?.P_name || "Unknown" },
     { Header: "Amount", accessor: "PM_Amount" },
-    // { Header: "Start Date", accessor: "PM_plan_startdate" },
     {
       Header: "Expire Date",
-      accessor: (row) => new Date(row.PM_expiredate).toLocaleDateString(), // Format the expire date to only show date
+      accessor: (row) => new Date(row.PM_expiredate).toLocaleDateString(),
     },
     { Header: "Received By", accessor: "PM_payment_recived_by" },
     {
@@ -239,6 +254,7 @@ const Payments = () => {
           A: "Accepted",
           P: "Pending",
           R: "Rejected",
+          E: "Expired",
         };
         return <span>{statusMap[row.original.Status] || "Unknown"}</span>;
       },
@@ -264,7 +280,7 @@ const Payments = () => {
             type="text"
             placeholder="Search by member"
             value={searchQuery}
-            onChange={handleSearchChange} // Link search to filtering logic
+            onChange={handleSearchChange}
           />
         </div>
       </div>
@@ -291,8 +307,8 @@ const Payments = () => {
               >
                 <option value="">Select Member</option>
                 {members.map((member) => (
-                  <option key={member.M_id} value={member.M_id}>
-                    {member.M_username}
+                  <option key={member.id} value={member.id}>
+                    {member.username}
                   </option>
                 ))}
               </select>
@@ -312,8 +328,8 @@ const Payments = () => {
               >
                 <option value="">Select Vehicle</option>
                 {vehicles.map((vehicle) => (
-                  <option key={vehicle.V_id} value={vehicle.V_id}>
-                    {vehicle.V_vihicle_number}
+                  <option key={vehicle.id} value={vehicle.id}>
+                    {vehicle.vehicle_number}
                   </option>
                 ))}
               </select>
@@ -326,58 +342,19 @@ const Payments = () => {
               <FaFileAlt className="icon" />
               <select
                 value={newPayment.PM_P_id}
-                onChange={(e) =>
-                  setNewPayment({ ...newPayment, PM_P_id: e.target.value })
-                }
-                disabled={!newPayment.PM_M_id}
+                onChange={(e) => handlePlanChange(e.target.value)} // Handle plan selection
               >
                 <option value="">Select Plan</option>
                 {plans.map((plan) => (
-                  <option key={plan.P_id} value={plan.P_id}>
-                    {plan.P_name}
+                  <option key={plan.id} value={plan.id}>
+                    {plan.name}
                   </option>
                 ))}
               </select>
             </div>
           </div>
 
-          {/* Start Date */}
-          {/* <div className="date-payment">
-            <div className="input-error-payment ">
-              <div className="input-payment">
-                <FaCalendarAlt className="icon" />
-                <input
-                  type="datetime-local"
-                  value={newPayment.PM_plan_startdate}
-                  onChange={(e) =>
-                    setNewPayment({
-                      ...newPayment,
-                      PM_plan_startdate: e.target.value,
-                    })
-                  }
-                />
-              </div>
-            </div>
-
-            {/* Expire Date */}
-            {/* <div className="input-error-payment">
-              <div className="input-payment">
-                <FaCalendarAlt className="icon" />
-                <input
-                  type="datetime-local"
-                  value={newPayment.PM_expiredate}
-                  onChange={(e) =>
-                    setNewPayment({
-                      ...newPayment,
-                      PM_expiredate: e.target.value,
-                    })
-                  }
-                />
-              </div>
-            </div>
-          </div> */} 
-
-          {/* Amount */}
+          {/* Amount (Plan Price) */}
           <div className="input-error-payment">
             <div className="input-payment">
               <FaRupeeSign className="icon" />
@@ -387,8 +364,26 @@ const Payments = () => {
                 value={newPayment.PM_Amount}
                 onChange={(e) =>
                   setNewPayment({ ...newPayment, PM_Amount: e.target.value })
-                }
+                } // Allow users to modify the amount
               />
+            </div>
+          </div>
+
+          {/* Status Dropdown */}
+          <div className="input-error-payment">
+            <div className="input-payment">
+              <MdOutlinePendingActions className="icon" />
+              <select
+                value={newPayment.Status}
+                onChange={(e) =>
+                  setNewPayment({ ...newPayment, Status: e.target.value })
+                }
+              >
+                <option value="P">Pending</option>
+                <option value="A">Accepted</option>
+                <option value="R">Rejected</option>
+                <option value="E">Expired</option>
+              </select>
             </div>
           </div>
 
@@ -459,7 +454,7 @@ const Payments = () => {
         data={filteredPayments.length > 0 ? filteredPayments : payments} // Conditionally render filtered payments or all payments
         handleDelete={(payment) => triggerDeleteModal(payment)}
         handleEdit={(payment) => {
-          setEditingPayment(payment);
+          setEditingPayment(editingPayment);
           setNewPayment(payment);
           setModalIsOpen(true);
         }}
