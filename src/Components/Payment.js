@@ -88,7 +88,7 @@ const handleMemberChange = async (memberId) => {
     );
 
     // Check if the API returns success or not
-    if (response.data.error) {
+    if (response.data.success) {
       toast.error(response.data.message || "No vehicles found for this member.");
       return;
     }
