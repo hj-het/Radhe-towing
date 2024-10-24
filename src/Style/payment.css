@@ -98,3 +98,7 @@
     align-items: center;
     gap: 10px;
   }
+
+  .member-info{
+    display: flex;
+  }

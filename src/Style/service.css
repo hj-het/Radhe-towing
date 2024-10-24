@@ -11,13 +11,12 @@
 
 .input-error select {
   width: 100%;
-  padding: 10px 15px;
-  padding-left: 40px; /* Space for the icon */
+  padding: 12px;
+  padding-left: 40px;
+  font-size: 16px;
   border: 1px solid #ccc;
-  border-radius: 5px;
+  border-radius: 4px;
   outline: none;
-  transition: border-color 0.2s ease-in-out;
-  font-size: 14px;
 }
 
 .input-error-location{
@@ -33,6 +32,18 @@
   outline: none;
   transition: border-color 0.2s ease-in-out;
   font-size: 14px;
+}
+
+input[type="date-time"] {
+  width: 89%;
+  padding: 10px 15px;
+  padding-left: 40px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  outline: none;
+  transition: border-color 0.2s ease-in-out;
+  font-size: 14px;
+  /* margin-bottom: 10px; */
 }
 
 .input-error-comment textarea{

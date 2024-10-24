@@ -386,9 +386,13 @@ const Member = () => {
     setModalIsOpen(true); // Open modal
   };
 
+
+
   // Handle Edit Member (populate form with member data and open modal)
   const handleEdit = (member) => {
     console.log("Editing Member -->", member);
+    console.log("Member city_id -->", member.city); 
+    const selectedCity = cities.find(city => city.name === member.city);
     setEditingMember(member); // Set editing mode
     setNewMember({
       username: member.username,
@@ -400,7 +404,7 @@ const Member = () => {
         : "",
       address_1: member.address_1 || "",
       address_2: member.address_2 || "",
-      city_id: member.city_id || "",
+      city_id: selectedCity ? selectedCity.id : "", // Set city_id based on the selected city
       pincode: member.pincode || "",
       contact: member.phone || "",
       email: member.email || "",
@@ -741,6 +745,8 @@ const Member = () => {
                 {errors.dob && <span className="error-text">{errors.dob}</span>}
               </div>
             </div>
+
+            
             {/* Phone Input with Icon */}
             <div className="input-error">
               <div className="input-with-iconm">

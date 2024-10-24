@@ -118,6 +118,10 @@
     margin-bottom: 16px;
   }
   
+  input[type="date"] {
+    width: 200px;
+}
+
   .input-with-iconm input {
     padding-left: 35px;
     width: 100%;

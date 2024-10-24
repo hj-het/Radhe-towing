@@ -1,14 +1,18 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import Modal from "react-modal";
-import { FaPlus, FaSearch,  FaUser,
+import {
+  FaPlus,
+  FaSearch,
+  FaUser,
   FaCar,
-  FaFileAlt,
+  // FaFileAlt,
   FaCalendarAlt,
   FaLocationArrow,
-  FaCommentAlt,
+  // FaCommentAlt,
   FaExclamationCircle,
-  FaClipboardCheck, } from "react-icons/fa";
+  // FaClipboardCheck,
+} from "react-icons/fa";
 import TableOne from "../Table/TableOne";
 import "./../Style/employees.css"; // Reuse employees CSS for styling
 import { ToastContainer, toast } from "react-toastify";
@@ -34,11 +38,14 @@ const Services = () => {
     datetime: "",
     comments: "",
     location: "",
-    status: "P", // Default to 'Processing'
+    status: "P",
   });
   const [modalIsOpen, setModalIsOpen] = useState(false);
   const [selectedMember, setSelectedMember] = useState(null);
-
+  const getCurrentDateTime = () => {
+    const now = new Date();
+    return now.toISOString().slice(0, 16); // Format as 'YYYY-MM-DDTHH:MM' for input field
+  };
   // Fetch services and members
   useEffect(() => {
     const fetchServices = async () => {
@@ -103,44 +110,61 @@ const Services = () => {
     const newErrors = {};
     if (!newService.member_id) newErrors.member_id = "Member is required";
     if (!newService.vehicle_id) newErrors.vehicle_id = "Vehicle is required";
-    // if (!newService.datetime) newErrors.datetime = "Date and Time are required";
+    if (!newService.datetime) newErrors.datetime = "Date and Time are required";
     if (!newService.location) newErrors.location = "Location is required";
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
+  // Add a new service
+  const handleAddService = async () => {
+    try {
+      const response = await axios.post(
+        "https://panel.radhetowing.com/api/towing-service-requests",
+        newService
+      );
+      // Add the new service to the services list
+      setServices([...services, response.data]);
+      setFilteredServices([...services, response.data]);
+      toast.success("Service added successfully");
+    } catch (error) {
+      console.error("Error adding service:", error);
+      toast.error("Error adding service");
+    }
+  };
+
+  // Edit an existing service
+  const handleEditService = async () => {
+    try {
+      const response = await axios.put(
+        `https://panel.radhetowing.com/api/towing-service-requests/${editingService.id}`,
+        newService
+      );
+      // Update the services list with the edited service
+      const updatedServices = services.map((service) =>
+        service.id === editingService.id ? response.data : service
+      );
+      setServices(updatedServices);
+      setFilteredServices(updatedServices);
+      toast.success("Service updated successfully");
+    } catch (error) {
+      console.error("Error editing service:", error);
+      toast.error("Error editing service");
+    }
+  };
+
   // Add or Edit a service
-  const handleSave = async () => {
+  const handleSave = () => {
     if (!validateForm()) return;
 
-    try {
-      if (editingService) {
-        // Editing an existing service
-        const response = await axios.put(
-          `https://panel.radhetowing.com/api/towing-service-requests/${editingService.id}`,
-          newService
-        );
-        const updatedServices = services.map((service) =>
-          service.id === editingService.id ? response.data : service
-        );
-        setServices(updatedServices);
-        setFilteredServices(updatedServices);
-        toast.success("Service updated successfully");
-      } else {
-        // Adding a new service
-        const response = await axios.post(
-          "https://panel.radhetowing.com/api/towing-service-requests",
-          newService
-        );
-        setServices([...services, response.data]);
-        setFilteredServices([...services, response.data]);
-        toast.success("Service added successfully");
-      }
-      setModalIsOpen(false); // Close modal after save
-      resetForm(); // Reset the form after saving
-    } catch (error) {
-      console.error("Error saving service:", error);
+    if (editingService) {
+      handleEditService(); // Call edit service function
+    } else {
+      handleAddService(); // Call add service function
     }
+
+    setModalIsOpen(false); // Close modal after save
+    resetForm(); // Reset the form after saving
   };
 
   // Reset form to initial state
@@ -148,7 +172,7 @@ const Services = () => {
     setNewService({
       member_id: "",
       vehicle_id: "",
-      datetime: "",
+      datetime: getCurrentDateTime(),
       comments: "",
       location: "",
       status: "P", // Default to 'Processing'
@@ -201,6 +225,8 @@ const Services = () => {
     );
     setFilteredServices(filtered);
   };
+
+
 
   // Table columns
   const columns = [
@@ -279,135 +305,133 @@ const Services = () => {
 
       {/* Add/Edit Modal */}
       <Modal
-  isOpen={modalIsOpen}
-  onRequestClose={() => setModalIsOpen(false)}
-  contentLabel="Add/Edit Service"
-  className="modal"
-  overlayClassName="modal-overlay"
-  shouldCloseOnOverlayClick={false}
->
-  <h2>{editingService ? "Edit Service" : "Add New Service"}</h2>
-
-  <div className="form-service">
-    {/* Member Dropdown */}
-    <div className="input-error">
-      <FaUser className="icon" />
-      <select
-        value={newService.member_id}
-        onChange={handleMemberChange} // Handle member change
+        isOpen={modalIsOpen}
+        onRequestClose={() => setModalIsOpen(false)}
+        contentLabel="Add/Edit Service"
+        className="modal"
+        overlayClassName="modal-overlay"
+        shouldCloseOnOverlayClick={false}
       >
-        <option value="">Select Member</option>
-        {members.map((member) => (
-          <option key={member.id} value={member.id}>
-            {member.username}
-          </option>
-        ))}
-      </select>
-      {errors.member_id && (
-        <span className="error-text">{errors.member_id}</span>
-      )}
-    </div>
+        <h2>{editingService ? "Edit Service" : "Add New Service"}</h2>
 
-    {/* Vehicle Dropdown */}
-    <div className="input-error">
-      <FaCar className="icon" />
-      <select
-        value={newService.vehicle_id}
-        onChange={(e) =>
-          setNewService({ ...newService, vehicle_id: e.target.value })
-        }
-        disabled={!selectedMember} // Disable if no member is selected
-      >
-        <option value="">Select Vehicle</option>
-        {vehicles.map((vehicle) => (
-          <option key={vehicle.id} value={vehicle.id}>
-            {vehicle.vehicle_number}
-          </option>
-        ))}
-      </select>
-      {errors.vehicle_id && (
-        <span className="error-text">{errors.vehicle_id}</span>
-      )}
-    </div>
+        <div className="form-service">
+          {/* Member Dropdown */}
+          <div className="input-error">
+            <FaUser className="icon" />
+            <select
+              value={newService.member_id}
+              onChange={handleMemberChange} // Handle member change
+            >
+              <option value="">Select Member</option>
+              {members.map((member) => (
+                <option key={member.id} value={member.id}>
+                  {member.username}
+                </option>
+              ))}
+            </select>
+            {errors.member_id && (
+              <span className="error-text">{errors.member_id}</span>
+            )}
+          </div>
 
-    {/* Date and Location */}
-    <div className="date-location">
-      {/* Date */}
-      {/* <div className="input-error">
-        <FaCalendarAlt className="icon" />
-        <input
-          type="datetime-local"
-          value={newService.datetime}
-          onChange={(e) =>
-            setNewService({ ...newService, datetime: e.target.value })
-          }
-        />
-        {errors.datetime && (
-          <span className="error-text">{errors.datetime}</span>
-        )}
-      </div> */}
+          {/* Vehicle Dropdown */}
+          <div className="input-error">
+            <FaCar className="icon" />
+            <select
+              value={newService.vehicle_id}
+              onChange={(e) =>
+                setNewService({ ...newService, vehicle_id: e.target.value })
+              }
+              disabled={!selectedMember} // Disable if no member is selected
+            >
+              <option value="">Select Vehicle</option>
+              {vehicles.map((vehicle) => (
+                <option key={vehicle.id} value={vehicle.id}>
+                  {vehicle.vehicle_number}
+                </option>
+              ))}
+            </select>
+            {errors.vehicle_id && (
+              <span className="error-text">{errors.vehicle_id}</span>
+            )}
+          </div>
 
-      {/* Location */}
-      <div className="input-error-location">
-        <FaLocationArrow className="icon" />
-        <input
-          type="text"
-          placeholder="Location"
-          value={newService.location}
-          onChange={(e) =>
-            setNewService({ ...newService, location: e.target.value })
-          }
-        />
-        {errors.location && (
-          <span className="error-text">{errors.location}</span>
-        )}
-      </div>
-    </div>
+          {/* Date and Location */}
+          {/* <div className="date-location"> */}
+            {/* Date */}
+            <div className="input-error">
+              <FaCalendarAlt className="icon" />
+              <input
+                type="date-time"
+                value={newService.datetime}
+                onChange={(e) =>
+                  setNewService({ ...newService, datetime: e.target.value })
+                }
+              />
+              {errors.datetime && (
+                <span className="error-text">{errors.datetime}</span>
+              )}
+            </div>
 
-    {/* Status Dropdown */}
-    <div className="input-error">
-      <FaExclamationCircle className="icon" />
-      <select
-        value={newService.status}
-        onChange={(e) =>
-          setNewService({ ...newService, status: e.target.value })
-        }
-      >
-        <option value="R">Request</option>
-        <option value="A">Accept</option>
-        <option value="D">Decline</option>
-        <option value="P">Processing</option>
-        <option value="C">Complete</option>
-      </select>
-    </div>
+            {/* Location */}
+            <div className="input-error-location">
+              <FaLocationArrow className="icon" />
+              <input
+                type="text"
+                placeholder="Location"
+                value={newService.location}
+                onChange={(e) =>
+                  setNewService({ ...newService, location: e.target.value })
+                }
+              />
+              {errors.location && (
+                <span className="error-text">{errors.location}</span>
+              )}
+            </div>
+      
 
-    {/* Comments */}
-    <div className="input-error-comment">
-      {/* <FaCommentAlt className="icon" /> */}
-      <textarea
-        placeholder="Comments"
-        value={newService.comments}
-        onChange={(e) =>
-          setNewService({ ...newService, comments: e.target.value })
-        }
-      />
-    </div>
+          {/* Status Dropdown */}
+          <div className="input-error">
+            <FaExclamationCircle className="icon" />
+            <select
+              value={newService.status}
+              onChange={(e) =>
+                setNewService({ ...newService, status: e.target.value })
+              }
+            >
+              <option value="R">Request</option>
+              <option value="A">Accept</option>
+              <option value="D">Decline</option>
+              <option value="P">Processing</option>
+              <option value="C">Complete</option>
+            </select>
+          </div>
 
+          {/* Comments */}
+          <div className="input-error-comment">
+            {/* <FaCommentAlt className="icon" /> */}
+            <textarea
+              placeholder="Comments"
+              value={newService.comments}
+              onChange={(e) =>
+                setNewService({ ...newService, comments: e.target.value })
+              }
+            />
+          </div>
 
-
-    <div className="modelbutton">
-      <button onClick={handleSave} className="btn-editmodel">
-        {editingService ? "Update Service" : "Add Service"}
-      </button>
-      <button
-        className="btn-closemodel"
-        onClick={() => setModalIsOpen(false)}
-      >
-        Close
-      </button>
-    </div>
-  </div>
-</Modal>
+          <div className="modelbutton">
+            <button onClick={handleSave} className="btn-editmodel">
+              {editingService ? "Update Service" : "Add Service"}
+            </button>
+            <button
+              className="btn-closemodel"
+              onClick={() => setModalIsOpen(false)}
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      </Modal>
       {/* Delete Confirmation Modal */}
       {showDeleteModal && (
         <div className="modal-overlay">
