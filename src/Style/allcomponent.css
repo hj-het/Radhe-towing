@@ -160,7 +160,7 @@
   
   /* Adjusting the icon for the dropdown */
   .input-with-iconm select:focus {
-    border-color: #999;
+    border-color: #398bff;
   }
   
 
@@ -199,5 +199,23 @@
     right: 10px;
     color: #888;
     cursor: pointer;
+  }
+  
+  .error-container {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+    border-radius: 5px;
+    padding: 10px;
+    margin-bottom: 10px;
+  }
+  
+  .error-container ul {
+    list-style-type: none;
+    padding-left: 0;
+  }
+  
+  .error-container li {
+    margin-bottom: 5px;
   }
   

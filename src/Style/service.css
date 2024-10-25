@@ -17,6 +17,15 @@
   border: 1px solid #ccc;
   border-radius: 4px;
   outline: none;
+  /* background-color: transparent; */
+  background-color: #f9f9f9;
+  /* flex: 1;
+  padding: 0.5rem;
+  border: none;
+  outline: none;
+  font-size: 1rem;
+  background-color: transparent;
+  width: 80%; */
 }
 
 .input-error-location{
@@ -25,24 +34,26 @@
 
 .input-error-location input{
   width: 89%;
-  padding: 10px 15px;
+  padding: 13px 15px;
   padding-left: 40px; /* Space for the icon */
   border: 1px solid #ccc;
   border-radius: 5px;
   outline: none;
   transition: border-color 0.2s ease-in-out;
-  font-size: 14px;
+  font-size: 16px;
+  background-color: #f9f9f9;
 }
 
 input[type="date-time"] {
   width: 89%;
-  padding: 10px 15px;
+  padding: 13px 15px;
   padding-left: 40px;
   border: 1px solid #ccc;
   border-radius: 5px;
   outline: none;
   transition: border-color 0.2s ease-in-out;
   font-size: 14px;
+  background-color: #f9f9f9;
   /* margin-bottom: 10px; */
 }
 
@@ -54,7 +65,8 @@ input[type="date-time"] {
   border-radius: 5px;
   outline: none;
   transition: border-color 0.2s ease-in-out;
-  font-size: 14px;
+  font-size: 16px;
+  background-color: #f9f9f9;
 }
 
 /* .input-error-comment .icon{

@@ -20,12 +20,15 @@ const TableOne = ({ columns, data, handleDelete, handleEdit, handlePasswordReset
             <table {...getTableProps()} className="table">
                 <thead>
                     {headerGroups.map(headerGroup => (
-                        <tr {...headerGroup.getHeaderGroupProps()} className="table-header-row">
-                            {headerGroup.headers.map(column => (
-                                <th {...column.getHeaderProps()} className="table-header">
-                                    {column.render('Header')}
-                                </th>
-                            ))}
+                        <tr key={headerGroup.id} {...headerGroup.getHeaderGroupProps()} className="table-header-row">
+                            {headerGroup.headers.map(column => {
+                                const { key, ...rest } = column.getHeaderProps();
+                                return (
+                                    <th key={key} {...rest} className="table-header">
+                                        {column.render('Header')}
+                                    </th>
+                                );
+                            })}
                             <th className="table-header">Actions</th>
                         </tr>
                     ))}
@@ -34,15 +37,18 @@ const TableOne = ({ columns, data, handleDelete, handleEdit, handlePasswordReset
                     {rows.map(row => {
                         prepareRow(row);
                         return (
-                            <tr {...row.getRowProps()} className="table-row">
-                                {row.cells.map(cell => (
-                                    <td {...cell.getCellProps()} className="table-cell">
-                                        {cell.render('Cell')}
-                                    </td>
-                                ))}
+                            <tr key={row.id} {...row.getRowProps()} className="table-row">
+                                {row.cells.map(cell => {
+                                    const { key, ...rest } = cell.getCellProps();
+                                    return (
+                                        <td key={key} {...rest} className="table-cell">
+                                            {cell.render('Cell')}
+                                        </td>
+                                    );
+                                })}
                                 <td className="table-cell">
                                     <div className='tablebutton'>
-                                    {isEmployeeTable && ( // Only show reset icon if it's the employee table
+                                        {isEmployeeTable && ( // Only show reset icon if it's the employee table
                                             <button className="btn-reset" onClick={() => handlePasswordReset(row.original)}>
                                                 <FaKey /> {/* Password reset icon */}
                                             </button>
@@ -53,7 +59,6 @@ const TableOne = ({ columns, data, handleDelete, handleEdit, handlePasswordReset
                                         <button className="btn-delete" onClick={() => handleDelete(row.original)}>
                                             <FaTrashAlt />
                                         </button>
-                                       
                                     </div>
                                 </td>
                             </tr>

@@ -294,12 +294,19 @@ const Payments = () => {
       accessor: "Status",
       Cell: ({ row }) => {
         const statusMap = {
-          A: "Accepted",
-          P: "Pending",
-          R: "Rejected",
-          E: "Expired",
+          A: { label: "Accepted", color: "green" },
+          P: { label: "Pending", color: "orange" },
+          R: { label: "Rejected", color: "red" },
+          E: { label: "Expired", color: "gray" },
         };
-        return <span>{statusMap[row.original.Status] || "Unknown"}</span>;
+    
+        const status = statusMap[row.original.Status] || { label: "Unknown", color: "black" };
+    
+        return (
+          <span style={{ color: status.color, fontWeight: "bold" }}>
+            {status.label}
+          </span>
+        );
       },
     },
   ];
@@ -345,10 +352,10 @@ const Payments = () => {
           {editingPayment && (
             <div className="member-info">
               {editingPayment.member && (
-                <h4>Member: {editingPayment.member.M_username}</h4>
+               <div className="member-label-pyt"><p>Member Name: </p><h4>{editingPayment.member.M_username}</h4></div>
               )}
               {editingPayment.vehicle && (
-                <h4>Vehicle No: {editingPayment.vehicle.V_vihicle_number}</h4>
+                <div className="vehicle-label-pyt"><p>Vehicle No:</p><h4>{editingPayment.vehicle.V_vihicle_number}</h4></div>
               )}
             </div>
           )}
@@ -379,11 +386,11 @@ const Payments = () => {
               <div className="input-payment">
                 <FaCar className="icon" />
                 <select
-                  value={newPayment.PM_V_id} // Correctly bind to the current vehicle ID
+                  value={newPayment.PM_V_id} 
                   onChange={(e) =>
                     setNewPayment({ ...newPayment, PM_V_id: e.target.value })
                   }
-                  disabled={!newPayment.PM_M_id} // Disable if no member is selected
+                  disabled={!newPayment.PM_M_id}
                 >
                   <option value="">Select Vehicle</option>
                   {vehicles.map((vehicle) => (
@@ -402,8 +409,8 @@ const Payments = () => {
               <FaFileAlt className="icon" />
               <select
                 value={newPayment.PM_P_id}
-                onChange={(e) => handlePlanChange(e.target.value)} // Handle plan selection
-                disabled={!!editingPayment} // Disable plan selection when editing
+                onChange={(e) => handlePlanChange(e.target.value)} 
+                disabled={!!editingPayment} 
               >
                 <option value="">Select Plan</option>
                 {plans.map((plan) => (
@@ -425,8 +432,8 @@ const Payments = () => {
                 value={newPayment.PM_Amount}
                 onChange={(e) =>
                   setNewPayment({ ...newPayment, PM_Amount: e.target.value })
-                } // Allow users to modify the amount
-                disabled={!!editingPayment} // Disable plan selection when editing
+                }
+                disabled={!!editingPayment} 
               />
             </div>
           </div>

@@ -144,6 +144,7 @@ const Services = () => {
       const updatedServices = services.map((service) =>
         service.id === editingService.id ? response.data : service
       );
+      console.log("updatedServices->",updatedServices)
       setServices(updatedServices);
       setFilteredServices(updatedServices);
       toast.success("Service updated successfully");
@@ -316,7 +317,7 @@ const Services = () => {
 
         <div className="form-service">
           {/* Member Dropdown */}
-          <div className="input-error">
+            <div className="input-error">
             <FaUser className="icon" />
             <select
               value={newService.member_id}
@@ -468,6 +469,9 @@ const Services = () => {
         data={filteredServices}
         handleDelete={(service) => triggerDeleteModal(service)}
         handleEdit={(service) => {
+          console.log("service-->",service)
+          console.log("serviveID",service.member.id)
+
           setEditingService(service);
           setNewService(service);
           setModalIsOpen(true);

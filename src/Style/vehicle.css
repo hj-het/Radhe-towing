@@ -1,0 +1,109 @@
+
+
+
+.form-vehicle {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-width: 500px;
+    margin: auto;
+  }
+  
+  .input-group {
+    display: flex;
+    align-items: center;
+    padding: 0.5rem;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+    width: 96%;
+  }
+  
+  .input-group .icon {
+    margin-right: 0.5rem;
+    color: #555;
+  }
+  
+  .form-vehicle input,
+  select,
+  textarea {
+    flex: 1;
+    padding: 0.5rem;
+    border: none;
+    outline: none;
+    font-size: 1rem;
+    background-color: transparent;
+    width: 80%;
+  }
+  /* .form-vehicle input{
+  flex: 1 1;
+    padding: 0.5rem;
+    border: none;
+    outline: none;
+    font-size: 1rem;
+    background-color: transparent;
+    } */
+  
+  .form-vehicle textarea {
+    resize: vertical;
+  }
+  
+  .form-vehicle .error-text-veh {
+    color: red;
+    /* font-size: 0.85rem; */
+    margin-top: 0px;
+    margin-bottom: -33px;
+    font-size: 12px;
+  }
+  
+  .modelbutton {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 1rem;
+  }
+  
+  .btn-editmodel,
+  .btn-closemodel {
+    padding: 0.75rem;
+    font-size: 1rem;
+    cursor: pointer;
+    border: none;
+    border-radius: 5px;
+    background-color: #4caf50;
+    color: white;
+  }
+  
+  .btn-closemodel {
+    background-color: #f44336;
+  }
+  
+
+  .name-vehiclenumber{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: row;
+    gap: 10px;
+  }
+
+  .vehicleage-amount{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: row;
+    gap: 10px;
+  }
+
+  .input-error-veh{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+  }
+/* .input-error-name{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+} */
+
