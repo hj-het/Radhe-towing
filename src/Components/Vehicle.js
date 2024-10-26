@@ -10,6 +10,7 @@ import {
   FaCommentAlt,
   FaUserEdit,
   FaAddressCard,
+  FaSearch
 } from "react-icons/fa";
 import TableOne from "../Table/TableOne";
 import "./../Style/vehicle.css";
@@ -26,6 +27,7 @@ const Vehicles = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [errors, setErrors] = useState({});
   const [modalIsOpen, setModalIsOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState(""); 
   const [newVehicle, setNewVehicle] = useState({
     member_id: "",
     vehicle_number: "",
@@ -36,6 +38,9 @@ const Vehicles = () => {
     is_active: true,
     amount: "",
   });
+
+
+
 
   // Fetch vehicles and members data from the API
   useEffect(() => {
@@ -93,9 +98,11 @@ const Vehicles = () => {
       if (response.status === 201) {
         setVehicles([...vehicles, { id: response.data.id, ...newVehicle }]);
         setModalIsOpen(false);
+        toast.success("Vehicle added successfully!");
       }
     } catch (error) {
       console.error("Error adding vehicle:", error);
+      toast.error("Failed to add vehicle.");
     }
   };
 
@@ -115,9 +122,12 @@ const Vehicles = () => {
         );
         setEditingVehicle(null);
         setModalIsOpen(false);
+        toast.success("Vehicle updated successfully!");
       }
     } catch (error) {
-      console.error("Error updating vehicle:", error);
+      // console.error("Error updating vehicle:", error);
+      toast.error("Failed to update vehicle.");
+    
     }
   };
 
@@ -165,12 +175,14 @@ const Vehicles = () => {
       if (response.status === 200) {
         setVehicles(vehicles.filter((v) => v.id !== vehicleId));
         setShowDeleteModal(false);
-        toast.success(response.data.message);
+        toast.success("Vehicle deleted successfully!");
       } else {
         console.error("Error deleting vehicle:", response.data.message);
+        toast.error("Failed to delete vehicle.");
       }
     } catch (error) {
       console.error("Error deleting vehicle:", error);
+      toast.error("Failed to delete vehicle.");
     }
   };
 
@@ -180,6 +192,16 @@ const Vehicles = () => {
     setDeleteVehicleName(vehicleName);
     setShowDeleteModal(true);
   };
+
+  const handleSearchChange = (e) => {
+    setSearchQuery(e.target.value.toLowerCase());
+  };
+
+  const filteredVehicles = vehicles.filter(
+    (vehicle) =>
+      vehicle.vehicle_number.toLowerCase().includes(searchQuery) ||
+      vehicle.vehicle_type.toLowerCase().includes(searchQuery)
+  );
 
   // Table columns
   const columns = [
@@ -205,6 +227,20 @@ const Vehicles = () => {
         <button onClick={handleOpenAddModal} className="add-btn">
           <FaPlus /> Add Vehicle
         </button>
+      </div>
+
+
+            {/* Search Input */}
+            <div className="search-bar">
+        <div className="search-input-container">
+          <FaSearch className="search-icon" />
+          <input
+            type="text"
+            placeholder="Search by Vehicle Number"
+            value={searchQuery}
+            onChange={handleSearchChange}
+          />
+        </div>
       </div>
 
       <Modal
@@ -406,7 +442,7 @@ const Vehicles = () => {
       {/* Vehicles Table */}
       <TableOne
         columns={columns}
-        data={vehicles}
+        data={filteredVehicles}
         handleDelete={(vehicle) =>
           triggerDeleteModal(vehicle.id, `${vehicle.vehicle_number}`)
         }

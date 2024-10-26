@@ -67,16 +67,17 @@ input[type="date-time"] {
   transition: border-color 0.2s ease-in-out;
   font-size: 16px;
   background-color: #f9f9f9;
+  font-family: sans-serif;
 }
 
-/* .input-error-comment .icon{
+.input-error-comment .icon{
   position: absolute;
-  left: 10px;
-  top: 50%;
+  left: 41px;
+  top: 68%;
   transform: translateY(-50%);
   font-size: 16px;
   color: #888;
-} */
+}
 
 .input-error-location .icon {
   position: absolute;

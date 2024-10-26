@@ -11,6 +11,7 @@ import {
   // FaFlag,
   // FaGlobe,
 } from "react-icons/fa";
+import { MdCardMembership } from "react-icons/md";
 import { AiOutlineTeam } from "react-icons/ai";
 import { AuthContext } from "../Context/AuthContext"; 
 import "./../Sidebar/sidebar.css";
@@ -50,7 +51,7 @@ const SidebarComponent = () => {
             </li>
             <li>
               <Link to="/member">
-                <FaUsers /> Members
+                <MdCardMembership /> Members
               </Link>
             </li>
             <li>

@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import Modal from "react-modal";
-import { FaPlus } from "react-icons/fa";
 import TableOne from "../Table/TableOne";
 import "./../Style/plan.css";
 import { TextField, MenuItem, InputAdornment } from "@mui/material";
@@ -14,6 +13,8 @@ import {
   FaGasPump,
   FaTruck,
   FaCalendarCheck,
+  FaSearch,
+  FaPlus,
 } from "react-icons/fa";
 import { MdOutlineCurrencyRupee } from "react-icons/md";
 import { toast } from "react-toastify";
@@ -28,6 +29,7 @@ const Plan = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [errors, setErrors] = useState({}); // To track validation errors
   const [modalIsOpen, setModalIsOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState(""); // State for search query
   const [newPlan, setNewPlan] = useState({
     name: "",
     duration: "",
@@ -41,7 +43,7 @@ const Plan = () => {
     service_24x7: false,
     is_customized: false,
     created_by: "Admin",
-    isActive:"0"
+    isActive: "0",
   });
 
   // Fetch plans data from the API
@@ -118,6 +120,14 @@ const Plan = () => {
     setShowDeleteModal(true);
   };
 
+  const handleSearchChange = (e) => {
+    setSearchQuery(e.target.value.toLowerCase());
+  };
+
+  const filteredPlans = plans.filter((plan) =>
+    plan.name.toLowerCase().includes(searchQuery)
+  );
+
   // Handle edit operation
   const handleEdit = (plan) => {
     setEditingPlan(plan);
@@ -140,7 +150,7 @@ const Plan = () => {
       service_24x7: false,
       is_customized: false,
       created_by: "Admin",
-      isActive:"0"
+      isActive: "0",
     });
     setEditingPlan(null);
     setModalIsOpen(true);
@@ -162,7 +172,7 @@ const Plan = () => {
       service_24x7: newPlan.service_24x7,
       is_customized: newPlan.is_customized,
       created_by: "Admin",
-      isActive:"0"
+      isActive: "0",
     };
 
     try {
@@ -173,7 +183,7 @@ const Plan = () => {
 
       if (response.status === 201) {
         setPlans([...plans, { id: response.data.id, ...newPlan }]);
-       toast.success("Plan Added ")
+        toast.success("Plan Added ");
         setModalIsOpen(false);
       } else {
         console.error("Error adding plan:", response.data.message);
@@ -198,7 +208,7 @@ const Plan = () => {
       service_24x7: newPlan.service_24x7,
       is_customized: newPlan.is_customized,
       created_by: "Admin",
-      isActive:"0"
+      isActive: "0",
     };
 
     try {
@@ -278,6 +288,20 @@ const Plan = () => {
           <FaPlus /> Add Plan
         </button>
       </div>
+
+      {/* Search Input */}
+      <div className="search-bar">
+        <div className="search-input-container">
+          <FaSearch className="search-icon" />
+          <input
+            type="text"
+            placeholder="Search by Plan Name"
+            value={searchQuery}
+            onChange={handleSearchChange}
+          />
+        </div>
+      </div>
+
       <Modal
         isOpen={modalIsOpen}
         onRequestClose={() => setModalIsOpen(false)}
@@ -348,32 +372,32 @@ const Plan = () => {
             )}
 
             {/* <div className="input-with-icon"> */}
-              <TextField
-                select
-                label="Fuel Type"
-                value={newPlan.fuel_type}
-                onChange={(e) =>
-                  setNewPlan({ ...newPlan, fuel_type: e.target.value })
-                }
-                variant="outlined"
-                fullWidth
-                error={!!errors.fuel_type} // Handle error
-                helperText={errors.fuel_type || ""} // Show error message
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <FaGasPump />
-                    </InputAdornment>
-                  ),
-                }}
-              >
-                <MenuItem value="Petrol">Petrol</MenuItem>
-                <MenuItem value="Diesel">Diesel</MenuItem>
-                <MenuItem value="CNG">CNG</MenuItem>
-                <MenuItem value="Electric">Electric</MenuItem>
-                <MenuItem value="Hybrid">Hybrid</MenuItem>
-              </TextField>
-            </div>
+            <TextField
+              select
+              label="Fuel Type"
+              value={newPlan.fuel_type}
+              onChange={(e) =>
+                setNewPlan({ ...newPlan, fuel_type: e.target.value })
+              }
+              variant="outlined"
+              fullWidth
+              error={!!errors.fuel_type} // Handle error
+              helperText={errors.fuel_type || ""} // Show error message
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <FaGasPump />
+                  </InputAdornment>
+                ),
+              }}
+            >
+              <MenuItem value="Petrol">Petrol</MenuItem>
+              <MenuItem value="Diesel">Diesel</MenuItem>
+              <MenuItem value="CNG">CNG</MenuItem>
+              <MenuItem value="Electric">Electric</MenuItem>
+              <MenuItem value="Hybrid">Hybrid</MenuItem>
+            </TextField>
+          </div>
           {/* </div> */}
 
           {/* Additional input fields with icons */}
@@ -508,7 +532,7 @@ const Plan = () => {
       {/* Plans Table */}
       <TableOne
         columns={columns}
-        data={plans}
+        data={filteredPlans}
         handleDelete={(plan) => triggerDeleteModal(plan.id, `${plan.name}`)}
         handleEdit={handleEdit}
       />

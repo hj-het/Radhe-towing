@@ -9,7 +9,7 @@ import {
   // FaFileAlt,
   FaCalendarAlt,
   FaLocationArrow,
-  // FaCommentAlt,
+  FaCommentAlt,
   FaExclamationCircle,
   // FaClipboardCheck,
 } from "react-icons/fa";
@@ -42,10 +42,26 @@ const Services = () => {
   });
   const [modalIsOpen, setModalIsOpen] = useState(false);
   const [selectedMember, setSelectedMember] = useState(null);
+
   const getCurrentDateTime = () => {
     const now = new Date();
-    return now.toISOString().slice(0, 16); // Format as 'YYYY-MM-DDTHH:MM' for input field
+    const day = String(now.getDate()).padStart(2, "0");
+    const month = String(now.getMonth() + 1).padStart(2, "0");
+    const year = now.getFullYear();
+
+    let hours = now.getHours();
+    const minutes = String(now.getMinutes()).padStart(2, "0");
+    const ampm = hours >= 12 ? "PM" : "AM";
+
+    // Convert to 12-hour format
+    hours = hours % 12 || 12;
+    hours = String(hours).padStart(2, "0");
+
+    return `${day}-${month}-${year} ${hours}:${minutes} ${ampm}`;
   };
+
+  // console.log(getCurrentDateTime()); // Output: 'dd-mm-yyyy hh:mm AM/PM'
+
   // Fetch services and members
   useEffect(() => {
     const fetchServices = async () => {
@@ -75,35 +91,49 @@ const Services = () => {
     fetchMembers();
   }, []);
 
+
+  const handleMemberChange = (e) => {
+    const memberId = e.target.value;
+    console.log("memberId",memberId)
+    setNewService({ ...newService, member_id: memberId, vehicle_id: "" });
+    setSelectedMember(memberId);
+    if (memberId) fetchVehiclesForMember(memberId); 
+  };
+
+  
   // Fetch vehicles when a member is selected
   const fetchVehiclesForMember = async (memberId) => {
     try {
-      const response = await axios.get(
-        `https://panel.radhetowing.com/api/towing-service-requests/member/${memberId}`
-      );
-
-      // Extract unique vehicles from the response
-      const vehicles = response.data.map((service) => service.vehicle);
-      const uniqueVehicles = [...new Set(vehicles.map((v) => v.id))].map((id) =>
-        vehicles.find((v) => v.id === id)
-      );
-
-      setVehicles(uniqueVehicles); // Update the vehicle state
+      const response = await axios.get(`https://panel.radhetowing.com/api/vehicles/member/${memberId}`);
+      
+      console.log("Response Data:", response.data); 
+  
+      if (response.data && Array.isArray(response.data)) {
+        setVehicles(response.data);
+      } else if (response.data && Array.isArray(response.data.data)) {
+        // If response.data.data is the array
+        setVehicles(response.data.data);
+      } else {
+        setVehicles([]);
+        console.warn("Unexpected response structure:", response);
+      }
     } catch (error) {
-      console.error("Error fetching vehicles:", error);
-    }
-  };
+      if (error.response && error.response.status === 404) {
+        // Handle 404 specifically
+        toast.error("No vehicles found for this member.");
+      } else {
+        // Generic error message for other errors
+        console.error("Error fetching vehicles:", error);
+        toast.error("Failed to fetch vehicles. Please try again.");
+      }
 
-  // Handle member selection
-  const handleMemberChange = (e) => {
-    const memberId = e.target.value;
-    setNewService({ ...newService, member_id: memberId });
-    setSelectedMember(memberId);
 
-    if (memberId) {
-      fetchVehiclesForMember(memberId); // Fetch vehicles when a member is selected
     }
+
+
+    
   };
+  
 
   // Validation function
   const validateForm = () => {
@@ -140,11 +170,11 @@ const Services = () => {
         `https://panel.radhetowing.com/api/towing-service-requests/${editingService.id}`,
         newService
       );
-      // Update the services list with the edited service
+
       const updatedServices = services.map((service) =>
         service.id === editingService.id ? response.data : service
       );
-      console.log("updatedServices->",updatedServices)
+      console.log("updatedServices->", updatedServices);
       setServices(updatedServices);
       setFilteredServices(updatedServices);
       toast.success("Service updated successfully");
@@ -154,18 +184,30 @@ const Services = () => {
     }
   };
 
+  // const handleEdit = async (service) => {
+  //   setEditingService(service);
+  //   setNewService({
+  //     ...service,
+  //     member_id: service.member.id,
+  //     vehicle_id: service.vehicle.id,
+  //   });
+  //   setSelectedMember(service.member.id);
+  //   await fetchVehiclesForMember(service.member.id); // Fetch vehicles when a member is selected
+  //   setModalIsOpen(true);
+  // };
+
   // Add or Edit a service
   const handleSave = () => {
     if (!validateForm()) return;
 
     if (editingService) {
-      handleEditService(); // Call edit service function
+      handleEditService();
     } else {
-      handleAddService(); // Call add service function
+      handleAddService();
     }
 
-    setModalIsOpen(false); // Close modal after save
-    resetForm(); // Reset the form after saving
+    setModalIsOpen(false);
+    resetForm();
   };
 
   // Reset form to initial state
@@ -176,16 +218,17 @@ const Services = () => {
       datetime: getCurrentDateTime(),
       comments: "",
       location: "",
-      status: "P", // Default to 'Processing'
+      status: "P",
+      chargble: "false",
     });
     setEditingService(null);
-    setVehicles([]); // Clear vehicles when form is reset
+    setVehicles([]);
   };
 
   // Handle opening modal for adding a new service
   const handleOpenAddModal = () => {
-    resetForm(); // Reset the form for adding a new service
-    setModalIsOpen(true); // Open the modal
+    resetForm();
+    setModalIsOpen(true);
   };
 
   // Delete service
@@ -210,7 +253,7 @@ const Services = () => {
   const triggerDeleteModal = (service) => {
     const memberFullName = `${service.member.username}`;
     setDeleteServiceId(service.id);
-    setDeleteServiceName(memberFullName); // Set full name instead of ID
+    setDeleteServiceName(memberFullName);
     setShowDeleteModal(true);
   };
 
@@ -227,8 +270,6 @@ const Services = () => {
     setFilteredServices(filtered);
   };
 
-
-
   // Table columns
   const columns = [
     {
@@ -244,6 +285,7 @@ const Services = () => {
       Header: "Vehicle Number",
       accessor: (row) => row.vehicle?.vehicle_number || "Unknown",
     },
+    
     { Header: "Date & Time", accessor: "datetime" },
     { Header: "Location", accessor: "location" },
     { Header: "Comments", accessor: "comments" },
@@ -317,7 +359,7 @@ const Services = () => {
 
         <div className="form-service">
           {/* Member Dropdown */}
-            <div className="input-error">
+          <div className="input-error">
             <FaUser className="icon" />
             <select
               value={newService.member_id}
@@ -335,15 +377,13 @@ const Services = () => {
             )}
           </div>
 
-          {/* Vehicle Dropdown */}
-          <div className="input-error">
+     {/* Vehicle Dropdown */}
+     <div className="input-error">
             <FaCar className="icon" />
             <select
               value={newService.vehicle_id}
-              onChange={(e) =>
-                setNewService({ ...newService, vehicle_id: e.target.value })
-              }
-              disabled={!selectedMember} // Disable if no member is selected
+              onChange={(e) => setNewService({ ...newService, vehicle_id: e.target.value })}
+              disabled={!selectedMember}
             >
               <option value="">Select Vehicle</option>
               {vehicles.map((vehicle) => (
@@ -352,44 +392,42 @@ const Services = () => {
                 </option>
               ))}
             </select>
-            {errors.vehicle_id && (
-              <span className="error-text">{errors.vehicle_id}</span>
-            )}
+            {errors.vehicle_id && <span className="error-text">{errors.vehicle_id}</span>}
           </div>
+
 
           {/* Date and Location */}
           {/* <div className="date-location"> */}
-            {/* Date */}
-            <div className="input-error">
-              <FaCalendarAlt className="icon" />
-              <input
-                type="date-time"
-                value={newService.datetime}
-                onChange={(e) =>
-                  setNewService({ ...newService, datetime: e.target.value })
-                }
-              />
-              {errors.datetime && (
-                <span className="error-text">{errors.datetime}</span>
-              )}
-            </div>
+          {/* Date */}
+          <div className="input-error">
+            <FaCalendarAlt className="icon" />
+            <input
+              type="date-time"
+              value={newService.datetime}
+              onChange={(e) =>
+                setNewService({ ...newService, datetime: e.target.value })
+              }
+            />
+            {errors.datetime && (
+              <span className="error-text">{errors.datetime}</span>
+            )}
+          </div>
 
-            {/* Location */}
-            <div className="input-error-location">
-              <FaLocationArrow className="icon" />
-              <input
-                type="text"
-                placeholder="Location"
-                value={newService.location}
-                onChange={(e) =>
-                  setNewService({ ...newService, location: e.target.value })
-                }
-              />
-              {errors.location && (
-                <span className="error-text">{errors.location}</span>
-              )}
-            </div>
-      
+          {/* Location */}
+          <div className="input-error-location">
+            <FaLocationArrow className="icon" />
+            <input
+              type="text"
+              placeholder="Location"
+              value={newService.location}
+              onChange={(e) =>
+                setNewService({ ...newService, location: e.target.value })
+              }
+            />
+            {errors.location && (
+              <span className="error-text">{errors.location}</span>
+            )}
+          </div>
 
           {/* Status Dropdown */}
           <div className="input-error">
@@ -410,7 +448,7 @@ const Services = () => {
 
           {/* Comments */}
           <div className="input-error-comment">
-            {/* <FaCommentAlt className="icon" /> */}
+            <FaCommentAlt className="icon" />
             <textarea
               placeholder="Comments"
               value={newService.comments}
@@ -433,6 +471,7 @@ const Services = () => {
           </div>
         </div>
       </Modal>
+
       {/* Delete Confirmation Modal */}
       {showDeleteModal && (
         <div className="modal-overlay">
@@ -468,17 +507,26 @@ const Services = () => {
         columns={columns}
         data={filteredServices}
         handleDelete={(service) => triggerDeleteModal(service)}
-        handleEdit={(service) => {
-          console.log("service-->",service)
-          console.log("serviveID",service.member.id)
-
+        handleEdit={async (service) => {
+          console.log("service-->", service);
+          console.log("member.id", service.member.id);
           setEditingService(service);
-          setNewService(service);
+          setNewService({
+            member_id: service.member.id,
+            vehicle_id: service.vehicle.id,
+            datetime: service.datetime,
+            comments: service.comments,
+            location: service.location,
+            status: service.status,
+            chargble: false,
+          });
+          setSelectedMember(service.member.id);
+          await fetchVehiclesForMember(service.member.id);
+
           setModalIsOpen(true);
         }}
       />
 
-      {/* Toast Container for notifications */}
       <ToastContainer />
     </div>
   );

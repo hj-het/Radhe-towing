@@ -46,6 +46,7 @@
   
   .form-vehicle textarea {
     resize: vertical;
+    font-family: sans-serif;
   }
   
   .form-vehicle .error-text-veh {
