@@ -91,23 +91,23 @@ const Services = () => {
     fetchMembers();
   }, []);
 
-
   const handleMemberChange = (e) => {
     const memberId = e.target.value;
-    console.log("memberId",memberId)
+    console.log("memberId", memberId);
     setNewService({ ...newService, member_id: memberId, vehicle_id: "" });
     setSelectedMember(memberId);
-    if (memberId) fetchVehiclesForMember(memberId); 
+    if (memberId) fetchVehiclesForMember(memberId);
   };
 
-  
   // Fetch vehicles when a member is selected
   const fetchVehiclesForMember = async (memberId) => {
     try {
-      const response = await axios.get(`https://panel.radhetowing.com/api/vehicles/member/${memberId}`);
-      
-      console.log("Response Data:", response.data); 
-  
+      const response = await axios.get(
+        `https://panel.radhetowing.com/api/vehicles/member/${memberId}`
+      );
+
+      console.log("Response Data:", response.data);
+
       if (response.data && Array.isArray(response.data)) {
         setVehicles(response.data);
       } else if (response.data && Array.isArray(response.data.data)) {
@@ -126,14 +126,8 @@ const Services = () => {
         console.error("Error fetching vehicles:", error);
         toast.error("Failed to fetch vehicles. Please try again.");
       }
-
-
     }
-
-
-    
   };
-  
 
   // Validation function
   const validateForm = () => {
@@ -285,7 +279,7 @@ const Services = () => {
       Header: "Vehicle Number",
       accessor: (row) => row.vehicle?.vehicle_number || "Unknown",
     },
-    
+
     { Header: "Date & Time", accessor: "datetime" },
     { Header: "Location", accessor: "location" },
     { Header: "Comments", accessor: "comments" },
@@ -377,12 +371,14 @@ const Services = () => {
             )}
           </div>
 
-     {/* Vehicle Dropdown */}
-     <div className="input-error">
+          {/* Vehicle Dropdown */}
+          <div className="input-error">
             <FaCar className="icon" />
             <select
               value={newService.vehicle_id}
-              onChange={(e) => setNewService({ ...newService, vehicle_id: e.target.value })}
+              onChange={(e) =>
+                setNewService({ ...newService, vehicle_id: e.target.value })
+              }
               disabled={!selectedMember}
             >
               <option value="">Select Vehicle</option>
@@ -392,9 +388,10 @@ const Services = () => {
                 </option>
               ))}
             </select>
-            {errors.vehicle_id && <span className="error-text">{errors.vehicle_id}</span>}
+            {errors.vehicle_id && (
+              <span className="error-text">{errors.vehicle_id}</span>
+            )}
           </div>
-
 
           {/* Date and Location */}
           {/* <div className="date-location"> */}
