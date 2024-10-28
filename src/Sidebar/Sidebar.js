@@ -1,5 +1,4 @@
 import React, { useContext } from "react";
-import { Sidebar, Menu, ProSidebarProvider } from "react-pro-sidebar";
 import { Link } from "react-router-dom";
 import {
   FaUsers,
@@ -7,9 +6,6 @@ import {
   FaRegCreditCard,
   FaMoneyBillAlt,
   FaWrench,
-  // FaCity,
-  // FaFlag,
-  // FaGlobe,
 } from "react-icons/fa";
 import { MdCardMembership } from "react-icons/md";
 import { AiOutlineTeam } from "react-icons/ai";
@@ -17,93 +13,65 @@ import { AuthContext } from "../Context/AuthContext";
 import "./../Sidebar/sidebar.css";
 
 const SidebarComponent = () => {
-  const { role } = useContext(AuthContext); 
+  const { role } = useContext(AuthContext);
 
   return (
-    <ProSidebarProvider>
-      <Sidebar
-        backgroundColor="#2c3e50"
-        style={{
-          height: "100vh",
-          position: "fixed",
-          top: 0,
-          bottom: 0,
-          zIndex: 1000,
-        }}
-      >
-        <Menu>
-          <ul className="sidebar-menu">
-            <Link to="/dashboard">
-              <li>
-                <img
-                  src="/images/radhe _logomain.png"
-                  alt="Company Logo"
-                  style={{ width: "251px", height: "65px" }}
-                />
-              </li>
-            </Link>
+    <div className="sidebar-container">
+      <div className="sidebar-logo">
+        <Link to="/dashboard">
+          <img
+            src="/images/radhe _logomain.png"
+            alt="Company Logo"
+            style={{ width: "251px", height: "65px" }}
+          />
+        </Link>
+      </div>
 
-            {/* Always show Dashboard, Members, Vehicles, Payments for employees and admin */}
-            <li>
-              <Link to="/dashboard">
-                <FaUsers /> Dashboard
-              </Link>
-            </li>
-            <li>
-              <Link to="/member">
-                <MdCardMembership /> Members
-              </Link>
-            </li>
-            <li>
-              <Link to="/vehicle">
-                <FaCar /> Vehicles
-              </Link>
-            </li>
-            <li>
-              <Link to="/payment">
-                <FaMoneyBillAlt /> Payments
-              </Link>
-            </li>
+      <ul className="sidebar-menu">
+        {/* Always show Dashboard, Members, Vehicles, Payments for employees and admin */}
+        <li>
+          <Link to="/dashboard" className="sidebar-link">
+            <FaUsers className="sidebar-icon" /> Dashboard
+          </Link>
+        </li>
+        <li>
+          <Link to="/member" className="sidebar-link">
+            <MdCardMembership className="sidebar-icon" /> Members
+          </Link>
+        </li>
+        <li>
+          <Link to="/vehicle" className="sidebar-link">
+            <FaCar className="sidebar-icon" /> Vehicles
+          </Link>
+        </li>
+        <li>
+          <Link to="/payment" className="sidebar-link">
+            <FaMoneyBillAlt className="sidebar-icon" /> Payments
+          </Link>
+        </li>
 
-            {/* Show the following links only for admins */}
-            {role === "admin" && (
-              <>
-                <li>
-                  <Link to="/employees">
-                    <AiOutlineTeam /> Employees
-                  </Link>
-                </li>
-                <li>
-                  <Link to="/plan">
-                    <FaRegCreditCard /> Plans
-                  </Link>
-                </li>
-                <li>
-                  <Link to="/service">
-                    <FaWrench /> Services
-                  </Link>
-                </li>
-                {/* <li>
-                  <Link to="/city">
-                    <FaCity /> City
-                  </Link>
-                </li> */}
-                {/* <li>
-                  <Link to="/state">
-                    <FaFlag /> State
-                  </Link>
-                </li>
-                <li>
-                  <Link to="/country">
-                    <FaGlobe /> Country
-                  </Link>
-                </li> */}
-              </>
-            )}
-          </ul>
-        </Menu>
-      </Sidebar>
-    </ProSidebarProvider>
+        {/* Show the following links only for admins */}
+        {role === "admin" && (
+          <>
+            <li>
+              <Link to="/employees" className="sidebar-link">
+                <AiOutlineTeam className="sidebar-icon" /> Employees
+              </Link>
+            </li>
+            <li>
+              <Link to="/plan" className="sidebar-link">
+                <FaRegCreditCard className="sidebar-icon" /> Plans
+              </Link>
+            </li>
+            <li>
+              <Link to="/service" className="sidebar-link">
+                <FaWrench className="sidebar-icon" /> Services
+              </Link>
+            </li>
+          </>
+        )}
+      </ul>
+    </div>
   );
 };
 
