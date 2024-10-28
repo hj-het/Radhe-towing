@@ -532,7 +532,7 @@ const Plan = () => {
       {/* Plans Table */}
       <TableOne
         columns={columns}
-        data={filteredPlans}
+        data={filteredPlans.slice().reverse()}
         handleDelete={(plan) => triggerDeleteModal(plan.id, `${plan.name}`)}
         handleEdit={handleEdit}
       />

@@ -502,7 +502,7 @@ const Services = () => {
       {/* Services Table */}
       <TableOne
         columns={columns}
-        data={filteredServices}
+        data={filteredServices.slice().reverse()}
         handleDelete={(service) => triggerDeleteModal(service)}
         handleEdit={async (service) => {
           console.log("service-->", service);

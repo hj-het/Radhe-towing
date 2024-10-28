@@ -10,11 +10,12 @@ import {
   FaCommentAlt,
   FaUserEdit,
   FaAddressCard,
-  FaSearch
+  FaSearch,
 } from "react-icons/fa";
 import TableOne from "../Table/TableOne";
 import "./../Style/vehicle.css";
 import { toast, ToastContainer } from "react-toastify";
+import { FormControlLabel, Switch } from "@mui/material"; // Import Material-UI components
 
 Modal.setAppElement("#root");
 
@@ -27,7 +28,7 @@ const Vehicles = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [errors, setErrors] = useState({});
   const [modalIsOpen, setModalIsOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState(""); 
+  const [searchQuery, setSearchQuery] = useState("");
   const [newVehicle, setNewVehicle] = useState({
     member_id: "",
     vehicle_number: "",
@@ -38,9 +39,6 @@ const Vehicles = () => {
     is_active: true,
     amount: "",
   });
-
-
-
 
   // Fetch vehicles and members data from the API
   useEffect(() => {
@@ -78,8 +76,7 @@ const Vehicles = () => {
       newErrors.vehicle_number = "* Vehicle number is required";
     if (!newVehicle.vehicle_type)
       newErrors.vehicle_type = "* Vehicle type is required";
-    if (!newVehicle.name)
-      newErrors.name = "* Name is required";
+    if (!newVehicle.name) newErrors.name = "* Name is required";
     if (!newVehicle.vehicle_age)
       newErrors.vehicle_age = "* Vehicle age is required";
     if (!newVehicle.amount) newErrors.amount = "* Amount is required";
@@ -125,9 +122,7 @@ const Vehicles = () => {
         toast.success("Vehicle updated successfully!");
       }
     } catch (error) {
-      // console.error("Error updating vehicle:", error);
       toast.error("Failed to update vehicle.");
-    
     }
   };
 
@@ -136,7 +131,6 @@ const Vehicles = () => {
     setEditingVehicle(vehicle);
     setNewVehicle(vehicle);
     setModalIsOpen(true);
-    // toast.success(response.data.message);
   };
 
   // Handle save operation
@@ -160,8 +154,8 @@ const Vehicles = () => {
       is_active: true,
       amount: "",
     });
-    setEditingVehicle(null); 
-    setModalIsOpen(true); 
+    setEditingVehicle(null);
+    setModalIsOpen(true);
     setErrors({});
   };
 
@@ -203,6 +197,9 @@ const Vehicles = () => {
       vehicle.vehicle_type.toLowerCase().includes(searchQuery)
   );
 
+
+  
+
   // Table columns
   const columns = [
     { Header: "ID", accessor: (row, index) => index + 1, id: "index" },
@@ -213,10 +210,15 @@ const Vehicles = () => {
     { Header: "Notes", accessor: "notes" },
     { Header: "Amount", accessor: "amount" },
     {
-      Header: "Active",
+      Header: "Status",
       accessor: "is_active",
-      Cell: ({ value }) => (value ? "Yes" : "No"),
-    },
+      Cell: ({ value }) => (
+        <span style={{ color: value ? "green" : "red" , fontWeight: "bold" }}>
+          {value ? "Active" : "Inactive"}
+        </span>
+      ),
+    }
+    
   ];
 
   return (
@@ -229,9 +231,8 @@ const Vehicles = () => {
         </button>
       </div>
 
-
-            {/* Search Input */}
-            <div className="search-bar">
+      {/* Search Input */}
+      <div className="search-bar">
         <div className="search-input-container">
           <FaSearch className="search-icon" />
           <input
@@ -253,64 +254,58 @@ const Vehicles = () => {
       >
         <h2>{editingVehicle ? "Edit Vehicle" : "Add New Vehicle"}</h2>
         <div className="form-vehicle">
-
-
           {/* Member Dropdown */}
           <div className="input-error-veh">
-          <div className="input-group">
-            <FaUser className="icon" />
-            <select
-              value={newVehicle.member_id}
-              onChange={(e) =>
-                setNewVehicle({ ...newVehicle, member_id: e.target.value })
-              }
-            >
-              <option value="">Select Member</option>
-              {members.map((member) => (
-                <option key={member.id} value={member.id}>
-                  {member.username}
-                </option>
-              ))}
-            </select>
+            <div className="input-group">
+              <FaUser className="icon" />
+              <select
+                value={newVehicle.member_id}
+                onChange={(e) =>
+                  setNewVehicle({ ...newVehicle, member_id: e.target.value })
+                }
+              >
+                <option value="">Select Member</option>
+                {members.map((member) => (
+                  <option key={member.id} value={member.id}>
+                    {member.username}
+                  </option>
+                ))}
+              </select>
             </div>
-             <div className="error">
-             {errors.member_id && (
-              <span className="error-text-veh">{errors.member_id}</span>
-            )}
-              </div>
-       
+            <div className="error">
+              {errors.member_id && (
+                <span className="error-text-veh">{errors.member_id}</span>
+              )}
+            </div>
           </div>
 
           {/* Vehicle Type Dropdown */}
           <div className="input-error-veh">
-          <div className="input-group">
-            <FaCar className="icon" />
-            <select
-              value={newVehicle.vehicle_type}
-              onChange={(e) =>
-                setNewVehicle({ ...newVehicle, vehicle_type: e.target.value })
-              }
-            >
-              <option value="">Select Vehicle Type</option>
-              <option value="Hatchback">Hatchback</option>
-              <option value="Sedan">Sedan</option>
-              <option value="SUV">SUV</option>
-              <option value="MPV">MPV</option>
-              <option value="Mini-Van">Mini-Van</option>
-            </select>       
-          </div>
-          <div className="error">
-          {errors.vehicle_type && (
-              <span className="error-text-veh">{errors.vehicle_type}</span>
-            )}
-              </div>
+            <div className="input-group">
+              <FaCar className="icon" />
+              <select
+                value={newVehicle.vehicle_type}
+                onChange={(e) =>
+                  setNewVehicle({ ...newVehicle, vehicle_type: e.target.value })
+                }
+              >
+                <option value="">Select Vehicle Type</option>
+                <option value="Hatchback">Hatchback</option>
+                <option value="Sedan">Sedan</option>
+                <option value="SUV">SUV</option>
+                <option value="MPV">MPV</option>
+                <option value="Mini-Van">Mini-Van</option>
+              </select>
+            </div>
+            <div className="error">
+              {errors.vehicle_type && (
+                <span className="error-text-veh">{errors.vehicle_type}</span>
+              )}
+            </div>
           </div>
 
-
-          {/* Owner name  */}
+          {/* Owner name */}
           <div className="name-vehiclenumber">
-
-        
             <div className="input-group">
               <FaUserEdit className="icon" />
               <input
@@ -320,11 +315,11 @@ const Vehicles = () => {
                 onChange={(e) =>
                   setNewVehicle({ ...newVehicle, name: e.target.value })
                 }
-              />  {errors.name && (
+              />
+              {errors.name && (
                 <span className="error-text-veh">{errors.name}</span>
               )}
             </div>
-          
 
             {/* Vehicle Number */}
             <div className="input-group">
@@ -380,6 +375,24 @@ const Vehicles = () => {
             </div>
           </div>
 
+                {/* Active Switch - Only visible in Edit Vehicle form */}
+                {editingVehicle && (
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={newVehicle.is_active}
+                  onChange={(e) =>
+                    setNewVehicle({
+                      ...newVehicle,
+                      is_active: e.target.checked,
+                    })
+                  }
+                  name="is_active"
+                />
+              }
+              label="Active"
+            />
+          )}
 
           {/* Notes */}
           <div className="input-group">
@@ -392,6 +405,7 @@ const Vehicles = () => {
               }
             />
           </div>
+    
 
           <div className="modelbutton">
             <button onClick={handleSave} className="btn-editmodel">
@@ -442,7 +456,7 @@ const Vehicles = () => {
       {/* Vehicles Table */}
       <TableOne
         columns={columns}
-        data={filteredVehicles}
+        data={filteredVehicles.slice().reverse()}
         handleDelete={(vehicle) =>
           triggerDeleteModal(vehicle.id, `${vehicle.vehicle_number}`)
         }

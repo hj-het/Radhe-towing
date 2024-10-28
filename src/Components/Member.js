@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import Modal from "react-modal"; // Import React Modal
+import Modal from "react-modal";
 import TableOne from "../Table/TableOne";
 import { FaPlus } from "react-icons/fa";
 import "./../Table/table.css";
@@ -21,7 +21,7 @@ import {
   FaSearch,
 } from "react-icons/fa";
 
-// Set Modal app element
+
 Modal.setAppElement("#root");
 
 const Member = () => {
@@ -32,7 +32,7 @@ const Member = () => {
   const [filteredMembers, setFilteredMembers] = useState([]);
   const [cities, setCities] = useState([]);
   const [activeDropdown, setActiveDropdown] = useState(null);
-  const [deleteMemberId, setDeleteMemberId] = useState(null); // For delete confirmation
+  const [deleteMemberId, setDeleteMemberId] = useState(null); 
   const [deleteMemberName, setDeleteMemberName] = useState("");
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [errors, setErrors] = useState({});
@@ -41,7 +41,7 @@ const Member = () => {
     memberName: null,
     newStatus: null,
   });
-  const [showConfirmModal, setShowConfirmModal] = useState(false); // For confirmation modal
+  const [showConfirmModal, setShowConfirmModal] = useState(false); 
   const [newMember, setNewMember] = useState({
     username: "",
     password: "",
@@ -208,24 +208,24 @@ const Member = () => {
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
-    const day = String(date.getDate()).padStart(2, "0"); // Get day and pad with 0 if needed
-    const month = String(date.getMonth() + 1).padStart(2, "0"); // Get month (0-indexed) and pad with 0
-    const year = date.getFullYear(); // Get year
-    return `${day}-${month}-${year}`; // Return in 'DD-MM-YYYY' format
+    const day = String(date.getDate()).padStart(2, "0"); 
+    const month = String(date.getMonth() + 1).padStart(2, "0"); 
+    const year = date.getFullYear(); 
+    return `${day}-${month}-${year}`; //  'DD-MM-YYYY' format
   };
 
   const columns = [
     {
       Header: "ID",
-      accessor: (row, index) => index + 1, // Use index as row number
-      id: "index", // Optional: Set an ID for the column
+      accessor: (row, index) => index + 1,
+      id: "index", 
     },
     { Header: "Username", accessor: "username" },
-    { Header: "First Name", accessor: "first_name" }, // First Name column
-    { Header: "Last Name", accessor: "last_name" }, // Last Name column
+    { Header: "First Name", accessor: "first_name" }, 
+    { Header: "Last Name", accessor: "last_name" },
     { Header: "Date of Birth", accessor: (row) => formatDate(row.dob) },
-    { Header: "Address 1", accessor: "address_1" }, // Address 1 column
-    { Header: "Address 2", accessor: "address_2" }, // Address 2 column
+    { Header: "Address 1", accessor: "address_1" }, 
+    { Header: "Address 2", accessor: "address_2" }, 
     { Header: "Pincode", accessor: "pincode" },
     { Header: "Phone", accessor: "phone" },
     { Header: "Email", accessor: "email" },
@@ -350,7 +350,7 @@ const Member = () => {
         const response = await axios.get(
           "https://panel.radhetowing.com/api/cities"
         );
-        setCities(response.data); // Save cities in state
+        setCities(response.data); 
       } catch (error) {
         console.error("Error fetching cities:", error);
       }
@@ -359,7 +359,6 @@ const Member = () => {
     fetchCities();
   }, []);
 
-  // Function to reset form fields for adding a new member
   const resetForm = () => {
     setNewMember({
       username: "",
@@ -369,7 +368,7 @@ const Member = () => {
       dob: "",
       address_1: "",
       address_2: "",
-      city_id: "", // Reset city_id
+      city_id: "", 
       pincode: "",
       contact: "",
       email: "",
@@ -381,9 +380,9 @@ const Member = () => {
 
   // Handle Add Member (reset form and open modal)
   const handleAddMember = () => {
-    resetForm(); // Clear form before opening modal
-    setEditingMember(null); // Clear editing state
-    setModalIsOpen(true); // Open modal
+    resetForm(); 
+    setEditingMember(null); 
+    setModalIsOpen(true); 
   };
 
 
@@ -393,7 +392,7 @@ const Member = () => {
     console.log("Editing Member -->", member);
     console.log("Member city_id -->", member.city); 
     const selectedCity = cities.find(city => city.name === member.city);
-    setEditingMember(member); // Set editing mode
+    setEditingMember(member); 
     setNewMember({
       username: member.username,
       password: member.password,
@@ -404,7 +403,7 @@ const Member = () => {
         : "",
       address_1: member.address_1 || "",
       address_2: member.address_2 || "",
-      city_id: selectedCity ? selectedCity.id : "", // Set city_id based on the selected city
+      city_id: selectedCity ? selectedCity.id : "", 
       pincode: member.pincode || "",
       contact: member.phone || "",
       email: member.email || "",
@@ -419,7 +418,7 @@ const Member = () => {
   // Handle Save (for Add and Update)
   const handleSave = async () => {
     const validationErrors = validateForm();
-    setErrors(validationErrors); // Set the validation errors in state
+    setErrors(validationErrors); 
 
     // if (Object.keys(validationErrors).length > 0) {
     //   return; // Stop execution if there are validation errors
@@ -470,8 +469,8 @@ const Member = () => {
                 : m
             )
           );
-          setModalIsOpen(false); // Close modal after updating
-          setEditingMember(null); // Clear editing state
+          setModalIsOpen(false);
+          setEditingMember(null); 
         }
       } catch (error) {
         console.error("Error updating member:", error);
@@ -488,7 +487,7 @@ const Member = () => {
             dob: newMember.dob,
             address_1: newMember.address_1,
             address_2: newMember.address_2,
-            city_id: newMember.city_id, // Ensure city_id is included here
+            city_id: newMember.city_id, 
             pincode: newMember.pincode,
             contact: newMember.contact,
             email: newMember.email,
@@ -499,14 +498,14 @@ const Member = () => {
           }
         );
 
-        const addedMemberId = response.data.id; // Get the newly created member's ID
+        const addedMemberId = response.data.id;
 
         // Now fetch the full data of the new member using the ID
         const addedMemberResponse = await axios.get(
           `https://panel.radhetowing.com/api/members/${addedMemberId}`
         );
 
-        const addedMember = addedMemberResponse.data; // Get full data of the added member
+        const addedMember = addedMemberResponse.data; 
 
         const addedCity =
           cities.find((city) => city.id === addedMember.city_id)?.name ||
@@ -517,17 +516,17 @@ const Member = () => {
           ...members,
           {
             ...addedMember,
-            city: addedCity, // Use the city name from the cities list
+            city: addedCity, 
           },
         ]);
         setFilteredMembers([
           ...filteredMembers,
           {
             ...addedMember,
-            city: addedCity, // Use the city name from the cities list
+            city: addedCity, 
           },
         ]);
-        setModalIsOpen(false); // Close modal after adding
+        setModalIsOpen(false);
       } catch (error) {
         console.error("Error adding member:", error);
       }
@@ -564,7 +563,7 @@ const Member = () => {
       {/* Search Input */}
       <div className="search-bar">
         <div className="search-input-container">
-          <FaSearch className="search-icon" /> {/* Search Icon */}
+          <FaSearch className="search-icon" /> 
           <input
             type="text"
             placeholder="Search by name or email"
@@ -577,7 +576,7 @@ const Member = () => {
       {/* Members Table */}
       <TableOne
         columns={columns}
-        data={filteredMembers}
+        data={filteredMembers.slice().reverse()} 
         handleDelete={(member) => triggerDeleteModal(member.id)}
         handleEdit={handleEdit}
       />

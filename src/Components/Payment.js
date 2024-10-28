@@ -22,6 +22,8 @@ const Payments = () => {
   const [deletePaymentId, setDeletePaymentId] = useState(null);
   const [deletePaymentName, setDeletePaymentName] = useState("");
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [imageModalIsOpen, setImageModalIsOpen] = useState(false); // For image modal
+  const [selectedImage, setSelectedImage] = useState(""); // To store selected image URL
   const [newPayment, setNewPayment] = useState({
     PM_M_id: "",
     PM_V_id: "",
@@ -267,6 +269,18 @@ const Payments = () => {
     setFilteredPayments(filtered); // Update the filtered payments state
   };
 
+    // Function to open the image modal with the selected image URL
+    const openImageModal = (imageUrl) => {
+      setSelectedImage(imageUrl);
+      setImageModalIsOpen(true);
+    };
+  
+    // Close the image modal
+    const closeImageModal = () => {
+      setImageModalIsOpen(false);
+      setSelectedImage("");
+    };
+
   // Table columns
   const columns = [
     {
@@ -283,12 +297,45 @@ const Payments = () => {
       accessor: (row) => row.vehicle?.V_vihicle_number || "Unknown",
     },
     { Header: "Plan Name", accessor: (row) => row.plan?.P_name || "Unknown" },
-    { Header: "Amount", accessor: "PM_Amount" },
+    {
+      Header: "Amount",
+      accessor: "PM_Amount",
+      Cell: ({ value }) => `₹ ${value}`, 
+    },
+    
     {
       Header: "Expire Date",
       accessor: (row) => new Date(row.PM_expiredate).toLocaleDateString(),
     },
     { Header: "Received By", accessor: "PM_payment_recived_by" },
+
+    {
+      Header: "Image",
+      accessor: "PM_payment_ss_image",
+      Cell: ({ row }) => {
+        const imagePath = row.original.PM_payment_ss_image
+          ? `${row.original.PM_payment_ss_image
+              .replace(/\\/g, '') 
+              .replace(/\/+/g, '/') 
+            }`
+          : null;
+          console.log("imagePath-->",imagePath)
+    
+        return imagePath ? (
+          <img
+            src={imagePath}
+            alt="Not ss"
+            style={{ width: "50px", height: "50px", objectFit: "cover" }}
+            onClick={() => openImageModal(imagePath)} 
+          />
+        ) : (
+          <span>No Image</span>
+        );
+      },
+    },
+    
+    
+
     {
       Header: "Status",
       accessor: "Status",
@@ -299,9 +346,12 @@ const Payments = () => {
           R: { label: "Rejected", color: "red" },
           E: { label: "Expired", color: "gray" },
         };
-    
-        const status = statusMap[row.original.Status] || { label: "Unknown", color: "black" };
-    
+
+        const status = statusMap[row.original.Status] || {
+          label: "Unknown",
+          color: "black",
+        };
+
         return (
           <span style={{ color: status.color, fontWeight: "bold" }}>
             {status.label}
@@ -348,14 +398,21 @@ const Payments = () => {
 
         <div className="form-payment">
           {/* Show member's username and vehicle number in h4 when editing */}
-          
+
           {editingPayment && (
             <div className="member-info">
               {editingPayment.member && (
-               <div className="member-label-pyt"><p>Member Name: </p><h4>{editingPayment.member.M_username}</h4></div>
+                <div className="member-label-pyt">
+                  <p>Member Name: </p>
+                  <h4>{editingPayment.member.M_username}</h4>
+                </div>
               )}
+
               {editingPayment.vehicle && (
-                <div className="vehicle-label-pyt"><p>Vehicle No:</p><h4>{editingPayment.vehicle.V_vihicle_number}</h4></div>
+                <div className="vehicle-label-pyt">
+                  <p>Vehicle No:</p>
+                  <h4>{editingPayment.vehicle.V_vihicle_number}</h4>
+                </div>
               )}
             </div>
           )}
@@ -386,7 +443,7 @@ const Payments = () => {
               <div className="input-payment">
                 <FaCar className="icon" />
                 <select
-                  value={newPayment.PM_V_id} 
+                  value={newPayment.PM_V_id}
                   onChange={(e) =>
                     setNewPayment({ ...newPayment, PM_V_id: e.target.value })
                   }
@@ -409,8 +466,8 @@ const Payments = () => {
               <FaFileAlt className="icon" />
               <select
                 value={newPayment.PM_P_id}
-                onChange={(e) => handlePlanChange(e.target.value)} 
-                disabled={!!editingPayment} 
+                onChange={(e) => handlePlanChange(e.target.value)}
+                disabled={!!editingPayment}
               >
                 <option value="">Select Plan</option>
                 {plans.map((plan) => (
@@ -433,7 +490,7 @@ const Payments = () => {
                 onChange={(e) =>
                   setNewPayment({ ...newPayment, PM_Amount: e.target.value })
                 }
-                disabled={!!editingPayment} 
+                disabled={!!editingPayment}
               />
             </div>
           </div>
@@ -478,6 +535,7 @@ const Payments = () => {
           </div>
 
           {/* Payment Screenshot */}
+          {!editingPayment && (
           <div className="input-error-payment">
             <div className="input-payment">
               <FaImage className="icon" />
@@ -493,6 +551,7 @@ const Payments = () => {
               />
             </div>
           </div>
+          )}
 
           <div className="modelbutton">
             <button onClick={handleSavePayment} className="btn-editmodel">
@@ -538,10 +597,30 @@ const Payments = () => {
         </div>
       )}
 
+        {/* Image Modal */}
+        <Modal
+        isOpen={imageModalIsOpen}
+        onRequestClose={closeImageModal}
+        contentLabel="View Image"
+        className="image-modal"
+        overlayClassName="modal-overlay"
+      >
+        <img
+          src={selectedImage}
+          alt="Payment Proof"
+          style={{ width: "100%", height: "500px" }}
+        />
+        <button onClick={closeImageModal} className="btn-closemodel">
+          Close
+        </button>
+      </Modal>
+
       {/* Payments Table */}
       <TableOne
         columns={columns}
-        data={filteredPayments.length > 0 ? filteredPayments : payments}
+        data={(filteredPayments.length > 0 ? filteredPayments : payments)
+          .slice()
+          .reverse()}
         handleDelete={(payment) => triggerDeleteModal(payment)}
         handleEdit={(payment) => {
           console.log("payment", payment);

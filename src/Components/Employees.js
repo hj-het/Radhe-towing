@@ -23,17 +23,17 @@ Modal.setAppElement("#root");
 
 const Employees = () => {
   const [employees, setEmployees] = useState([]);
-  const [filteredEmployees, setFilteredEmployees] = useState([]); // State for filtered employees
-  const [searchQuery, setSearchQuery] = useState(""); // State for search query
+  const [filteredEmployees, setFilteredEmployees] = useState([]);
+  const [searchQuery, setSearchQuery] = useState("");
   const [editingEmployee, setEditingEmployee] = useState(null);
-  const [deleteEmployeeId, setDeleteEmployeeId] = useState(null); // For delete confirmation
+  const [deleteEmployeeId, setDeleteEmployeeId] = useState(null);
   const [deleteEmployeeName, setDeleteEmployeeName] = useState("");
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [errors, setErrors] = useState({}); // To track validation errors
-  const [showResetPasswordModal, setShowResetPasswordModal] = useState(false); // Modal state for reset password
-  const [newPassword, setNewPassword] = useState(""); // For the reset password input
-  const [resetEmployeeId, setResetEmployeeId] = useState(null); // To keep track of which employee is being reset
+  const [errors, setErrors] = useState({});
+  const [showResetPasswordModal, setShowResetPasswordModal] = useState(false);
+  const [newPassword, setNewPassword] = useState("");
+  const [resetEmployeeId, setResetEmployeeId] = useState(null);
   const [newEmployee, setNewEmployee] = useState({
     Username: "",
     Password: "",
@@ -65,7 +65,7 @@ const Employees = () => {
           Email: emp.Email,
         }));
         setEmployees(employeeData);
-        setFilteredEmployees(employeeData); // Initialize filtered data with all employees
+        setFilteredEmployees(employeeData);
         console.log("employeeData-->", employeeData);
       } catch (error) {
         console.error("Error fetching employee data:", error);
@@ -75,7 +75,6 @@ const Employees = () => {
     fetchEmployees();
   }, []);
 
-  // Validation function to check form inputs
   const validateForm = () => {
     const newErrors = {};
 
@@ -100,28 +99,26 @@ const Employees = () => {
     return Object.keys(newErrors).length === 0;
   };
 
+  // Function to Handle Delete Operation
+  const handleDelete = async (employeeId) => {
+    try {
+      const response = await axios.delete(
+        `https://panel.radhetowing.com/api/employee/delete/${employeeId}`
+      );
 
-
- // Function to Handle Delete Operation
-const handleDelete = async (employeeId) => {
-  try {
-    const response = await axios.delete(
-      `https://panel.radhetowing.com/api/employee/delete/${employeeId}`
-    );
-
-    if (response.data.success) {
-      const updatedEmployees = employees.filter((e) => e.id !== employeeId);
-      setEmployees(updatedEmployees); // Update employees state
-      setFilteredEmployees(updatedEmployees); // Update filtered employees state
-      setShowDeleteModal(false);
-      toast.success(response.data.message || "Employee Deleted Successfully");
-    } else {
-      toast.error(response.data.message);
+      if (response.data.success) {
+        const updatedEmployees = employees.filter((e) => e.id !== employeeId);
+        setEmployees(updatedEmployees);
+        setFilteredEmployees(updatedEmployees);
+        setShowDeleteModal(false);
+        toast.success(response.data.message || "Employee Deleted Successfully");
+      } else {
+        toast.error(response.data.message);
+      }
+    } catch (error) {
+      console.error("Error deleting employee:", error);
     }
-  } catch (error) {
-    console.error("Error deleting employee:", error);
-  }
-};
+  };
   // Trigger delete confirmation modal
   const triggerDeleteModal = (employeeId, employeeName) => {
     setDeleteEmployeeId(employeeId);
@@ -149,105 +146,102 @@ const handleDelete = async (employeeId) => {
       Contact: "",
       Email: "",
     });
-    setEditingEmployee(null); // Ensure that we're not editing any employee
-    setModalIsOpen(true); // Open modal
-    setErrors({}); // Reset errors when opening modal
+    setEditingEmployee(null);
+    setModalIsOpen(true);
+    setErrors({});
   };
 
-// Function to Add a New Employee
-const addEmployee = async () => {
-  const payload = {
-    Username: newEmployee.Username,
-    Password: newEmployee.Password,
-    FirstName: newEmployee.FirstName,
-    LastName: newEmployee.LastName,
-    DOB: newEmployee.DOB,
-    DOJ: newEmployee.DOJ,
-    Contact: newEmployee.Contact,
-    Email: newEmployee.Email,
-  };
+  // Function to Add a New Employee
+  const addEmployee = async () => {
+    const payload = {
+      Username: newEmployee.Username,
+      Password: newEmployee.Password,
+      FirstName: newEmployee.FirstName,
+      LastName: newEmployee.LastName,
+      DOB: newEmployee.DOB,
+      DOJ: newEmployee.DOJ,
+      Contact: newEmployee.Contact,
+      Email: newEmployee.Email,
+    };
 
-  try {
-    const response = await axios.post(
-      "https://panel.radhetowing.com/api/employee/add",
-      payload
-    );
-
-    if (response.data.success) {
-      // Add the new employee to the list
-      const newId = response.data.data.id; // Get the newly added employee ID from the response
-      toast.success(response.data.message);
-      const updatedEmployees = [...employees, { id: newId, ...newEmployee }];
-      setEmployees(updatedEmployees); // Update employees state
-      setFilteredEmployees(updatedEmployees); // Update filtered employees state
-
-      // Reset the form
-      setNewEmployee({
-        Username: "",
-        Password: "",
-        FirstName: "",
-        LastName: "",
-        DOB: "",
-        DOJ: "",
-        Contact: "",
-        Email: "",
-      });
-
-      // Close the modal
-      setModalIsOpen(false);
-    } else {
-      console.error("Error adding employee:", response.data.message);
-    }
-  } catch (error) {
-    console.error("Error adding employee:", error);
-  }
-};
-
-
-
-// Function to Edit/Update an Employee
-const editEmployee = async () => {
-  const payload = {
-    Username: newEmployee.Username,
-    Password: newEmployee.Password,
-    FirstName: newEmployee.FirstName,
-    LastName: newEmployee.LastName,
-    DOB: newEmployee.DOB,
-    DOJ: newEmployee.DOJ,
-    Contact: newEmployee.Contact,
-    Email: newEmployee.Email,
-  };
-
-  try {
-    const response = await axios.put(
-      `https://panel.radhetowing.com/api/employee/update/${editingEmployee.id}`,
-      payload
-    );
-
-    if (response.data.success) {
-      const updatedEmployees = employees.map((e) =>
-        e.id === editingEmployee.id ? { id: e.id, ...payload } : e
+    try {
+      const response = await axios.post(
+        "https://panel.radhetowing.com/api/employee/add",
+        payload
       );
-      setEmployees(updatedEmployees); // Update employees state
-      setFilteredEmployees(updatedEmployees); // Update filtered employees state
 
-      toast.success(response.data.message || "Employee Updated Successfully");
-      setEditingEmployee(null);
-      setModalIsOpen(false);
-    } else {
-      toast.error(response.data.message);
+      if (response.data.success) {
+        // Add the new employee to the list
+        const newId = response.data.data.id;
+        toast.success(response.data.message);
+        const updatedEmployees = [...employees, { id: newId, ...newEmployee }];
+        setEmployees(updatedEmployees);
+        setFilteredEmployees(updatedEmployees);
+
+        // Reset the form
+        setNewEmployee({
+          Username: "",
+          Password: "",
+          FirstName: "",
+          LastName: "",
+          DOB: "",
+          DOJ: "",
+          Contact: "",
+          Email: "",
+        });
+
+        setModalIsOpen(false);
+      } else {
+        console.error("Error adding employee:", response.data.message);
+      }
+    } catch (error) {
+      console.error("Error adding employee:", error);
     }
-  } catch (error) {
-    console.error("Error updating employee:", error);
-  }
-};
+  };
+
+  // Function to Edit/Update an Employee
+  const editEmployee = async () => {
+    const payload = {
+      Username: newEmployee.Username,
+      Password: newEmployee.Password,
+      FirstName: newEmployee.FirstName,
+      LastName: newEmployee.LastName,
+      DOB: newEmployee.DOB,
+      DOJ: newEmployee.DOJ,
+      Contact: newEmployee.Contact,
+      Email: newEmployee.Email,
+    };
+
+    try {
+      const response = await axios.put(
+        `https://panel.radhetowing.com/api/employee/update/${editingEmployee.id}`,
+        payload
+      );
+
+      if (response.data.success) {
+        const updatedEmployees = employees.map((e) =>
+          e.id === editingEmployee.id ? { id: e.id, ...payload } : e
+        );
+        setEmployees(updatedEmployees);
+        setFilteredEmployees(updatedEmployees);
+
+        toast.success(response.data.message || "Employee Updated Successfully");
+        setEditingEmployee(null);
+        setModalIsOpen(false);
+      } else {
+        toast.error(response.data.message);
+      }
+    } catch (error) {
+      console.error("Error updating employee:", error);
+    }
+  };
 
   const handleSave = () => {
     if (validateForm()) {
       if (editingEmployee) {
-        editEmployee(); // Call the edit function if we are editing
+        editEmployee();
       } else {
-        addEmployee(); // Call the add function if we are adding a new employee
+        addEmployee();
       }
     }
   };
@@ -255,10 +249,10 @@ const editEmployee = async () => {
   // Function to format date in 'DD-MM-YYYY' format
   const formatDate = (dateString) => {
     const date = new Date(dateString);
-    const day = String(date.getDate()).padStart(2, "0"); // Get day and pad with 0 if needed
-    const month = String(date.getMonth() + 1).padStart(2, "0"); // Get month (0-indexed) and pad with 0
-    const year = date.getFullYear(); // Get year
-    return `${day}-${month}-${year}`; // Return in 'DD-MM-YYYY' format
+    const day = String(date.getDate()).padStart(2, "0");
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const year = date.getFullYear();
+    return `${day}-${month}-${year}`; //'DD-MM-YYYY' format
   };
 
   // Simple Custom Password Generator
@@ -275,14 +269,14 @@ const editEmployee = async () => {
 
   // Auto-generate password and set it in the input field
   const generateAutoPassword = () => {
-    const password = generatePassword(); // Use the custom password generator
+    const password = generatePassword();
     setNewPassword(password);
   };
 
   const sendResetPasswordEmail = (email, newPassword, Username) => {
     console.log("username-->", Username);
     const templateParams = {
-      to_email: email, // Dynamic email from API response
+      to_email: email,
       message: newPassword,
       reply_to: "radhetowing@gmail.com",
       to_name: Username,
@@ -310,21 +304,20 @@ const editEmployee = async () => {
   const saveNewPassword = async () => {
     try {
       const response = await axios.put(
-        `https://panel.radhetowing.com/api/employee/reset-password/${resetEmployeeId}`, // Ensure this is the correct endpoint
-        { New_Password: newPassword } // Correct payload
+        `https://panel.radhetowing.com/api/employee/reset-password/${resetEmployeeId}`,
+        { New_Password: newPassword }
       );
 
       if (response.data.success) {
-        toast.success("Password reset successfully!"); // Show success toast
+        toast.success("Password reset successfully!");
         sendResetPasswordEmail(
           response.data.data.Email,
           response.data.data.New_Password,
           response.data.data.Username
         );
-        setShowResetPasswordModal(false); // Close modal
-        setNewPassword(""); // Clear the input field
+        setShowResetPasswordModal(false);
+        setNewPassword("");
       } else {
-        // console.error("Error resetting password:", response.data.message);
         toast.error("Error resetting password");
       }
     } catch (error) {
@@ -337,7 +330,6 @@ const editEmployee = async () => {
     const query = e.target.value.toLowerCase();
     setSearchQuery(query);
 
-    // Filter employees based on the search query
     const filtered = employees.filter(
       (employee) =>
         employee.FirstName.toLowerCase().includes(query) ||
@@ -352,7 +344,7 @@ const editEmployee = async () => {
   const columns = [
     {
       Header: "ID",
-      accessor: (row, index) => index + 1, // Use index as row number
+      accessor: (row, index) => index + 1,
       id: "index",
     },
     { Header: "Username", accessor: "Username" },
@@ -389,15 +381,14 @@ const editEmployee = async () => {
         </div>
       </div>
 
-    {/* Add/Edit Modal */}
-    <Modal
+      {/* Add/Edit Modal */}
+      <Modal
         isOpen={modalIsOpen}
         onRequestClose={() => setModalIsOpen(false)}
         contentLabel="Add/Edit Employee"
         className="modal"
         overlayClassName="modal-overlay"
         shouldCloseOnOverlayClick={false}
-
       >
         <h2>{editingEmployee ? "Edit Employee" : "Add New Employee"}</h2>
 
@@ -413,7 +404,7 @@ const editEmployee = async () => {
                 onChange={(e) =>
                   setNewEmployee({ ...newEmployee, Username: e.target.value })
                 }
-                disabled={!!editingEmployee} 
+                disabled={!!editingEmployee}
               />
             </div>
             <div className="error">
@@ -617,6 +608,37 @@ const editEmployee = async () => {
         overlayClassName="modal-overlay"
       >
         <h2>Reset Password</h2>
+
+        {/* Display employee name */}
+        {resetEmployeeId && (
+          <>
+            <p>
+              Reset password for {" "}
+              <strong>
+                {
+                  employees.find((employee) => employee.id === resetEmployeeId)
+                    ?.FirstName
+                }{" "}
+                {
+                  employees.find((employee) => employee.id === resetEmployeeId)
+                    ?.LastName
+                }
+              </strong>
+            </p>
+            <p>
+              {" "}
+              Mobile No: {""}
+              <strong>
+                {
+                  employees.find((employee) => employee.id === resetEmployeeId)
+                    ?.Contact
+                }
+                {""}
+              </strong>
+            </p>
+          </>
+        )}
+
         <div className="form">
           <div className="input-with-icon">
             <FaLock className="input-icon" />
@@ -636,7 +658,7 @@ const editEmployee = async () => {
                 color: "#888",
               }}
             >
-              {showPassword ? <FaEyeSlash /> : <FaEye />}
+              {/* {showPassword ? <FaEyeSlash /> : <FaEye />} */}
             </span>
           </div>
 
@@ -695,7 +717,7 @@ const editEmployee = async () => {
       {/* Employees Table */}
       <TableOne
         columns={columns}
-        data={filteredEmployees} // Pass filtered data to the table}
+        data={filteredEmployees.slice().reverse()}
         handleDelete={(employee) =>
           triggerDeleteModal(
             employee.id,
