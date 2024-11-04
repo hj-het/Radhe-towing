@@ -19,7 +19,10 @@ import {
   FaCalendarAlt,
   FaMapPin,
   FaSearch,
+  FaCheckCircle,
+  FaTimesCircle
 } from "react-icons/fa";
+
 
 
 Modal.setAppElement("#root");
@@ -36,6 +39,8 @@ const Member = () => {
   const [deleteMemberName, setDeleteMemberName] = useState("");
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [errors, setErrors] = useState({});
+  const [allUsernames, setAllUsernames] = useState([]); //for username validation
+  const [usernameValid, setUsernameValid] = useState(null); //for username validation
   const [statusChange, setStatusChange] = useState({
     memberId: null,
     memberName: null,
@@ -75,6 +80,9 @@ const Member = () => {
         );
         const mappedMembers = membersResponse.data.map((member) => {
           const city = cities.find((city) => city.id === member.city_id);
+
+          const usernames = membersResponse.data.map((member) => member.username);
+          setAllUsernames(usernames);
           return {
             id: member.id,
             username: member.username,
@@ -94,6 +102,7 @@ const Member = () => {
 
         setMembers(mappedMembers);
         setFilteredMembers(mappedMembers);
+      
       } catch (error) {
         console.error("Error fetching members:", error);
       }
@@ -101,6 +110,25 @@ const Member = () => {
 
     fetchMembers();
   }, []);
+
+
+  // Validate username uniqueness
+  useEffect(() => {
+    if (newMember.username) {
+      setUsernameValid(!allUsernames.includes(newMember.username));
+    } else {
+      setUsernameValid(null);
+    }
+  }, [newMember.username, allUsernames]);
+
+  // Handle input change
+  const handleInputChange = (field, value) => {
+    setNewMember((prevState) => ({
+      ...prevState,
+      [field]: value,
+    }));
+  };
+console.log("handleInputChange",handleInputChange)
 
   // Handle status change
   const handleStatusChange = async () => {
@@ -606,6 +634,12 @@ const Member = () => {
                 }
                 disabled={!!editingMember}
               />
+                   {usernameValid === true && (
+            <FaCheckCircle className="validation-icon valid" />
+          )}
+          {usernameValid === false && (
+            <FaTimesCircle className="validation-icon invalid" />
+          )}
             </div>
             <div className="error">
               {errors.username && (

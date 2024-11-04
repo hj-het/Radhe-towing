@@ -140,3 +140,8 @@ textarea {
   background-color: #d32f2f;
 }
 
+.top-search{
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}

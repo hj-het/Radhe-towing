@@ -34,6 +34,8 @@ const Employees = () => {
   const [showResetPasswordModal, setShowResetPasswordModal] = useState(false);
   const [newPassword, setNewPassword] = useState("");
   const [resetEmployeeId, setResetEmployeeId] = useState(null);
+  const [showStatusModal, setShowStatusModal] = useState(false);
+  const [currentEmployee, setCurrentEmployee] = useState(null); // For status change confirmation
   const [newEmployee, setNewEmployee] = useState({
     Username: "",
     Password: "",
@@ -47,33 +49,61 @@ const Employees = () => {
   const [modalIsOpen, setModalIsOpen] = useState(false);
 
   // Fetch employees data from the API
-  useEffect(() => {
-    const fetchEmployees = async () => {
-      try {
-        const response = await axios.get(
-          "https://panel.radhetowing.com/api/employees"
-        );
-        const employeeData = response.data.data.map((emp) => ({
-          id: emp.id,
-          Username: emp.Username,
-          Password: emp.Password,
-          FirstName: emp.FirstName,
-          LastName: emp.LastName,
-          DOB: emp.DOB,
-          DOJ: emp.DOJ,
-          Contact: emp.Contact,
-          Email: emp.Email,
-        }));
-        setEmployees(employeeData);
-        setFilteredEmployees(employeeData);
-        console.log("employeeData-->", employeeData);
-      } catch (error) {
-        console.error("Error fetching employee data:", error);
-      }
-    };
+  const fetchEmployees = async () => {
+    try {
+      const response = await axios.get("https://panel.radhetowing.com/api/employees");
+      const employeeData = response.data.data.map((emp) => ({
+        id: emp.id,
+        Username: emp.Username,
+        Password: emp.Password,
+        FirstName: emp.FirstName,
+        LastName: emp.LastName,
+        DOB: emp.DOB,
+        DOJ: emp.DOJ,
+        Contact: emp.Contact,
+        Email: emp.Email,
+        IsActive: emp.IsActive,
+      }));
+      setEmployees(employeeData);
+      setFilteredEmployees(employeeData);
+    } catch (error) {
+      console.error("Error fetching employee data:", error);
+    }
+  };
 
+  useEffect(() => {
     fetchEmployees();
   }, []);
+
+ // Open the confirmation modal for status change
+ const openStatusModal = (employee) => {
+  setCurrentEmployee(employee);
+  setShowStatusModal(true);
+};
+
+// Confirm the status change
+const confirmStatusChange = async () => {
+  const newStatus = !currentEmployee.IsActive;
+  try {
+    const response = await axios.put(
+      `https://panel.radhetowing.com/api/employee/update-status/${currentEmployee.id}`,
+      { IsActive: newStatus }
+    );
+
+    if (response.data.success) {
+      toast.success(
+        `Employee status updated to ${newStatus ? "Active" : "Inactive"}`
+      );
+      setShowStatusModal(false); // Close the modal
+      fetchEmployees(); // Refetch the employees to get the latest status
+    } else {
+      toast.error("Failed to update status.");
+    }
+  } catch (error) {
+    console.error("Error updating status:", error);
+    toast.error("Error updating employee status.");
+  }
+};
 
   const validateForm = () => {
     const newErrors = {};
@@ -340,6 +370,10 @@ const Employees = () => {
     setFilteredEmployees(filtered);
   };
 
+
+  
+  
+
   // Table columns
   const columns = [
     {
@@ -355,6 +389,27 @@ const Employees = () => {
     { Header: "DOJ", accessor: (row) => formatDate(row.DOJ) }, // Format DOJ
     { Header: "Contact", accessor: "Contact" },
     { Header: "Email", accessor: "Email" },
+    {
+      Header: "Status",
+      accessor: "status",
+      Cell: ({ row }) => {
+        const isActive = row.original.IsActive;
+        return (
+          <button
+          onClick={() => openStatusModal(row.original)}
+            style={{
+              color: isActive ? "green" : "red",
+              fontWeight: "bold",
+              cursor: "pointer",
+              border: "transparent",
+              background:"transparent",
+            }}
+          >
+            {isActive ? "Active" : "Inactive"}
+          </button>
+        );
+      },
+    },
   ];
 
   return (
@@ -713,6 +768,48 @@ const Employees = () => {
           </div>
         </div>
       )}
+
+        {/* Confirmation Modal for Status Change */}
+        <Modal
+        isOpen={showStatusModal}
+        onRequestClose={() => setShowStatusModal(false)}
+        contentLabel="Confirm Status Change"
+        className="modal"
+        overlayClassName="modal-overlay"
+        style={{
+          content: {
+            textAlign: "center", 
+          },
+        }}
+      >
+        <h2>Confirm Status Change</h2>
+        {currentEmployee && (
+          <p>
+            Are you sure you want to change the status of{" "}
+            <span style={{ fontWeight: "bold", color: "#ee5757" }}>
+              {currentEmployee.FirstName} {currentEmployee.LastName}
+            </span>{" "}
+            ?
+            {/* to {currentEmployee.is_active ? "Inactive" : "Active"}? */}
+          </p>
+        )}
+        <div className="modal-buttons">
+          <button
+            onClick={confirmStatusChange}
+            className="btn-confirm"
+            style={{ backgroundColor: "red", color: "white" }}
+          >
+            Yes, Change
+          </button>
+          <button
+            onClick={() => setShowStatusModal(false)}
+            className="btn-cancel"
+            style={{ backgroundColor: "grey", color: "white" }}
+          >
+            Cancel
+          </button>
+        </div>
+      </Modal>
 
       {/* Employees Table */}
       <TableOne

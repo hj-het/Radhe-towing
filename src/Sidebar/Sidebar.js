@@ -22,7 +22,7 @@ const SidebarComponent = () => {
           <img
             src="/images/radhe _logomain.png"
             alt="Company Logo"
-            style={{ width: "251px", height: "65px" }}
+            style={{ width: "201px", height: "55px" }}
           />
         </Link>
       </div>

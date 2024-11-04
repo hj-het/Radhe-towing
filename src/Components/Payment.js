@@ -325,7 +325,7 @@ const Payments = () => {
           <img
             src={imagePath}
             alt="Not ss"
-            style={{ width: "50px", height: "50px", objectFit: "cover" }}
+            style={{ width: "25px", height: "25px", objectFit: "cover" }}
             onClick={() => openImageModal(imagePath)} 
           />
         ) : (

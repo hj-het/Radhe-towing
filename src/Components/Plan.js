@@ -3,14 +3,19 @@ import axios from "axios";
 import Modal from "react-modal";
 import TableOne from "../Table/TableOne";
 import "./../Style/plan.css";
-import { TextField, MenuItem, InputAdornment } from "@mui/material";
+import {
+  TextField,
+  // MenuItem,
+  // InputAdornment,
+  Autocomplete,
+} from "@mui/material";
 
 import {
   FaFileAlt,
   // FaDollarSign,
   FaCalendarAlt,
   FaCar,
-  FaGasPump,
+  // FaGasPump,
   FaTruck,
   FaCalendarCheck,
   FaSearch,
@@ -35,7 +40,7 @@ const Plan = () => {
     duration: "",
     price: "",
     value_of_car: "",
-    fuel_type: "",
+    fuel_type: [],
     num_of_towing: "",
     exchange_car: false,
     exchange_car_validity: "",
@@ -45,6 +50,15 @@ const Plan = () => {
     created_by: "Admin",
     isActive: "0",
   });
+
+  
+  const fuelOptions = [
+    { title: "Petrol", value: "Petrol" },
+    { title: "Diesel", value: "Diesel" },
+    { title: "CNG", value: "CNG" },
+    { title: "Electric", value: "Electric" },
+    { title: "Hybrid", value: "Hybrid" },
+  ];
 
   // Fetch plans data from the API
   useEffect(() => {
@@ -59,7 +73,7 @@ const Plan = () => {
           duration: plan.duration,
           price: plan.price,
           value_of_car: plan.value_of_car,
-          fuel_type: plan.fuel_type,
+          fuel_type: plan.fuel_type || [],
           num_of_towing: plan.num_of_towing,
           exchange_car: plan.exchange_car,
           exchange_car_validity: plan.exchange_car_validity,
@@ -142,7 +156,7 @@ const Plan = () => {
       duration: "",
       price: "",
       value_of_car: "",
-      fuel_type: "",
+      fuel_type: [],
       num_of_towing: "",
       exchange_car: false,
       exchange_car_validity: "",
@@ -172,7 +186,7 @@ const Plan = () => {
       service_24x7: newPlan.service_24x7,
       is_customized: newPlan.is_customized,
       created_by: "Admin",
-      isActive: "0",
+      isActive: newPlan.isActive,
     };
 
     try {
@@ -242,25 +256,52 @@ const Plan = () => {
     }
   };
 
+
   // Table columns
   const columns = [
     {
       Header: "ID",
-      accessor: (row, index) => index + 1, // Use index as row number
-      id: "index", // Optional: Set an ID for the column
+      accessor: (row, index) => index + 1,
+      id: "index",
     },
     { Header: "Plan Name", accessor: "name" },
-    { Header: "Duration (months)", accessor: "duration" },
-    { Header: "Price (₹)", accessor: "price" },
+    {
+      Header: "Duration (months)",
+      accessor: "duration",
+      Cell: ({ value }) => {
+        const duration = value || 0;
+        return `${duration} month${duration !== 1 ? "s" : ""}`;
+      },
+    },
+    {
+      Header: "Price (₹)",
+      accessor: "price",
+      Cell: ({ value }) => {
+        const price = value;
+        return `${price}₹`;
+      },
+    },
     { Header: "Car Value", accessor: "value_of_car" },
-    { Header: "Fuel Type", accessor: "fuel_type" },
+    {
+      Header: "Fuel Type",
+      accessor: "fuel_type",
+      Cell: ({ value }) => Array.isArray(value) ? value.join(", ") : "N/A", // Ensure value is an array
+    },
     { Header: "Towing Limit", accessor: "num_of_towing" },
     {
       Header: "Exchange Car",
       accessor: "exchange_car",
       Cell: ({ value }) => (value ? "Yes" : "No"),
     },
-    { Header: "Exchange Validity", accessor: "exchange_car_validity" },
+    {
+      Header: "Exchange Validity",
+      accessor: "exchange_car_validity",
+      Cell: ({ value }) => {
+        const months = value || 0;
+        return `${months} month${months !== 1 ? "s" : ""}`;
+      },
+    },
+
     {
       Header: "Email Support",
       accessor: "is_email_support",
@@ -274,6 +315,11 @@ const Plan = () => {
     {
       Header: "Customized",
       accessor: "is_customized",
+      Cell: ({ value }) => (value ? "Yes" : "No"),
+    },
+    {
+      Header: "Status",
+      accessor: "isActive",
       Cell: ({ value }) => (value ? "Yes" : "No"),
     },
   ];
@@ -372,31 +418,29 @@ const Plan = () => {
             )}
 
             {/* <div className="input-with-icon"> */}
-            <TextField
-              select
-              label="Fuel Type"
-              value={newPlan.fuel_type}
-              onChange={(e) =>
-                setNewPlan({ ...newPlan, fuel_type: e.target.value })
-              }
-              variant="outlined"
-              fullWidth
-              error={!!errors.fuel_type} // Handle error
-              helperText={errors.fuel_type || ""} // Show error message
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <FaGasPump />
-                  </InputAdornment>
-                ),
-              }}
-            >
-              <MenuItem value="Petrol">Petrol</MenuItem>
-              <MenuItem value="Diesel">Diesel</MenuItem>
-              <MenuItem value="CNG">CNG</MenuItem>
-              <MenuItem value="Electric">Electric</MenuItem>
-              <MenuItem value="Hybrid">Hybrid</MenuItem>
-            </TextField>
+            <Autocomplete
+            multiple
+            id="fuel-type-multiple"
+            options={fuelOptions}
+            getOptionLabel={(option) => option.title}
+            value={fuelOptions.filter((opt) =>
+              newPlan.fuel_type.includes(opt.value)
+            )}
+            onChange={(event, newValue) =>
+              setNewPlan({
+                ...newPlan,
+                fuel_type: newValue.map((item) => item.value),
+              })
+            }
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                label="Fuel Type"
+                placeholder="Select Fuel Type"
+                variant="outlined"
+              />
+            )}
+          />
           </div>
           {/* </div> */}
 
@@ -421,8 +465,8 @@ const Plan = () => {
               <FaCalendarCheck className="input-icon" />{" "}
               {/* Icon for exchange car validity */}
               <input
-                type="text"
-                placeholder="Exchange Car Validity"
+                type="number"
+                placeholder="Exchange Validity (months)"
                 value={newPlan.exchange_car_validity}
                 onChange={(e) =>
                   setNewPlan({

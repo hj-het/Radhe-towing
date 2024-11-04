@@ -5,7 +5,7 @@ import Payment from './Components/Payment';
 import Service from './Components/Service';
 import City from './Components/City';
 import State from './Components/State';
-import Country from './Components/Country';
+// import Country from './Components/Country';
 import Member from './Components/Member';
 import Employees from './Components/Employees';
 import Vehicle from './Components/Vehicle';
@@ -13,6 +13,7 @@ import Login from './Auth/Login';
 import Layout from './Sidebar/Layout';
 import { AuthProvider } from './Context/AuthContext'; // Import AuthProvider
 import ProtectedRoute from './Context/ProtectedRoute';
+// import NotFound from './Components/NotFound';
 
 function App() {
     return (
@@ -97,14 +98,14 @@ function App() {
                             </ProtectedRoute>
                         } 
                     />
-                    <Route 
-                        path="/country" 
+                    {/* <Route 
+                        path="/notfound" 
                         element={
                             <ProtectedRoute allowedRoles={['admin']}>
-                                <Layout><Country /></Layout>
+                                <Layout><NotFound /></Layout>
                             </ProtectedRoute>
                         } 
-                    />
+                    /> */}
                 </Routes>
             </Router>
         </AuthProvider>

@@ -218,4 +218,28 @@
   .error-container li {
     margin-bottom: 5px;
   }
+  /* Position validation icon next to input */
+.validation-icon {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 1.5rem;
+}
+
+.validation-icon.valid {
+  color: green;
+}
+
+.validation-icon.invalid {
+  color: #fe4b4b;
+}
+
+/* Error text styling */
+.error-text {
+  color: red;
+  font-size: 0.875rem;
+  margin-top: 5px;
+}
+
   

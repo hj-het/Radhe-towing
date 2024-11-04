@@ -18,8 +18,18 @@ import "./../Style/employees.css"; // Reuse employees CSS for styling
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "./../Style/service.css";
+import Autocomplete from "@mui/material/Autocomplete";
+import TextField from "@mui/material/TextField";
 
 Modal.setAppElement("#root");
+
+const statusOptions = [
+  { label: "Request", value: "R" },
+  { label: "Accept", value: "A" },
+  { label: "Decline", value: "D" },
+  { label: "Processing", value: "P" },
+  { label: "Complete", value: "C" },
+];
 
 const Services = () => {
   const [services, setServices] = useState([]);
@@ -27,6 +37,7 @@ const Services = () => {
   const [vehicles, setVehicles] = useState([]); // State to store vehicles related to a member
   const [filteredServices, setFilteredServices] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedStatuses, setSelectedStatuses] = useState([]);
   const [editingService, setEditingService] = useState(null);
   const [deleteServiceId, setDeleteServiceId] = useState(null);
   const [deleteServiceName, setDeleteServiceName] = useState("");
@@ -251,17 +262,26 @@ const Services = () => {
     setShowDeleteModal(true);
   };
 
-  // Handle search
-  const handleSearchChange = (e) => {
-    const query = e.target.value.toLowerCase();
-    setSearchQuery(query);
-    const filtered = services.filter(
-      (service) =>
-        service.member.username.toLowerCase().includes(query) ||
-        service.vehicle.vehicle_number.toLowerCase().includes(query) ||
-        service.location.toLowerCase().includes(query)
-    );
+  // Filter services based on search and selected statuses
+  useEffect(() => {
+    const filtered = services.filter((service) => {
+      const matchesSearch =
+        service.member.username.toLowerCase().includes(searchQuery) ||
+        service.vehicle.vehicle_number.toLowerCase().includes(searchQuery) ||
+        service.location.toLowerCase().includes(searchQuery);
+
+      const matchesStatus =
+        selectedStatuses.length === 0 ||
+        selectedStatuses.includes(service.status);
+
+      return matchesSearch && matchesStatus;
+    });
     setFilteredServices(filtered);
+  }, [searchQuery, selectedStatuses, services]);
+
+  // Handle search input change
+  const handleSearchChange = (e) => {
+    setSearchQuery(e.target.value.toLowerCase());
   };
 
   // Table columns
@@ -326,16 +346,38 @@ const Services = () => {
           <FaPlus /> Add Service
         </button>
       </div>
+      
+      <div className="top-search">
+        {/* Search Input */}
+        <div className="search-bar">
+          <div className="search-input-container">
+            <FaSearch className="search-icon" />
+            <input
+              type="text"
+              placeholder="Search by member"
+              value={searchQuery}
+              onChange={handleSearchChange}
+            />
+          </div>
+        </div>
 
-      {/* Search Input */}
-      <div className="search-bar">
-        <div className="search-input-container">
-          <FaSearch className="search-icon" />
-          <input
-            type="text"
-            placeholder="Search by member"
-            value={searchQuery}
-            onChange={handleSearchChange}
+        {/* Status Multi-Select Filter */}
+        <div className="status-filter">
+          <Autocomplete
+            multiple
+            options={statusOptions}
+            getOptionLabel={(option) => option.label}
+            onChange={(event, newValue) => {
+              setSelectedStatuses(newValue.map((option) => option.value));
+            }}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                variant="outlined"
+                label="Filter by Status"
+                placeholder="Select statuses"
+              />
+            )}
           />
         </div>
       </div>
