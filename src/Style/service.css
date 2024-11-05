@@ -1,4 +1,3 @@
-
 .form-service {
   display: flex;
   flex-direction: column;
@@ -28,11 +27,11 @@
   width: 80%; */
 }
 
-.input-error-location{
+.input-error-location {
   position: relative;
 }
 
-.input-error-location input{
+.input-error-location input {
   width: 89%;
   padding: 13px 15px;
   padding-left: 40px; /* Space for the icon */
@@ -57,7 +56,7 @@ input[type="date-time"] {
   /* margin-bottom: 10px; */
 }
 
-.input-error-comment textarea{
+.input-error-comment textarea {
   width: 89%;
   padding: 10px 15px;
   padding-left: 40px; /* Space for the icon */
@@ -70,7 +69,7 @@ input[type="date-time"] {
   font-family: sans-serif;
 }
 
-.input-error-comment .icon{
+.input-error-comment .icon {
   position: absolute;
   left: 41px;
   top: 68%;
@@ -140,8 +139,65 @@ textarea {
   background-color: #d32f2f;
 }
 
-.top-search{
+.top-search {
   display: flex;
   align-items: center;
   gap: 10px;
+}
+.css-1kmkvia {
+  width: 260px !important;
+}
+
+.member-details {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  margin-top: -25px;
+  margin-bottom: -25px;
+}
+
+.close-completedCountData {
+  display: flex;
+  justify-content: end;
+  align-items: center;
+  margin-top: 15px;
+}
+
+.btn-closemodel-service {
+  padding: 4px 10px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.3s ease;
+  background-color: #f44336;
+  color: white;
+}
+
+.completedCountData {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+}
+
+.completed-count {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: -22px;
+  margin-bottom: -22px;
+}
+/* .form-count-towing {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: -23px;
+  margin-bottom: -23px;
+} */
+
+.towing-info {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: -22px;
+  margin-bottom: -22px;
 }

@@ -8,6 +8,8 @@ import {
   // MenuItem,
   // InputAdornment,
   Autocomplete,
+  Switch,
+  // FormControlLabel,
 } from "@mui/material";
 
 import {
@@ -48,10 +50,9 @@ const Plan = () => {
     service_24x7: false,
     is_customized: false,
     created_by: "Admin",
-    isActive: "0",
+    isActive: 0,
   });
 
-  
   const fuelOptions = [
     { title: "Petrol", value: "Petrol" },
     { title: "Diesel", value: "Diesel" },
@@ -80,6 +81,7 @@ const Plan = () => {
           is_email_support: plan.is_email_support,
           service_24x7: plan.service_24x7,
           is_customized: plan.is_customized,
+          isActive: plan.isActive,
         }));
         setPlans(planData);
       } catch (error) {
@@ -164,7 +166,7 @@ const Plan = () => {
       service_24x7: false,
       is_customized: false,
       created_by: "Admin",
-      isActive: "0",
+      isActive: 0,
     });
     setEditingPlan(null);
     setModalIsOpen(true);
@@ -222,7 +224,7 @@ const Plan = () => {
       service_24x7: newPlan.service_24x7,
       is_customized: newPlan.is_customized,
       created_by: "Admin",
-      isActive: "0",
+      isActive: newPlan.isActive,
     };
 
     try {
@@ -255,7 +257,12 @@ const Plan = () => {
       }
     }
   };
-
+  const handleStatusToggle = () => {
+    setNewPlan((prevPlan) => ({
+      ...prevPlan,
+      isActive: prevPlan.isActive === 1 ? 0 : 1, // Toggle active/inactive
+    }));
+  };
 
   // Table columns
   const columns = [
@@ -285,7 +292,7 @@ const Plan = () => {
     {
       Header: "Fuel Type",
       accessor: "fuel_type",
-      Cell: ({ value }) => Array.isArray(value) ? value.join(", ") : "N/A", // Ensure value is an array
+      Cell: ({ value }) => (Array.isArray(value) ? value.join(", ") : "N/A"), 
     },
     { Header: "Towing Limit", accessor: "num_of_towing" },
     {
@@ -320,7 +327,13 @@ const Plan = () => {
     {
       Header: "Status",
       accessor: "isActive",
-      Cell: ({ value }) => (value ? "Yes" : "No"),
+      Cell: ({ value }) => (
+        <span
+          style={{ color: value === 1 ? "green" : "red", fontWeight: "bold" }}
+        >
+          {value === 1 ? "Active" : "Inactive"}
+        </span>
+      ),
     },
   ];
 
@@ -418,30 +431,34 @@ const Plan = () => {
             )}
 
             {/* <div className="input-with-icon"> */}
-            <Autocomplete
-            multiple
-            id="fuel-type-multiple"
-            options={fuelOptions}
-            getOptionLabel={(option) => option.title}
-            value={fuelOptions.filter((opt) =>
-              newPlan.fuel_type.includes(opt.value)
-            )}
-            onChange={(event, newValue) =>
-              setNewPlan({
-                ...newPlan,
-                fuel_type: newValue.map((item) => item.value),
-              })
-            }
-            renderInput={(params) => (
-              <TextField
-                {...params}
-                label="Fuel Type"
-                placeholder="Select Fuel Type"
-                variant="outlined"
+
+            <div className="plan-active">
+              <Autocomplete
+                multiple
+                id="fuel-type-multiple"
+                options={fuelOptions}
+                getOptionLabel={(option) => option.title}
+                value={fuelOptions.filter((opt) =>
+                  newPlan.fuel_type.includes(opt.value)
+                )}
+                onChange={(event, newValue) =>
+                  setNewPlan({
+                    ...newPlan,
+                    fuel_type: newValue.map((item) => item.value),
+                  })
+                }
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    label="Fuel Type"
+                    placeholder="Select Fuel Type"
+                    variant="outlined"
+                  />
+                )}
               />
-            )}
-          />
+            </div>
           </div>
+
           {/* </div> */}
 
           {/* Additional input fields with icons */}
@@ -527,6 +544,19 @@ const Plan = () => {
               Customized Plan
             </label>
           </div>
+
+          {/* Status Toggle Switch */}
+          {editingPlan && (
+            <div className="status-toggle">
+              <label>Plan Status:</label>
+              <Switch
+                checked={newPlan.isActive === 1}
+                onChange={handleStatusToggle}
+                color="primary"
+              />
+              <span>{newPlan.isActive === 1 ? "Active" : "Inactive"}</span>
+            </div>
+          )}
 
           <div className="modelbutton">
             <button onClick={handleSave} className="btn-editmodel">

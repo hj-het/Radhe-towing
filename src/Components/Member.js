@@ -255,7 +255,7 @@ console.log("handleInputChange",handleInputChange)
     { Header: "Address 1", accessor: "address_1" }, 
     { Header: "Address 2", accessor: "address_2" }, 
     { Header: "Pincode", accessor: "pincode" },
-    { Header: "Phone", accessor: "phone" },
+    { Header: "Phone", accessor: "contact" },
     { Header: "Email", accessor: "email" },
     { Header: "City", accessor: "city" },
     {
@@ -293,7 +293,7 @@ console.log("handleInputChange",handleInputChange)
 
     if (!newMember.username || newMember.username.length < 3) {
       errors.username =
-        "Username is required and must be at least 3 characters long";
+        "*Username is required Min 3 Letter";
     }
 
     if (
@@ -301,44 +301,44 @@ console.log("handleInputChange",handleInputChange)
       (!newMember.password || newMember.password.length < 6)
     ) {
       errors.password =
-        "Password is required and must be at least 6 characters long";
+        "* Password is required";
     }
 
     if (newMember.password !== newMember.password_confirmation) {
-      errors.password_confirmation = "Passwords do not match";
+      errors.password_confirmation = "* Passwords do not match";
     }
 
     if (!newMember.first_name) {
-      errors.first_name = "First name is required";
+      errors.first_name = "*First name is required";
     }
 
     if (!newMember.last_name) {
-      errors.last_name = "Last name is required";
+      errors.last_name = "*Last name is required";
     }
 
     const dob = new Date(newMember.dob);
     if (!newMember.dob || isNaN(dob.getTime()) || dob >= new Date()) {
-      errors.dob = "Date of Birth is required and must be in the past";
+      errors.dob = "* Date of Birth is required";
     }
 
     if (!newMember.address_1) {
-      errors.address_1 = "Address 1 is required";
+      errors.address_1 = "*Address 1 is required";
     }
 
     if (!/^\d{6}$/.test(newMember.pincode)) {
-      errors.pincode = "Pincode must be exactly 6 digits";
+      errors.pincode = "*Pincode must be exactly 6 digits";
     }
 
     if (!/^\d{10}$/.test(newMember.contact)) {
-      errors.contact = "Contact number must be exactly 10 digits";
+      errors.contact = "*Number must be 10 digits";
     }
 
-    if (!/^[^\s@]+@gmail\.com$/.test(newMember.email)) {
-      errors.email = "Email must be a valid @gmail.com address";
+    if (!/^[^\s@]+@\.com$/.test(newMember.email)) {
+      errors.email = "*Email must be required";
     }
 
     if (!newMember.city_id) {
-      errors.city_id = "City is required";
+      errors.city_id = "*City is required";
     }
 
     return errors;
@@ -404,6 +404,7 @@ console.log("handleInputChange",handleInputChange)
       is_active: "P",
       password_confirmation: "",
     });
+    validateForm("")
   };
 
   // Handle Add Member (reset form and open modal)
@@ -411,6 +412,7 @@ console.log("handleInputChange",handleInputChange)
     resetForm(); 
     setEditingMember(null); 
     setModalIsOpen(true); 
+    validateForm(null);
   };
 
 

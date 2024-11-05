@@ -343,8 +343,8 @@ const Payments = () => {
         const statusMap = {
           A: { label: "Accepted", color: "green" },
           P: { label: "Pending", color: "orange" },
-          R: { label: "Rejected", color: "red" },
-          E: { label: "Expired", color: "gray" },
+          R: { label: "Rejected", color: "gray" },
+          E: { label: "Expired", color: "red" },
         };
 
         const status = statusMap[row.original.Status] || {

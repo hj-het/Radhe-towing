@@ -49,6 +49,11 @@ const SidebarComponent = () => {
             <FaMoneyBillAlt className="sidebar-icon" /> Payments
           </Link>
         </li>
+        <li>
+              <Link to="/service" className="sidebar-link">
+                <FaWrench className="sidebar-icon" /> Services
+              </Link>
+            </li>
 
         {/* Show the following links only for admins */}
         {role === "admin" && (
@@ -63,11 +68,11 @@ const SidebarComponent = () => {
                 <FaRegCreditCard className="sidebar-icon" /> Plans
               </Link>
             </li>
-            <li>
+            {/* <li>
               <Link to="/service" className="sidebar-link">
                 <FaWrench className="sidebar-icon" /> Services
               </Link>
-            </li>
+            </li> */}
           </>
         )}
       </ul>

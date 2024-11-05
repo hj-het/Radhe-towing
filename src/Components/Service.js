@@ -7,7 +7,7 @@ import {
   FaUser,
   FaCar,
   // FaFileAlt,
-  FaCalendarAlt,
+  // FaCalendarAlt,
   FaLocationArrow,
   FaCommentAlt,
   FaExclamationCircle,
@@ -31,10 +31,22 @@ const statusOptions = [
   { label: "Complete", value: "C" },
 ];
 
+const getCurrentDateTime = () => {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, "0");
+  const day = String(now.getDate()).padStart(2, "0");
+  const hours = String(now.getHours()).padStart(2, "0");
+  const minutes = String(now.getMinutes()).padStart(2, "0");
+  const seconds = String(now.getSeconds()).padStart(2, "0");
+
+  return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+};
+
 const Services = () => {
   const [services, setServices] = useState([]);
   const [members, setMembers] = useState([]);
-  const [vehicles, setVehicles] = useState([]); // State to store vehicles related to a member
+  const [vehicles, setVehicles] = useState([]);
   const [filteredServices, setFilteredServices] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedStatuses, setSelectedStatuses] = useState([]);
@@ -46,30 +58,21 @@ const Services = () => {
   const [newService, setNewService] = useState({
     member_id: "",
     vehicle_id: "",
-    datetime: "",
+    datetime: getCurrentDateTime(),
     comments: "",
     location: "",
     status: "P",
+    chargble: false,
   });
   const [modalIsOpen, setModalIsOpen] = useState(false);
   const [selectedMember, setSelectedMember] = useState(null);
-
-  const getCurrentDateTime = () => {
-    const now = new Date();
-    const day = String(now.getDate()).padStart(2, "0");
-    const month = String(now.getMonth() + 1).padStart(2, "0");
-    const year = now.getFullYear();
-
-    let hours = now.getHours();
-    const minutes = String(now.getMinutes()).padStart(2, "0");
-    const ampm = hours >= 12 ? "PM" : "AM";
-
-    // Convert to 12-hour format
-    hours = hours % 12 || 12;
-    hours = String(hours).padStart(2, "0");
-
-    return `${day}-${month}-${year} ${hours}:${minutes} ${ampm}`;
-  };
+  const [memberDetails, setMemberDetails] = useState(null);
+  const [completedCountModalIsOpen, setCompletedCountModalIsOpen] =
+    useState(false); // Modal for showing response data
+  const [completedCountData, setCompletedCountData] = useState(null);
+  const [paymentData, setPaymentData] = useState(null);
+  const [completedCount, setCompletedCount] = useState(null); // State for completed count
+  const [numOfTowing, setNumOfTowing] = useState(null);
 
   // console.log(getCurrentDateTime()); // Output: 'dd-mm-yyyy hh:mm AM/PM'
 
@@ -102,12 +105,78 @@ const Services = () => {
     fetchMembers();
   }, []);
 
-  const handleMemberChange = (e) => {
+  const handleMemberChange = async (e) => {
     const memberId = e.target.value;
-    console.log("memberId", memberId);
     setNewService({ ...newService, member_id: memberId, vehicle_id: "" });
     setSelectedMember(memberId);
-    if (memberId) fetchVehiclesForMember(memberId);
+    setMemberDetails(null);
+    setCompletedCount(null); 
+    setNumOfTowing(null);
+
+    if (memberId) {
+      fetchVehiclesForMember(memberId);
+      fetchMemberDetails(memberId);
+    }
+  };
+  const handleVehicleChange = async (e) => {
+    const vehicleId = e.target.value;
+    setNewService({ ...newService, vehicle_id: vehicleId });
+
+    if (newService.member_id && vehicleId) {
+      try {
+        // Fetch completed count
+        const completedCountResponse = await axios.get(
+          `https://panel.radhetowing.com/api/towing-service-requests/completed-count/${newService.member_id}/${vehicleId}`
+        );
+        setCompletedCount(completedCountResponse.data.completed_count);
+
+        // Fetch payment data for the member
+        const paymentResponse = await axios.get(
+          `https://panel.radhetowing.com/api/payment-master/member/${newService.member_id}`
+        );
+
+        // Ensure paymentResponse.data is an array
+        const payments = Array.isArray(paymentResponse.data)
+          ? paymentResponse.data
+          : paymentResponse.data.data;
+
+        // Convert vehicleId to the same type as PM_V_id for comparison (both to strings here)
+        const matchedPayment = payments.find(
+          (payment) => String(payment.PM_V_id) === String(vehicleId)
+        );
+        console.log("matchedPayment", matchedPayment);
+        if (matchedPayment) {
+          setNumOfTowing(matchedPayment.PM_num_of_towing);
+        } else {
+          console.warn(
+            "No matching payment data found for the selected vehicle."
+          );
+          setNumOfTowing(null);
+        }
+      } catch (error) {
+        console.error("Error fetching data:", error);
+        toast.error("Failed to fetch data.");
+      }
+    }
+  };
+
+  // Fetch member details
+  const fetchMemberDetails = async (memberId) => {
+    try {
+      const response = await axios.get(
+        `https://panel.radhetowing.com/api/members/${memberId}`
+      );
+
+      // Combine first_name and last_name for full name
+      const fullName = `${response.data.first_name} ${response.data.last_name}`;
+      setMemberDetails({
+        full_name: fullName,
+        contact: response.data.contact,
+      });
+    } catch (error) {
+      console.error("Error fetching member details:", error);
+      toast.error("Failed to fetch member details. Please try again.");
+    }
   };
 
   // Fetch vehicles when a member is selected
@@ -152,19 +221,45 @@ const Services = () => {
   };
 
   // Add a new service
+  // Add a new service
   const handleAddService = async () => {
     try {
+      // Log the newService data to ensure it contains all required fields
+      console.log("Adding new service with data:", newService);
+
       const response = await axios.post(
         "https://panel.radhetowing.com/api/towing-service-requests",
         newService
       );
+
+      console.log("Server Response:", response); // Log the server's response
+
       // Add the new service to the services list
       setServices([...services, response.data]);
       setFilteredServices([...services, response.data]);
       toast.success("Service added successfully");
     } catch (error) {
-      console.error("Error adding service:", error);
-      toast.error("Error adding service");
+      // Enhanced error handling with detailed logs
+      if (error.response) {
+        // Server responded with a status other than 200 range
+        console.error("Server Error:", error.response.data);
+        console.error("Status:", error.response.status);
+        console.error("Headers:", error.response.headers);
+
+        toast.error(
+          `Server Error: ${
+            error.response.data.message || "Failed to add service"
+          }`
+        );
+      } else if (error.request) {
+        // No response received from server
+        console.error("Network Error - No response received:", error.request);
+        toast.error("Network Error: No response received from the server");
+      } else {
+        // Other errors during request setup
+        console.error("Error:", error.message);
+        toast.error(`Error: ${error.message}`);
+      }
     }
   };
 
@@ -213,6 +308,9 @@ const Services = () => {
 
     setModalIsOpen(false);
     resetForm();
+    setMemberDetails(null);
+    setCompletedCount(null); 
+    setNumOfTowing(null);
   };
 
   // Reset form to initial state
@@ -224,16 +322,22 @@ const Services = () => {
       comments: "",
       location: "",
       status: "P",
-      chargble: "false",
+      chargble: false,
     });
     setEditingService(null);
     setVehicles([]);
+    setMemberDetails(null);
+    setCompletedCount(null); 
+    setNumOfTowing(null);
   };
 
   // Handle opening modal for adding a new service
   const handleOpenAddModal = () => {
     resetForm();
     setModalIsOpen(true);
+    setMemberDetails(null);
+    setCompletedCount(null); 
+    setNumOfTowing(null);
   };
 
   // Delete service
@@ -284,6 +388,42 @@ const Services = () => {
     setSearchQuery(e.target.value.toLowerCase());
   };
 
+  // Function to fetch completed count data based on member_id and vehicle_id
+  const handleCompletedCount = async (memberId, vehicleId) => {
+    if (!memberId || !vehicleId) {
+      console.warn("Member ID or Vehicle ID is missing.");
+      return;
+    }
+    try {
+      const completedCountResponse = await axios.get(
+        `https://panel.radhetowing.com/api/towing-service-requests/completed-count/${memberId}/${vehicleId}`
+      );
+      setCompletedCountData(completedCountResponse.data);
+
+      const paymentResponse = await axios.get(
+        `https://panel.radhetowing.com/api/payment-master/member/${memberId}`
+      );
+
+      // Filter payment data to find the record matching the selected vehicle ID
+      const matchedPaymentData = paymentResponse.data.find(
+        (payment) => payment.PM_V_id === vehicleId
+      );
+
+      if (matchedPaymentData) {
+        setPaymentData(matchedPaymentData);
+      } else {
+        console.warn(
+          "No matching payment data found for the selected vehicle."
+        );
+        setPaymentData(null);
+      }
+
+      setCompletedCountModalIsOpen(true);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
+  };
+
   // Table columns
   const columns = [
     {
@@ -308,7 +448,7 @@ const Services = () => {
       accessor: "status",
       Cell: ({ row }) => {
         const statusMap = {
-          R: "Request",
+          // R: "Request",
           A: "Accept",
           D: "Decline",
           P: "Processing",
@@ -346,7 +486,7 @@ const Services = () => {
           <FaPlus /> Add Service
         </button>
       </div>
-      
+
       <div className="top-search">
         {/* Search Input */}
         <div className="search-bar">
@@ -362,7 +502,7 @@ const Services = () => {
         </div>
 
         {/* Status Multi-Select Filter */}
-        <div className="status-filter">
+        <div className="status-filter" style={{ width: "250px" }}>
           <Autocomplete
             multiple
             options={statusOptions}
@@ -413,14 +553,25 @@ const Services = () => {
             )}
           </div>
 
+          {/* Display Member Details */}
+
+          {memberDetails && (
+            <div className="member-details">
+              <p>
+                <strong>Full Name:</strong> {memberDetails.full_name}
+              </p>
+              <p>
+                <strong>Contact:</strong> {memberDetails.contact}
+              </p>
+            </div>
+          )}
+
           {/* Vehicle Dropdown */}
           <div className="input-error">
             <FaCar className="icon" />
             <select
               value={newService.vehicle_id}
-              onChange={(e) =>
-                setNewService({ ...newService, vehicle_id: e.target.value })
-              }
+              onChange={handleVehicleChange} // Handle vehicle change
               disabled={!selectedMember}
             >
               <option value="">Select Vehicle</option>
@@ -435,10 +586,22 @@ const Services = () => {
             )}
           </div>
 
+          {/* Display Completed Count and Number of Towing if Available */}
+          <div className="form-count-towing">
+            {completedCount !== null && numOfTowing !== null && (
+              <div className="towing-info">
+                <p>
+                  <strong>Used Towing Service:</strong> {completedCount} /{" "}
+                  {numOfTowing}
+                </p>
+              </div>
+            )}
+          </div>
+
           {/* Date and Location */}
           {/* <div className="date-location"> */}
           {/* Date */}
-          <div className="input-error">
+          {/*<div className="input-error">
             <FaCalendarAlt className="icon" />
             <input
               type="date-time"
@@ -450,7 +613,7 @@ const Services = () => {
             {errors.datetime && (
               <span className="error-text">{errors.datetime}</span>
             )}
-          </div>
+          </div>*/}
 
           {/* Location */}
           <div className="input-error-location">
@@ -477,7 +640,7 @@ const Services = () => {
                 setNewService({ ...newService, status: e.target.value })
               }
             >
-              <option value="R">Request</option>
+              {/* <option value="R">Request</option> */}
               <option value="A">Accept</option>
               <option value="D">Decline</option>
               <option value="P">Processing</option>
@@ -508,6 +671,57 @@ const Services = () => {
               Close
             </button>
           </div>
+        </div>
+      </Modal>
+
+      {/* Modal for completed count data */}
+      {/* Modal for completed count and towing details */}
+      <Modal
+        isOpen={completedCountModalIsOpen}
+        onRequestClose={() => setCompletedCountModalIsOpen(false)}
+        contentLabel="Completed Service Count"
+        className="modal"
+        overlayClassName="modal-overlay"
+        shouldCloseOnOverlayClick={false}
+      >
+        <h2>Number of Towing Services</h2>
+        {completedCountData && paymentData ? (
+          <div className="completedCountData">
+            {/* <p>
+              <strong>Completed Count:</strong>{" "}
+              {completedCountData.completed_count}
+            </p>
+            <p>
+              <strong>Total Towing Allowed:</strong>{" "}
+              {paymentData.PM_num_of_towing}
+            </p> */}
+
+            <p>
+              Used Towing Service:{" "}
+              <strong>
+                {completedCountData.completed_count}/{" "}
+                {paymentData.PM_num_of_towing}
+              </strong>
+            </p>
+            <p>
+              Remaining Towing:
+              <strong>
+                {" "}
+                {paymentData.PM_num_of_towing -
+                  completedCountData.completed_count}
+              </strong>{" "}
+            </p>
+          </div>
+        ) : (
+          <p>Loading...</p>
+        )}
+        <div className="close-completedCountData">
+          <button
+            onClick={() => setCompletedCountModalIsOpen(false)}
+            className="btn-closemodel-service"
+          >
+            Close
+          </button>
         </div>
       </Modal>
 
@@ -559,11 +773,15 @@ const Services = () => {
             status: service.status,
             chargble: false,
           });
+          setMemberDetails(null);
           setSelectedMember(service.member.id);
           await fetchVehiclesForMember(service.member.id);
-
+          setCompletedCount(null); 
+          setNumOfTowing(null);
           setModalIsOpen(true);
         }}
+        isServiceTable={true}
+        handleCompletedCount={handleCompletedCount}
       />
 
       <ToastContainer />
