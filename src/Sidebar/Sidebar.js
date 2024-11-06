@@ -6,9 +6,10 @@ import {
   FaRegCreditCard,
   FaMoneyBillAlt,
   FaWrench,
+  FaUserTie 
 } from "react-icons/fa";
-import { MdCardMembership } from "react-icons/md";
-import { AiOutlineTeam } from "react-icons/ai";
+// import { MdCardMembership } from "react-icons/md";
+import {  AiOutlineDashboard } from "react-icons/ai";
 import { AuthContext } from "../Context/AuthContext"; 
 import "./../Sidebar/sidebar.css";
 
@@ -31,12 +32,12 @@ const SidebarComponent = () => {
         {/* Always show Dashboard, Members, Vehicles, Payments for employees and admin */}
         <li>
           <Link to="/dashboard" className="sidebar-link">
-            <FaUsers className="sidebar-icon" /> Dashboard
+            <AiOutlineDashboard className="sidebar-icon" /> Dashboard
           </Link>
         </li>
         <li>
           <Link to="/member" className="sidebar-link">
-            <MdCardMembership className="sidebar-icon" /> Members
+            <FaUsers className="sidebar-icon" /> Members
           </Link>
         </li>
         <li>
@@ -60,7 +61,7 @@ const SidebarComponent = () => {
           <>
             <li>
               <Link to="/employees" className="sidebar-link">
-                <AiOutlineTeam className="sidebar-icon" /> Employees
+                <FaUserTie className="sidebar-icon" /> Employees
               </Link>
             </li>
             <li>

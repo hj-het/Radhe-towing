@@ -46,7 +46,7 @@
   }
   
   .AddButton button {
-    padding: 10px 20px;
+    padding: 10px 15px;
     background-color: #007bff;
     color: white;
     border: none;
@@ -54,6 +54,9 @@
     border-radius: 5px;
     font-size: 12px;
     margin-right: 10px;
+    display: flex;
+    text-align: center;
+    gap: 6px;
   }
   
   button:hover {
@@ -77,15 +80,19 @@
   
  .modelbutton .btn-closemodel {
     background-color: #dc3545;
-    padding: 10px 20px;
+    padding: 10px 10px;
     /* background-color: #007bff; */
     color: white;
     border: none;
     cursor: pointer;
     border-radius: 5px;
-    font-size: 12px;
+    font-size: 13px;
     margin-right: 10px;
-
+    display: flex;
+    /* text-align: center; */
+    justify-content: center;
+    align-items: center;
+    gap: 5px;
   }
   
   .btn-closemodel:hover {

@@ -11,6 +11,7 @@ import {
   FaLocationArrow,
   FaCommentAlt,
   FaExclamationCircle,
+  FaWrench
   // FaClipboardCheck,
 } from "react-icons/fa";
 import TableOne from "../Table/TableOne";
@@ -478,7 +479,7 @@ const Services = () => {
 
   return (
     <div className="services-page">
-      <h1>Services</h1>
+      <h1 style={{display:"flex",textAlign:'center',gap:'6px'}}> <FaWrench/> Services</h1>
 
       {/* Add Service Button */}
       <div className="AddButton">
@@ -531,7 +532,7 @@ const Services = () => {
         overlayClassName="modal-overlay"
         shouldCloseOnOverlayClick={false}
       >
-        <h2>{editingService ? "Edit Service" : "Add New Service"}</h2>
+        <h2>{editingService ? "Edit Service" : "Add Service"}</h2>
 
         <div className="form-service">
           {/* Member Dropdown */}
@@ -662,7 +663,7 @@ const Services = () => {
 
           <div className="modelbutton">
             <button onClick={handleSave} className="btn-editmodel">
-              {editingService ? "Update Service" : "Add Service"}
+              {editingService ? "Edit Service" : "Add Service"}
             </button>
             <button
               className="btn-closemodel"

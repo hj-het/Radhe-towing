@@ -10,6 +10,7 @@ import {
   Autocomplete,
   Switch,
   // FormControlLabel,
+
 } from "@mui/material";
 
 import {
@@ -22,6 +23,7 @@ import {
   FaCalendarCheck,
   FaSearch,
   FaPlus,
+  FaRegCreditCard
 } from "react-icons/fa";
 import { MdOutlineCurrencyRupee } from "react-icons/md";
 import { toast } from "react-toastify";
@@ -339,7 +341,7 @@ const Plan = () => {
 
   return (
     <div className="plans-page">
-      <h1>Plans</h1>
+      <h1 style={{display:"flex",textAlign:'center',gap:'6px'}}> <FaRegCreditCard/> Plans</h1>
 
       {/* Add Plan Button */}
       <div className="AddButton">
@@ -369,7 +371,7 @@ const Plan = () => {
         overlayClassName="modal-overlay"
         shouldCloseOnOverlayClick={false}
       >
-        <h2>{editingPlan ? "Edit Plan" : "Add New Plan"}</h2>
+        <h2>{editingPlan ? "Edit Plan" : "Add Plan"}</h2>
 
         <div className="form-plan">
           <div className="input-with-icon">
@@ -560,7 +562,7 @@ const Plan = () => {
 
           <div className="modelbutton">
             <button onClick={handleSave} className="btn-editmodel">
-              {editingPlan ? "Update Plan" : "Add Plan"}
+              {editingPlan ? "Edit Plan" : "Add Plan"}
             </button>
             <button
               className="btn-closemodel"

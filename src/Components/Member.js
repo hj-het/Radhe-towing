@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import Modal from "react-modal";
 import TableOne from "../Table/TableOne";
-import { FaPlus } from "react-icons/fa";
 import "./../Table/table.css";
 import "./../Style/allcomponent.css";
 // import styled from "styled-components";
@@ -20,9 +19,12 @@ import {
   FaMapPin,
   FaSearch,
   FaCheckCircle,
-  FaTimesCircle
+  FaTimesCircle,
+  FaUsers,
+  FaUserPlus 
+  
 } from "react-icons/fa";
-
+import { MdCancel } from "react-icons/md";
 
 
 Modal.setAppElement("#root");
@@ -252,10 +254,10 @@ console.log("handleInputChange",handleInputChange)
     { Header: "First Name", accessor: "first_name" }, 
     { Header: "Last Name", accessor: "last_name" },
     { Header: "Date of Birth", accessor: (row) => formatDate(row.dob) },
-    { Header: "Address 1", accessor: "address_1" }, 
-    { Header: "Address 2", accessor: "address_2" }, 
+    { Header: "Address ", accessor: "address_1" }, 
+    // { Header: "Address 2", accessor: "address_2" }, 
     { Header: "Pincode", accessor: "pincode" },
-    { Header: "Phone", accessor: "contact" },
+    { Header: "Phone", accessor: "phone" },
     { Header: "Email", accessor: "email" },
     { Header: "City", accessor: "city" },
     {
@@ -583,10 +585,10 @@ console.log("handleInputChange",handleInputChange)
 
   return (
     <div className="mainhead">
-      <h1>Members </h1>
+      <h1 style={{display:"flex",textAlign:'center',gap:'6px'}}>  <FaUsers/> Members</h1>
       <div className="AddButton">
         <button className="btn-add" onClick={handleAddMember}>
-          <FaPlus /> Add Member
+          <FaUserPlus  /> Add Member
         </button>
       </div>
 
@@ -620,7 +622,7 @@ console.log("handleInputChange",handleInputChange)
         overlayClassName="modal-overlay"
         shouldCloseOnOverlayClick={false}
       >
-        <h2>{editingMember ? "Edit Member" : "Add New Member"}</h2>
+        <h2>{editingMember ? "Edit Member" : "Add Member"}</h2>
 
         <div className="form-member">
           {/* Username Input with Icon */}
@@ -910,14 +912,14 @@ console.log("handleInputChange",handleInputChange)
 
           <div className="modelbutton">
             <button onClick={handleSave} className="btn-editmodel">
-              {editingMember ? "Update Member" : "Add Member"}
+              {editingMember ?  "Edit Member" : "Add Member"}
             </button>
 
             <button
               className="btn-closemodel"
               onClick={() => setModalIsOpen(false)}
-            >
-              Close
+            > <MdCancel/>
+              Cancel
             </button>
           </div>
         </div>

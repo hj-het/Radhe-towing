@@ -5,7 +5,7 @@ import { FaPlus, FaSearch } from "react-icons/fa";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "./../Style/payment.css";
-import { FaUser, FaCar, FaFileAlt, FaRupeeSign, FaImage } from "react-icons/fa";
+import { FaUser, FaCar, FaFileAlt, FaRupeeSign, FaImage,FaMoneyBillAlt } from "react-icons/fa";
 import { MdOutlinePendingActions } from "react-icons/md";
 import TableOne from "../Table/TableOne";
 
@@ -363,7 +363,7 @@ const Payments = () => {
 
   return (
     <div className="payments-page">
-      <h1>Payments</h1>
+      <h1 style={{display:"flex",textAlign:'center',gap:'6px'}}> <FaMoneyBillAlt/> Payments</h1>
 
       {/* Add Payment Button */}
       <div className="AddButton">
@@ -394,7 +394,7 @@ const Payments = () => {
         overlayClassName="modal-overlay"
         shouldCloseOnOverlayClick={false}
       >
-        <h2>{editingPayment ? "Edit Payment" : "Add New Payment"}</h2>
+        <h2>{editingPayment ? "Edit Payment" : "Add Payment"}</h2>
 
         <div className="form-payment">
           {/* Show member's username and vehicle number in h4 when editing */}
@@ -555,7 +555,7 @@ const Payments = () => {
 
           <div className="modelbutton">
             <button onClick={handleSavePayment} className="btn-editmodel">
-              {editingPayment ? "Update Payment" : "Add Payment"}
+              {editingPayment ? "Edit Payment" : "Add Payment"}
             </button>
             <button
               className="btn-closemodel"

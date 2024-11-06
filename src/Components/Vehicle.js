@@ -11,6 +11,7 @@ import {
   FaUserEdit,
   FaAddressCard,
   FaSearch,
+  
 } from "react-icons/fa";
 import TableOne from "../Table/TableOne";
 import "./../Style/vehicle.css";
@@ -223,7 +224,7 @@ const Vehicles = () => {
 
   return (
     <div className="vehicles-page">
-      <h1>Vehicles</h1>
+      <h1 style={{display:"flex",textAlign:'center',gap:'6px'}}> <FaCar/> Vehicles</h1>
 
       <div className="AddButton">
         <button onClick={handleOpenAddModal} className="add-btn">
@@ -252,7 +253,7 @@ const Vehicles = () => {
         overlayClassName="modal-overlay"
         shouldCloseOnOverlayClick={false}
       >
-        <h2>{editingVehicle ? "Edit Vehicle" : "Add New Vehicle"}</h2>
+        <h2>{editingVehicle ? "Edit Vehicle" : "Add Vehicle"}</h2>
         <div className="form-vehicle">
           {/* Member Dropdown */}
           <div className="input-error-veh">
@@ -409,7 +410,7 @@ const Vehicles = () => {
 
           <div className="modelbutton">
             <button onClick={handleSave} className="btn-editmodel">
-              {editingVehicle ? "Update Vehicle" : "Add Vehicle"}
+              {editingVehicle ? "Edit Vehicle" : "Add Vehicle"}
             </button>
             <button
               className="btn-closemodel"

@@ -17,6 +17,7 @@ import {
   FaEye,
   FaEyeSlash,
   FaSearch,
+  FaUserTie
 } from "react-icons/fa";
 
 Modal.setAppElement("#root");
@@ -414,7 +415,7 @@ const confirmStatusChange = async () => {
 
   return (
     <div className="employees-page">
-      <h1>Employees </h1>
+      <h1 style={{display:"flex",textAlign:'center',gap:'6px'}}>  <FaUserTie/> Employees </h1>
 
       {/* Add Employee Button */}
       <div className="AddButton">
@@ -445,7 +446,7 @@ const confirmStatusChange = async () => {
         overlayClassName="modal-overlay"
         shouldCloseOnOverlayClick={false}
       >
-        <h2>{editingEmployee ? "Edit Employee" : "Add New Employee"}</h2>
+        <h2>{editingEmployee ? "Edit Employee" : "Add Employee"}</h2>
 
         <div className="form">
           {/* Username Input with Icon */}
@@ -641,7 +642,7 @@ const confirmStatusChange = async () => {
 
           <div className="modelbutton">
             <button onClick={handleSave} className="btn-editmodel">
-              {editingEmployee ? "Update Employee" : "Add Employee"}
+              {editingEmployee ? "Edit Employee" : "Add Employee"}
             </button>
 
             <button

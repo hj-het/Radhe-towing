@@ -1,6 +1,8 @@
 import React from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
 import "./dashboard.css";
+import {  AiOutlineDashboard } from "react-icons/ai";
+
 
 const data = [
   { name: '1', uv: 2000, pv: 1000 },
@@ -15,7 +17,7 @@ const data = [
 const Dashboard = () => {
   return (
     <div className="dashboard-container">
-      <h1>Dashboard</h1>
+      <h1 style={{display:"flex",textAlign:'center',gap:'6px'}}><AiOutlineDashboard/> Dashboard</h1>
       <div className="dashboard-content">
         {/* Sales Ratio Line Chart */}
         <div className="chart-container">
