@@ -479,7 +479,7 @@ const Services = () => {
 
   return (
     <div className="services-page">
-      <h1 style={{display:"flex",textAlign:'center',gap:'6px'}}> <FaWrench/> Services</h1>
+      <h1 style={{display:"flex",textAlign:'center',gap:'6px',alignItems:"center",fontSize:"25px"}}> <FaWrench/> Services</h1>
 
       {/* Add Service Button */}
       <div className="AddButton">

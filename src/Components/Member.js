@@ -21,12 +21,10 @@ import {
   FaCheckCircle,
   FaTimesCircle,
   FaUsers,
-  FaUserPlus 
-  
+ 
 } from "react-icons/fa";
 import { MdCancel } from "react-icons/md";
-
-
+import { FaUserEdit, FaUserPlus } from "react-icons/fa";
 Modal.setAppElement("#root");
 
 const Member = () => {
@@ -37,7 +35,7 @@ const Member = () => {
   const [filteredMembers, setFilteredMembers] = useState([]);
   const [cities, setCities] = useState([]);
   const [activeDropdown, setActiveDropdown] = useState(null);
-  const [deleteMemberId, setDeleteMemberId] = useState(null); 
+  const [deleteMemberId, setDeleteMemberId] = useState(null);
   const [deleteMemberName, setDeleteMemberName] = useState("");
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [errors, setErrors] = useState({});
@@ -48,7 +46,7 @@ const Member = () => {
     memberName: null,
     newStatus: null,
   });
-  const [showConfirmModal, setShowConfirmModal] = useState(false); 
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [newMember, setNewMember] = useState({
     username: "",
     password: "",
@@ -83,7 +81,9 @@ const Member = () => {
         const mappedMembers = membersResponse.data.map((member) => {
           const city = cities.find((city) => city.id === member.city_id);
 
-          const usernames = membersResponse.data.map((member) => member.username);
+          const usernames = membersResponse.data.map(
+            (member) => member.username
+          );
           setAllUsernames(usernames);
           return {
             id: member.id,
@@ -104,7 +104,6 @@ const Member = () => {
 
         setMembers(mappedMembers);
         setFilteredMembers(mappedMembers);
-      
       } catch (error) {
         console.error("Error fetching members:", error);
       }
@@ -112,7 +111,6 @@ const Member = () => {
 
     fetchMembers();
   }, []);
-
 
   // Validate username uniqueness
   useEffect(() => {
@@ -130,7 +128,7 @@ const Member = () => {
       [field]: value,
     }));
   };
-console.log("handleInputChange",handleInputChange)
+  console.log("handleInputChange", handleInputChange);
 
   // Handle status change
   const handleStatusChange = async () => {
@@ -238,24 +236,24 @@ console.log("handleInputChange",handleInputChange)
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
-    const day = String(date.getDate()).padStart(2, "0"); 
-    const month = String(date.getMonth() + 1).padStart(2, "0"); 
-    const year = date.getFullYear(); 
+    const day = String(date.getDate()).padStart(2, "0");
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const year = date.getFullYear();
     return `${day}-${month}-${year}`; //  'DD-MM-YYYY' format
   };
 
   const columns = [
     {
-      Header: "ID",
+      Header: "Sr No.",
       accessor: (row, index) => index + 1,
-      id: "index", 
+      id: "index",
     },
     { Header: "Username", accessor: "username" },
-    { Header: "First Name", accessor: "first_name" }, 
+    { Header: "First Name", accessor: "first_name" },
     { Header: "Last Name", accessor: "last_name" },
     { Header: "Date of Birth", accessor: (row) => formatDate(row.dob) },
-    { Header: "Address ", accessor: "address_1" }, 
-    // { Header: "Address 2", accessor: "address_2" }, 
+    { Header: "Address ", accessor: "address_1" },
+    // { Header: "Address 2", accessor: "address_2" },
     { Header: "Pincode", accessor: "pincode" },
     { Header: "Phone", accessor: "phone" },
     { Header: "Email", accessor: "email" },
@@ -294,16 +292,14 @@ console.log("handleInputChange",handleInputChange)
     const errors = {};
 
     if (!newMember.username || newMember.username.length < 3) {
-      errors.username =
-        "*Username is required Min 3 Letter";
+      errors.username = "*Username is required Min 3 Letter";
     }
 
     if (
       !editingMember &&
       (!newMember.password || newMember.password.length < 6)
     ) {
-      errors.password =
-        "* Password is required";
+      errors.password = "* Password is required";
     }
 
     if (newMember.password !== newMember.password_confirmation) {
@@ -380,7 +376,7 @@ console.log("handleInputChange",handleInputChange)
         const response = await axios.get(
           "https://panel.radhetowing.com/api/cities"
         );
-        setCities(response.data); 
+        setCities(response.data);
       } catch (error) {
         console.error("Error fetching cities:", error);
       }
@@ -398,7 +394,7 @@ console.log("handleInputChange",handleInputChange)
       dob: "",
       address_1: "",
       address_2: "",
-      city_id: "", 
+      city_id: "",
       pincode: "",
       contact: "",
       email: "",
@@ -406,25 +402,23 @@ console.log("handleInputChange",handleInputChange)
       is_active: "P",
       password_confirmation: "",
     });
-    validateForm("")
+    validateForm("");
   };
 
   // Handle Add Member (reset form and open modal)
   const handleAddMember = () => {
-    resetForm(); 
-    setEditingMember(null); 
-    setModalIsOpen(true); 
+    resetForm();
+    setEditingMember(null);
+    setModalIsOpen(true);
     validateForm(null);
   };
-
-
 
   // Handle Edit Member (populate form with member data and open modal)
   const handleEdit = (member) => {
     console.log("Editing Member -->", member);
-    console.log("Member city_id -->", member.city); 
-    const selectedCity = cities.find(city => city.name === member.city);
-    setEditingMember(member); 
+    console.log("Member city_id -->", member.city);
+    const selectedCity = cities.find((city) => city.name === member.city);
+    setEditingMember(member);
     setNewMember({
       username: member.username,
       password: member.password,
@@ -435,7 +429,7 @@ console.log("handleInputChange",handleInputChange)
         : "",
       address_1: member.address_1 || "",
       address_2: member.address_2 || "",
-      city_id: selectedCity ? selectedCity.id : "", 
+      city_id: selectedCity ? selectedCity.id : "",
       pincode: member.pincode || "",
       contact: member.phone || "",
       email: member.email || "",
@@ -450,7 +444,7 @@ console.log("handleInputChange",handleInputChange)
   // Handle Save (for Add and Update)
   const handleSave = async () => {
     const validationErrors = validateForm();
-    setErrors(validationErrors); 
+    setErrors(validationErrors);
 
     // if (Object.keys(validationErrors).length > 0) {
     //   return; // Stop execution if there are validation errors
@@ -502,7 +496,7 @@ console.log("handleInputChange",handleInputChange)
             )
           );
           setModalIsOpen(false);
-          setEditingMember(null); 
+          setEditingMember(null);
         }
       } catch (error) {
         console.error("Error updating member:", error);
@@ -519,7 +513,7 @@ console.log("handleInputChange",handleInputChange)
             dob: newMember.dob,
             address_1: newMember.address_1,
             address_2: newMember.address_2,
-            city_id: newMember.city_id, 
+            city_id: newMember.city_id,
             pincode: newMember.pincode,
             contact: newMember.contact,
             email: newMember.email,
@@ -537,7 +531,7 @@ console.log("handleInputChange",handleInputChange)
           `https://panel.radhetowing.com/api/members/${addedMemberId}`
         );
 
-        const addedMember = addedMemberResponse.data; 
+        const addedMember = addedMemberResponse.data;
 
         const addedCity =
           cities.find((city) => city.id === addedMember.city_id)?.name ||
@@ -548,14 +542,14 @@ console.log("handleInputChange",handleInputChange)
           ...members,
           {
             ...addedMember,
-            city: addedCity, 
+            city: addedCity,
           },
         ]);
         setFilteredMembers([
           ...filteredMembers,
           {
             ...addedMember,
-            city: addedCity, 
+            city: addedCity,
           },
         ]);
         setModalIsOpen(false);
@@ -585,17 +579,20 @@ console.log("handleInputChange",handleInputChange)
 
   return (
     <div className="mainhead">
-      <h1 style={{display:"flex",textAlign:'center',gap:'6px'}}>  <FaUsers/> Members</h1>
+      <h1 style={{ display: "flex", textAlign: "center", gap: "6px",alignItems:"center" ,fontSize:"25px"}}>
+        {" "}
+        <FaUsers /> Members
+      </h1>
       <div className="AddButton">
         <button className="btn-add" onClick={handleAddMember}>
-          <FaUserPlus  /> Add Member
+          <FaUserPlus /> Add Member
         </button>
       </div>
 
       {/* Search Input */}
       <div className="search-bar">
         <div className="search-input-container">
-          <FaSearch className="search-icon" /> 
+          <FaSearch className="search-icon" />
           <input
             type="text"
             placeholder="Search by name or email"
@@ -608,7 +605,7 @@ console.log("handleInputChange",handleInputChange)
       {/* Members Table */}
       <TableOne
         columns={columns}
-        data={filteredMembers.slice().reverse()} 
+        data={filteredMembers.slice().reverse()}
         handleDelete={(member) => triggerDeleteModal(member.id)}
         handleEdit={handleEdit}
       />
@@ -622,7 +619,10 @@ console.log("handleInputChange",handleInputChange)
         overlayClassName="modal-overlay"
         shouldCloseOnOverlayClick={false}
       >
-        <h2>{editingMember ? "Edit Member" : "Add Member"}</h2>
+        <h2>
+          {editingMember ? <FaUserEdit /> : <FaUserPlus />}
+          {editingMember ? " Update Member" : " Add Member"}
+        </h2>
 
         <div className="form-member">
           {/* Username Input with Icon */}
@@ -638,12 +638,12 @@ console.log("handleInputChange",handleInputChange)
                 }
                 disabled={!!editingMember}
               />
-                   {usernameValid === true && (
-            <FaCheckCircle className="validation-icon valid" />
-          )}
-          {usernameValid === false && (
-            <FaTimesCircle className="validation-icon invalid" />
-          )}
+              {usernameValid === true && (
+                <FaCheckCircle className="validation-icon valid" />
+              )}
+              {usernameValid === false && (
+                <FaTimesCircle className="validation-icon invalid" />
+              )}
             </div>
             <div className="error">
               {errors.username && (
@@ -783,7 +783,6 @@ console.log("handleInputChange",handleInputChange)
               </div>
             </div>
 
-            
             {/* Phone Input with Icon */}
             <div className="input-error">
               <div className="input-with-iconm">
@@ -912,13 +911,16 @@ console.log("handleInputChange",handleInputChange)
 
           <div className="modelbutton">
             <button onClick={handleSave} className="btn-editmodel">
-              {editingMember ?  "Edit Member" : "Add Member"}
+            {editingMember ? <FaUserEdit /> : <FaUserPlus />} 
+              {editingMember ? "Update Member" : "Add Member"}
             </button>
 
             <button
               className="btn-closemodel"
               onClick={() => setModalIsOpen(false)}
-            > <MdCancel/>
+            >
+              {" "}
+              <MdCancel />
               Cancel
             </button>
           </div>

@@ -415,7 +415,7 @@ const confirmStatusChange = async () => {
 
   return (
     <div className="employees-page">
-      <h1 style={{display:"flex",textAlign:'center',gap:'6px'}}>  <FaUserTie/> Employees </h1>
+      <h1 style={{display:"flex",textAlign:'center',gap:'6px',alignItems:"center",fontSize:"25px"}}>  <FaUserTie/> Employees </h1>
 
       {/* Add Employee Button */}
       <div className="AddButton">

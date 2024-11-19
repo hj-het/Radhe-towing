@@ -363,7 +363,7 @@ const Payments = () => {
 
   return (
     <div className="payments-page">
-      <h1 style={{display:"flex",textAlign:'center',gap:'6px'}}> <FaMoneyBillAlt/> Payments</h1>
+      <h1 style={{display:"flex",textAlign:'center',gap:'6px',alignItems:"center",fontSize:"25px"}}> <FaMoneyBillAlt/> Payments</h1>
 
       {/* Add Payment Button */}
       <div className="AddButton">

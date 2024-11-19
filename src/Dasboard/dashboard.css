@@ -13,7 +13,7 @@
   }
   
   .chart-container {
-    width: 65%;
+    width: 98%;
     background-color: white;
     padding: 20px;
     border-radius: 8px;
@@ -32,6 +32,7 @@
     padding: 20px;
     border-radius: 8px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    width: 30%;
   }
   
   .info-card h3 {
@@ -50,4 +51,42 @@
     margin-left: 10px;
   }
   
-  
+  .barchart-container{
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+  .graph-pichart{
+    /* display: flex;
+    justify-content: center;
+    align-items: center; */
+    margin-top: 30px;
+  }
+  .vehicle-card{
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+  .service-card{
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+
+  .barchart-box{
+    display: flex;
+   justify-content: space-around;
+    /* align-items: center;  */
+    flex-direction: row;
+  }
+  .info-more {
+    display: flex;
+    text-align: center;
+    flex-direction: column;
+  }
+  .info-card h2,p{
+    text-align: center;
+  }

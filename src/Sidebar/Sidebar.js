@@ -1,5 +1,5 @@
 import React, { useContext } from "react";
-import { Link } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 import {
   FaUsers,
   FaCar,
@@ -8,9 +8,8 @@ import {
   FaWrench,
   FaUserTie 
 } from "react-icons/fa";
-// import { MdCardMembership } from "react-icons/md";
-import {  AiOutlineDashboard } from "react-icons/ai";
-import { AuthContext } from "../Context/AuthContext"; 
+import { AiOutlineDashboard } from "react-icons/ai";
+import { AuthContext } from "../Context/AuthContext";
 import "./../Sidebar/sidebar.css";
 
 const SidebarComponent = () => {
@@ -19,61 +18,91 @@ const SidebarComponent = () => {
   return (
     <div className="sidebar-container">
       <div className="sidebar-logo">
-        <Link to="/dashboard">
+        <NavLink to="/dashboard">
           <img
             src="/images/radhe _logomain.png"
             alt="Company Logo"
             style={{ width: "201px", height: "55px" }}
           />
-        </Link>
+        </NavLink>
       </div>
 
       <ul className="sidebar-menu">
         {/* Always show Dashboard, Members, Vehicles, Payments for employees and admin */}
         <li>
-          <Link to="/dashboard" className="sidebar-link">
+          <NavLink
+            to="/dashboard"
+            className={({ isActive }) =>
+              `sidebar-link ${isActive ? "active-link" : ""}`
+            }
+          >
             <AiOutlineDashboard className="sidebar-icon" /> Dashboard
-          </Link>
+          </NavLink>
         </li>
         <li>
-          <Link to="/member" className="sidebar-link">
+          <NavLink
+            to="/member"
+            className={({ isActive }) =>
+              `sidebar-link ${isActive ? "active-link" : ""}`
+            }
+          >
             <FaUsers className="sidebar-icon" /> Members
-          </Link>
+          </NavLink>
         </li>
         <li>
-          <Link to="/vehicle" className="sidebar-link">
+          <NavLink
+            to="/vehicle"
+            className={({ isActive }) =>
+              `sidebar-link ${isActive ? "active-link" : ""}`
+            }
+          >
             <FaCar className="sidebar-icon" /> Vehicles
-          </Link>
+          </NavLink>
         </li>
         <li>
-          <Link to="/payment" className="sidebar-link">
+          <NavLink
+            to="/payment"
+            className={({ isActive }) =>
+              `sidebar-link ${isActive ? "active-link" : ""}`
+            }
+          >
             <FaMoneyBillAlt className="sidebar-icon" /> Payments
-          </Link>
+          </NavLink>
         </li>
         <li>
-              <Link to="/service" className="sidebar-link">
-                <FaWrench className="sidebar-icon" /> Services
-              </Link>
-            </li>
+          <NavLink
+            to="/service"
+            className={({ isActive }) =>
+              `sidebar-link ${isActive ? "active-link" : ""}`
+            }
+          >
+            <FaWrench className="sidebar-icon" /> Services
+          </NavLink>
+        </li>
 
         {/* Show the following links only for admins */}
         {role === "admin" && (
           <>
             <li>
-              <Link to="/employees" className="sidebar-link">
+              <NavLink
+                to="/employees"
+                className={({ isActive }) =>
+                  `sidebar-link ${isActive ? "active-link" : ""}`
+                }
+              >
                 <FaUserTie className="sidebar-icon" /> Employees
-              </Link>
+              </NavLink>
             </li>
             <li>
-              <Link to="/plan" className="sidebar-link">
+              <NavLink
+                to="/plan"
+                className={({ isActive }) =>
+                  `sidebar-link ${isActive ? "active-link" : ""}`
+                }
+              >
                 <FaRegCreditCard className="sidebar-icon" /> Plans
-              </Link>
+              </NavLink>
             </li>
-            {/* <li>
-              <Link to="/service" className="sidebar-link">
-                <FaWrench className="sidebar-icon" /> Services
-              </Link>
-            </li> */}
           </>
         )}
       </ul>

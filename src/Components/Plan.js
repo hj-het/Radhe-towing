@@ -341,7 +341,7 @@ const Plan = () => {
 
   return (
     <div className="plans-page">
-      <h1 style={{display:"flex",textAlign:'center',gap:'6px'}}> <FaRegCreditCard/> Plans</h1>
+      <h1 style={{display:"flex",textAlign:'center',gap:'6px',alignItems:"center",fontSize:"25px"}}> <FaRegCreditCard/> Plans</h1>
 
       {/* Add Plan Button */}
       <div className="AddButton">

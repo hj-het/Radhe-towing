@@ -3,8 +3,8 @@ import Dashboard from "./Dasboard/Dashboard";
 import Plan from "./Components/Plan";
 import Payment from "./Components/Payment";
 import Service from "./Components/Service";
-import City from "./Components/City";
-import State from "./Components/State";
+// import City from "./Components/City";
+// import State from "./Components/State";
 // import Country from './Components/Country';
 import Member from "./Components/Member";
 import Employees from "./Components/Employees";
@@ -107,7 +107,7 @@ function App() {
               </ProtectedRoute>
             }
           />
-          <Route
+          {/* <Route
             path="/city"
             element={
               <ProtectedRoute allowedRoles={["admin"]}>
@@ -116,8 +116,8 @@ function App() {
                 </Layout>
               </ProtectedRoute>
             }
-          />
-          <Route
+          /> */}
+          {/* <Route
             path="/state"
             element={
               <ProtectedRoute allowedRoles={["admin"]}>
@@ -126,7 +126,7 @@ function App() {
                 </Layout>
               </ProtectedRoute>
             }
-          />
+          /> */}
           {/* <Route 
                         path="/notfound" 
                         element={

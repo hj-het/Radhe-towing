@@ -224,7 +224,7 @@ const Vehicles = () => {
 
   return (
     <div className="vehicles-page">
-      <h1 style={{display:"flex",textAlign:'center',gap:'6px'}}> <FaCar/> Vehicles</h1>
+      <h1 style={{display:"flex",textAlign:'center',gap:'6px',alignItems:"center",fontSize:"25px"}}> <FaCar/> Vehicles</h1>
 
       <div className="AddButton">
         <button onClick={handleOpenAddModal} className="add-btn">

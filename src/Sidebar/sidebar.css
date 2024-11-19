@@ -51,3 +51,8 @@
   margin-right: 10px;
   font-size: 18px;
 }
+
+.sidebar-link.active-link {
+  background-color: #afc5dc9c;
+  color: #fff;
+}
