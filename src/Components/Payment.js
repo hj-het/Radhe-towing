@@ -345,6 +345,8 @@ const Payments = () => {
           P: { label: "Pending", color: "orange" },
           R: { label: "Rejected", color: "gray" },
           E: { label: "Expired", color: "red" },
+          U: { label: "Used", color: "blue" },
+          
         };
 
         const status = statusMap[row.original.Status] || {
@@ -530,6 +532,7 @@ const Payments = () => {
                 <option value="A">Accepted</option>
                 <option value="R">Rejected</option>
                 <option value="E">Expired</option>
+                <option value="U">Used</option>
               </select>
             </div>
           </div>
