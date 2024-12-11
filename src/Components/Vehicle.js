@@ -30,6 +30,7 @@ const Vehicles = () => {
   const [errors, setErrors] = useState({});
   const [modalIsOpen, setModalIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [loading, setLoading] = useState(true);
   const [newVehicle, setNewVehicle] = useState({
     member_id: "",
     vehicle_number: "",
@@ -44,6 +45,7 @@ const Vehicles = () => {
   // Fetch vehicles and members data from the API
   useEffect(() => {
     const fetchVehicles = async () => {
+      setLoading(true);
       try {
         const response = await axios.get(
           "https://panel.radhetowing.com/api/vehicles"
@@ -52,6 +54,7 @@ const Vehicles = () => {
       } catch (error) {
         console.error("Error fetching vehicle data:", error);
       }
+      setLoading(false);
     };
 
     const fetchMembers = async () => {
@@ -455,6 +458,12 @@ const Vehicles = () => {
       <ToastContainer />
 
       {/* Vehicles Table */}
+      {loading ? (
+        <div className="loader-container">
+          <div className="loader"></div>
+          <p>Loading...</p>
+        </div>
+      ) : (
       <TableOne
         columns={columns}
         data={filteredVehicles.slice().reverse()}
@@ -462,7 +471,7 @@ const Vehicles = () => {
           triggerDeleteModal(vehicle.id, `${vehicle.vehicle_number}`)
         }
         handleEdit={handleEdit}
-      />
+      />)}
     </div>
   );
 };

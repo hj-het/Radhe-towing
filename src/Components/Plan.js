@@ -39,6 +39,7 @@ const Plan = () => {
   const [errors, setErrors] = useState({}); // To track validation errors
   const [modalIsOpen, setModalIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState(""); // State for search query
+  const [loading, setLoading] = useState(true);
   const [newPlan, setNewPlan] = useState({
     name: "",
     duration: "",
@@ -66,6 +67,7 @@ const Plan = () => {
   // Fetch plans data from the API
   useEffect(() => {
     const fetchPlans = async () => {
+      setLoading(true);
       try {
         const response = await axios.get(
           "https://panel.radhetowing.com/api/plans"
@@ -89,6 +91,7 @@ const Plan = () => {
       } catch (error) {
         console.error("Error fetching plan data:", error);
       }
+      setLoading(false);
     };
 
     fetchPlans();
@@ -606,12 +609,18 @@ const Plan = () => {
       )}
 
       {/* Plans Table */}
+      {loading ? (
+        <div className="loader-container">
+          <div className="loader"></div>
+          <p>Loading...</p>
+        </div>
+      ) : (
       <TableOne
         columns={columns}
         data={filteredPlans.slice().reverse()}
         handleDelete={(plan) => triggerDeleteModal(plan.id, `${plan.name}`)}
         handleEdit={handleEdit}
-      />
+      />)}
     </div>
   );
 };

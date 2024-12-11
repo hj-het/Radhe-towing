@@ -32,6 +32,7 @@ const Member = () => {
   const [editingMember, setEditingMember] = useState(null);
   const [showPassword, setShowPassword] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [loading, setLoading] = useState(true);
   const [filteredMembers, setFilteredMembers] = useState([]);
   const [cities, setCities] = useState([]);
   const [activeDropdown, setActiveDropdown] = useState(null);
@@ -69,6 +70,7 @@ const Member = () => {
   // Fetch members and cities from API
   useEffect(() => {
     const fetchMembers = async () => {
+      setLoading(true); // Show loader
       try {
         const citiesResponse = await axios.get(
           "https://panel.radhetowing.com/api/cities"
@@ -106,6 +108,8 @@ const Member = () => {
         setFilteredMembers(mappedMembers);
       } catch (error) {
         console.error("Error fetching members:", error);
+      }finally {
+        setLoading(false); // Hide loader
       }
     };
 
@@ -603,12 +607,20 @@ const Member = () => {
       </div>
 
       {/* Members Table */}
+
+      {loading ? (
+        <div className="loader-container">
+          <div className="loader"></div>
+          <p>Loading...</p>
+        </div>
+      ) : (
+
       <TableOne
         columns={columns}
         data={filteredMembers.slice().reverse()}
         handleDelete={(member) => triggerDeleteModal(member.id)}
         handleEdit={handleEdit}
-      />
+      />)}
 
       {/* Modal for Adding/Editing Member */}
       <Modal

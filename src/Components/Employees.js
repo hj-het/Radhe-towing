@@ -24,6 +24,7 @@ Modal.setAppElement("#root");
 
 const Employees = () => {
   const [employees, setEmployees] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [filteredEmployees, setFilteredEmployees] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [editingEmployee, setEditingEmployee] = useState(null);
@@ -36,7 +37,7 @@ const Employees = () => {
   const [newPassword, setNewPassword] = useState("");
   const [resetEmployeeId, setResetEmployeeId] = useState(null);
   const [showStatusModal, setShowStatusModal] = useState(false);
-  const [currentEmployee, setCurrentEmployee] = useState(null); // For status change confirmation
+  const [currentEmployee, setCurrentEmployee] = useState(null); 
   const [newEmployee, setNewEmployee] = useState({
     Username: "",
     Password: "",
@@ -51,6 +52,7 @@ const Employees = () => {
 
   // Fetch employees data from the API
   const fetchEmployees = async () => {
+    setLoading(true);
     try {
       const response = await axios.get("https://panel.radhetowing.com/api/employees");
       const employeeData = response.data.data.map((emp) => ({
@@ -70,6 +72,7 @@ const Employees = () => {
     } catch (error) {
       console.error("Error fetching employee data:", error);
     }
+    setLoading(false);
   };
 
   useEffect(() => {
@@ -813,6 +816,12 @@ const confirmStatusChange = async () => {
       </Modal>
 
       {/* Employees Table */}
+      {loading ? (
+        <div className="loader-container">
+          <div className="loader"></div>
+          <p>Loading...</p>
+        </div>
+      ) : (
       <TableOne
         columns={columns}
         data={filteredEmployees.slice().reverse()}
@@ -828,7 +837,7 @@ const confirmStatusChange = async () => {
           setShowResetPasswordModal(true);
         }}
         isEmployeeTable={true} // Pass true to show the Reset Password button
-      />
+      /> )}
       {/* Toast Container for notifications */}
       <ToastContainer />
     </div>

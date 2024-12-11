@@ -56,6 +56,7 @@ const Services = () => {
   const [deleteServiceName, setDeleteServiceName] = useState("");
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [errors, setErrors] = useState({});
+  const [loading, setLoading] = useState(true);
   const [newService, setNewService] = useState({
     member_id: "",
     vehicle_id: "",
@@ -80,6 +81,7 @@ const Services = () => {
   // Fetch services and members
   useEffect(() => {
     const fetchServices = async () => {
+      setLoading(true);
       try {
         const response = await axios.get(
           "https://panel.radhetowing.com/api/towing-service-requests"
@@ -89,6 +91,7 @@ const Services = () => {
       } catch (error) {
         console.error("Error fetching services:", error);
       }
+      setLoading(false);
     };
 
     const fetchMembers = async () => {
@@ -757,6 +760,12 @@ const Services = () => {
       )}
 
       {/* Services Table */}
+      {loading ? (
+        <div className="loader-container">
+          <div className="loader"></div>
+          <p>Loading...</p>
+        </div>
+      ) : (
       <TableOne
         columns={columns}
         data={filteredServices.slice().reverse()}
@@ -783,7 +792,7 @@ const Services = () => {
         }}
         isServiceTable={true}
         handleCompletedCount={handleCompletedCount}
-      />
+      /> )}
 
       <ToastContainer />
     </div>

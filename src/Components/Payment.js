@@ -5,7 +5,14 @@ import { FaPlus, FaSearch } from "react-icons/fa";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "./../Style/payment.css";
-import { FaUser, FaCar, FaFileAlt, FaRupeeSign, FaImage,FaMoneyBillAlt } from "react-icons/fa";
+import {
+  FaUser,
+  FaCar,
+  FaFileAlt,
+  FaRupeeSign,
+  FaImage,
+  FaMoneyBillAlt,
+} from "react-icons/fa";
 import { MdOutlinePendingActions } from "react-icons/md";
 import TableOne from "../Table/TableOne";
 
@@ -14,6 +21,7 @@ Modal.setAppElement("#root");
 const Payments = () => {
   const [payments, setPayments] = useState([]);
   const [members, setMembers] = useState([]);
+  const [employees, setEmployees] = useState([]);
   const [vehicles, setVehicles] = useState([]);
   const [plans, setPlans] = useState([]);
   const [filteredPayments, setFilteredPayments] = useState([]);
@@ -24,6 +32,9 @@ const Payments = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [imageModalIsOpen, setImageModalIsOpen] = useState(false); // For image modal
   const [selectedImage, setSelectedImage] = useState(""); // To store selected image URL
+  const [loading, setLoading] = useState(true);
+  const [role, setRole] = useState("");
+  const [user, setUser] = useState(null);
   const [newPayment, setNewPayment] = useState({
     PM_M_id: "",
     PM_V_id: "",
@@ -38,24 +49,74 @@ const Payments = () => {
     Status: "",
   });
   const [modalIsOpen, setModalIsOpen] = useState(false);
+  
+  useEffect(() => {
+    const fetchPayments = async () => {
+      const storedRole = localStorage.getItem("role");
+      const storedUser = JSON.parse(localStorage.getItem("user"));
+  
+      setRole(storedRole);
+      setUser(storedUser);
+  
+      setLoading(true); // Show loader while fetching data
+  
+      try {
+        if (storedRole === "employee" && storedUser?.id) {
+          // Fetch payments for employees only
+          const employeePayments = await fetchPaymentsForEmployee(storedUser.id);
+          setPayments(employeePayments); // Set raw payments for employees
+          setFilteredPayments(employeePayments); // Set filtered payments for employees
+        } else if (storedRole === "admin") {
+          // Fetch all payments for admin only
+          const allPayments = await fetchAllPayments();
+          setPayments(allPayments); // Set raw payments for admin
+          setFilteredPayments(allPayments); // Set filtered payments for admin
+        } else {
+          toast.error("Invalid role or user data.");
+        }
+      } catch (error) {
+        console.error("Error fetching payments:", error);
+        toast.error("Failed to fetch payments.");
+      } finally {
+        setLoading(false); // Hide loader
+      }
+    };
+  
+    fetchPayments();
+  }, []); // Run this effect once when the component mounts
+  
 
-  // Fetch all payments from the API
-  const fetchPayments = async () => {
+  const fetchAllPayments = async () => {
+    console.log("nbhdghsd")
     try {
-      const response = await axios.get(
-        "https://panel.radhetowing.com/api/payment-master"
-      );
+      const response = await axios.get("https://panel.radhetowing.com/api/payment-master");
       setPayments(response.data);
-      setFilteredPayments(response.data); // Initialize filteredPayments with full list of payments
+      setFilteredPayments(response.data);
     } catch (error) {
-      console.error("Error fetching payments:", error);
+      console.error("Error fetching all payments:", error);
+      toast.error("Failed to fetch payments.");
     }
   };
 
-  useEffect(() => {
-    fetchPayments();
-    fetchPlans(); // Fetch all plans on component mount
-  }, []);
+  const fetchPaymentsForEmployee = async (employeeId) => {
+    console.log("employee")
+    try {
+      const response = await axios.get(
+        `https://panel.radhetowing.com/api/payment-master/employee/${employeeId}`
+      );
+      const employeePayments = response.data.data; // Assuming the response contains payments in `data.data`
+      setPayments(employeePayments);
+      setFilteredPayments(employeePayments);
+    } catch (error) {
+      console.error("Error fetching payments for employee:", error);
+      toast.error("Failed to fetch payments for the employee.");
+    }
+  };
+  
+
+  
+  
+  
 
   // Fetch members from the API
   const fetchMembers = async () => {
@@ -80,6 +141,26 @@ const Payments = () => {
       console.error("Error fetching plans:", error);
     }
   };
+
+  // Fetch employees from the API
+  const fetchEmployees = async () => {
+    try {
+      const response = await axios.get(
+        "https://panel.radhetowing.com/api/employees"
+      );
+      setEmployees(response.data.data); // Assuming 'data' contains the list of employees
+    } catch (error) {
+      console.error("Error fetching employees:", error);
+      toast.error("Error fetching employees. Please try again.");
+    }
+  };
+
+  // Fetch employees on component mount
+  useEffect(() => {
+    fetchAllPayments();
+    fetchPlans();
+    fetchEmployees(); // Fetch all employees when the component mounts
+  }, []);
 
   // Handle member change, fetch vehicles based on the selected member ID
   const handleMemberChange = async (memberId) => {
@@ -151,7 +232,7 @@ const Payments = () => {
       );
       toast.success("Payment added successfully!");
       setModalIsOpen(false);
-      fetchPayments(); // Refresh the payments list after save
+      fetchAllPayments(); // Refresh the payments list after save
     } catch (error) {
       console.error("Error adding payment:", error);
       toast.error("Error adding payment");
@@ -187,7 +268,7 @@ const Payments = () => {
       if (response.ok) {
         toast.success("Payment updated successfully!");
         setModalIsOpen(false);
-        fetchPayments(); // Refresh the payments list after save
+        fetchAllPayments(); // Refresh the payments list after save
       } else {
         throw new Error(result.message || "Error updating payment");
       }
@@ -269,17 +350,17 @@ const Payments = () => {
     setFilteredPayments(filtered); // Update the filtered payments state
   };
 
-    // Function to open the image modal with the selected image URL
-    const openImageModal = (imageUrl) => {
-      setSelectedImage(imageUrl);
-      setImageModalIsOpen(true);
-    };
-  
-    // Close the image modal
-    const closeImageModal = () => {
-      setImageModalIsOpen(false);
-      setSelectedImage("");
-    };
+  // Function to open the image modal with the selected image URL
+  const openImageModal = (imageUrl) => {
+    setSelectedImage(imageUrl);
+    setImageModalIsOpen(true);
+  };
+
+  // Close the image modal
+  const closeImageModal = () => {
+    setImageModalIsOpen(false);
+    setSelectedImage("");
+  };
 
   // Table columns
   const columns = [
@@ -300,40 +381,62 @@ const Payments = () => {
     {
       Header: "Amount",
       accessor: "PM_Amount",
-      Cell: ({ value }) => `₹ ${value}`, 
+      Cell: ({ value }) => `₹ ${value}`,
     },
-    
+
     {
       Header: "Expire Date",
       accessor: (row) => new Date(row.PM_expiredate).toLocaleDateString(),
     },
-    { Header: "Received By", accessor: "PM_payment_recived_by" },
+     {
+      Header: "Received By",
+      accessor: (row) => {
+        if (!employees || employees.length === 0) {
+          return "Loading...";
+        }
+
+        const employee = employees.find(
+          (emp) => emp.id === parseInt(row.PM_payment_recived_by)
+        );
+
+        return employee
+          ? employee.Username || `${employee.FirstName} ${employee.LastName}`
+          : "Unknown";
+      },
+    },
 
     {
       Header: "Image",
       accessor: "PM_payment_ss_image",
       Cell: ({ row }) => {
-        const imagePath = row.original.PM_payment_ss_image
-          ? `${row.original.PM_payment_ss_image
-              .replace(/\\/g, '') 
-              .replace(/\/+/g, '/') 
-            }`
-          : null;
-          console.log("imagePath-->",imagePath)
+        let imagePath = row.original.PM_payment_ss_image;
+    
+        if (imagePath) {
+          // Ensure the base URL is consistent
+          if (!imagePath.startsWith("http")) {
+            imagePath = `https://panel.radhetowing.com/${imagePath.replace(
+              /\\/g,
+              ""
+            ).replace(/\/+/g, "/")}`;
+          }
+    
+      
+          imagePath = imagePath.replace(/\\/g, "").replace(/\/+/g, "/");
+          // console.log("imagePath",imagePath)
+        }
     
         return imagePath ? (
           <img
             src={imagePath}
-            alt="Not ss"
-            style={{ width: "25px", height: "25px", objectFit: "cover" }}
-            onClick={() => openImageModal(imagePath)} 
+            alt="Imagess"
+            style={{ width: "30px", height: "30px", objectFit: "cover" }}
+            onClick={() => openImageModal(imagePath)}
           />
         ) : (
           <span>No Image</span>
         );
       },
     },
-    
     
 
     {
@@ -345,7 +448,7 @@ const Payments = () => {
           P: { label: "Pending", color: "orange" },
           R: { label: "Rejected", color: "gray" },
           E: { label: "Expired", color: "red" },
-          U: { label: "Used", color: "blue" },
+          U: { label: "Used", color: "Blue" },
           
         };
 
@@ -365,7 +468,18 @@ const Payments = () => {
 
   return (
     <div className="payments-page">
-      <h1 style={{display:"flex",textAlign:'center',gap:'6px',alignItems:"center",fontSize:"25px"}}> <FaMoneyBillAlt/> Payments</h1>
+      <h1
+        style={{
+          display: "flex",
+          textAlign: "center",
+          gap: "6px",
+          alignItems: "center",
+          fontSize: "25px",
+        }}
+      >
+        {" "}
+        <FaMoneyBillAlt /> Payments
+      </h1>
 
       {/* Add Payment Button */}
       <div className="AddButton">
@@ -496,23 +610,27 @@ const Payments = () => {
               />
             </div>
           </div>
-
-          {/* Payment Received By Input (only for editing) */}
           {editingPayment && (
             <div className="input-error-payment">
               <div className="input-payment">
                 <FaUser className="icon" />
-                <input
-                  type="text"
-                  placeholder="Payment Received By"
-                  value={newPayment.PM_payment_recived_by} // Set default value
+                <select
+                  value={newPayment.PM_payment_recived_by} // Bind the selected value
                   onChange={(e) =>
                     setNewPayment({
                       ...newPayment,
-                      PM_payment_recived_by: e.target.value,
+                      PM_payment_recived_by: e.target.value, // Update state on change
                     })
                   }
-                />
+                >
+                  <option value="">Select Employee</option>
+                  {employees.map((employee) => (
+                    <option key={employee.id} value={employee.id}>
+                      {employee.Username ||
+                        `${employee.FirstName} ${employee.LastName}`}
+                    </option>
+                  ))}
+                </select>
               </div>
             </div>
           )}
@@ -533,27 +651,28 @@ const Payments = () => {
                 <option value="R">Rejected</option>
                 <option value="E">Expired</option>
                 <option value="U">Used</option>
+
               </select>
             </div>
           </div>
 
           {/* Payment Screenshot */}
           {!editingPayment && (
-          <div className="input-error-payment">
-            <div className="input-payment">
-              <FaImage className="icon" />
-              <input
-                type="file"
-                accept="image/*"
-                onChange={(e) =>
-                  setNewPayment({
-                    ...newPayment,
-                    PM_payment_ss_image: e.target.files[0],
-                  })
-                }
-              />
+            <div className="input-error-payment">
+              <div className="input-payment">
+                <FaImage className="icon" />
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) =>
+                    setNewPayment({
+                      ...newPayment,
+                      PM_payment_ss_image: e.target.files[0],
+                    })
+                  }
+                />
+              </div>
             </div>
-          </div>
           )}
 
           <div className="modelbutton">
@@ -600,8 +719,8 @@ const Payments = () => {
         </div>
       )}
 
-        {/* Image Modal */}
-        <Modal
+      {/* Image Modal */}
+      <Modal
         isOpen={imageModalIsOpen}
         onRequestClose={closeImageModal}
         contentLabel="View Image"
@@ -618,23 +737,28 @@ const Payments = () => {
         </button>
       </Modal>
 
-      {/* Payments Table */}
-      <TableOne
-        columns={columns}
-        data={(filteredPayments.length > 0 ? filteredPayments : payments)
-          .slice()
-          .reverse()}
-        handleDelete={(payment) => triggerDeleteModal(payment)}
-        handleEdit={(payment) => {
-          console.log("payment", payment);
-          console.log("payment-->", payment.member.M_username);
-          console.log("vehicle-->", payment.vehicle.V_vihicle_number);
-          console.log("status", payment.Status);
-          setEditingPayment(payment);
-          setNewPayment(payment);
-          setModalIsOpen(true);
-        }}
-      />
+
+  {/* Payments Table */}
+{loading ? (
+  <div className="loader-container">
+    <div className="loader"></div>
+    <p>Loading...</p>
+  </div>
+) : (
+  <TableOne
+    columns={columns}
+    data={Array.isArray(filteredPayments) 
+      ? [...filteredPayments].reverse() // Safely reverse the array
+      : []}
+    handleDelete={(payment) => triggerDeleteModal(payment)}
+    handleEdit={(payment) => {
+      setEditingPayment(payment);
+      setNewPayment(payment);
+      setModalIsOpen(true);
+    }}
+  />
+)}
+
 
       <ToastContainer />
     </div>
