@@ -60,6 +60,7 @@ const Services = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(true);
+ 
   const [newService, setNewService] = useState({
     member_id: "",
     vehicle_id: "",
@@ -401,6 +402,7 @@ const Services = () => {
       console.warn("Member ID or Vehicle ID is missing.");
       return;
     }
+    setLoading(true); // Start loading
     try {
       // Fetch completed count data
       const completedCountResponse = await axios.get(
@@ -440,6 +442,7 @@ const Services = () => {
         position: "top-right",
       });
     }
+    setLoading(false); 
   };
 
   // Table columns

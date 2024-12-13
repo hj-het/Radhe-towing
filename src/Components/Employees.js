@@ -93,7 +93,7 @@ const Employees = () => {
     const newStatus = !currentEmployee.IsActive;
     try {
       const response = await axios.put(
-        `https://panel.radhetowing.com/api/employee/Edit-status/${currentEmployee.id}`,
+        `https://panel.radhetowing.com/api/employee/update-status/${currentEmployee.id}`,
         { IsActive: newStatus }
       );
 
@@ -575,56 +575,58 @@ const Employees = () => {
             </div>
           </div>
 
-          {/* Date of Birth and Date of Joining */}
-          <div className="datefield">
-            {/* Date of Birth Input with Icon */}
-            <div className="input-error">
-              <div className="input-with-icon">
-                <FaCalendarAlt className="input-icon" />
-                <input
-                  type="text"
-                  onFocus={(e) => (e.target.type = "date")}
-                  onBlur={(e) =>
-                    e.target.value === ""
-                      ? (e.target.type = "text")
-                      : (e.target.type = "date")
-                  }
-                  placeholder="Date of Birth"
-                  value={newEmployee.DOB ? formatDate(newEmployee.DOB) : ""}
-                  onChange={(e) =>
-                    setNewEmployee({ ...newEmployee, DOB: e.target.value })
-                  }
-                />
-              </div>
-              <div className="error">
-                {errors.DOB && <span className="error-text">{errors.DOB}</span>}
-              </div>
-            </div>
+{/* Date of Birth and Date of Joining */}
+<div className="datefield">
+  {/* Date of Birth Input with Icon */}
+  <div className="input-error">
+    <div className="input-with-icon">
+      <FaCalendarAlt className="input-icon" />
+      <input
+        type="text"
+        onFocus={(e) => (e.target.type = "date")}
+        onBlur={(e) =>
+          e.target.value === ""
+            ? (e.target.type = "text")
+            : (e.target.type = "date")
+        }
+        placeholder="Date of Birth" // Placeholder for DOB
+        value={newEmployee.DOB || ""}
+        onChange={(e) =>
+          setNewEmployee({ ...newEmployee, DOB: e.target.value })
+        }
+      />
+    </div>
+    <div className="error">
+      {errors.DOB && <span className="error-text">{errors.DOB}</span>}
+    </div>
+  </div>
 
-            {/* Date of Joining Input with Icon */}
-            <div className="input-error">
-              <div className="input-with-icon">
-                <FaCalendarAlt className="input-icon" />
-                <input
-                  type="text"
-                  onFocus={(e) => (e.target.type = "date")}
-                  onBlur={(e) =>
-                    e.target.value === ""
-                      ? (e.target.type = "text")
-                      : (e.target.type = "date")
-                  }
-                  placeholder="Date of Joining"
-                  value={newEmployee.DOJ ? formatDate(newEmployee.DOJ) : ""}
-                  onChange={(e) =>
-                    setNewEmployee({ ...newEmployee, DOJ: e.target.value })
-                  }
-                />
-              </div>
-              <div className="error">
-                {errors.DOJ && <span className="error-text">{errors.DOJ}</span>}
-              </div>
-            </div>
-          </div>
+  {/* Date of Joining Input with Icon */}
+  <div className="input-error">
+    <div className="input-with-icon">
+      <FaCalendarAlt className="input-icon" />
+      <input
+        type="text"
+        onFocus={(e) => (e.target.type = "date")}
+        onBlur={(e) =>
+          e.target.value === ""
+            ? (e.target.type = "text")
+            : (e.target.type = "date")
+        }
+        placeholder="Date of Joining" // Placeholder for DOJ
+        value={newEmployee.DOJ || ""}
+        onChange={(e) =>
+          setNewEmployee({ ...newEmployee, DOJ: e.target.value })
+        }
+      />
+    </div>
+    <div className="error">
+      {errors.DOJ && <span className="error-text">{errors.DOJ}</span>}
+    </div>
+  </div>
+</div>
+
+
 
           {/* Contact Input with Icon */}
           <div className="input-error">
