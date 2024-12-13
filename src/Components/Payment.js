@@ -12,10 +12,12 @@ import {
   FaRupeeSign,
   FaImage,
   FaMoneyBillAlt,
-} from "react-icons/fa";
-import { MdOutlinePendingActions } from "react-icons/md";
-import TableOne from "../Table/TableOne";
+  FaEdit,
 
+} from "react-icons/fa";
+import { MdOutlinePendingActions, MdCancel } from "react-icons/md";
+import TableOne from "../Table/TableOne";
+import { IoWarningOutline } from "react-icons/io5";
 Modal.setAppElement("#root");
 
 const Payments = () => {
@@ -49,47 +51,47 @@ const Payments = () => {
     Status: "",
   });
   const [modalIsOpen, setModalIsOpen] = useState(false);
-  
+
+  console.log(user, role);
   useEffect(() => {
-    const fetchPayments = async () => {
-      const storedRole = localStorage.getItem("role");
-      const storedUser = JSON.parse(localStorage.getItem("user"));
-  
-      setRole(storedRole);
-      setUser(storedUser);
-  
-      setLoading(true); // Show loader while fetching data
-  
+    const storedRole = localStorage.getItem("role");
+    const storedUser = JSON.parse(localStorage.getItem("user"));
+
+    setRole(storedRole);
+    setUser(storedUser);
+  }, []);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true);
+
       try {
-        if (storedRole === "employee" && storedUser?.id) {
-          // Fetch payments for employees only
-          const employeePayments = await fetchPaymentsForEmployee(storedUser.id);
-          setPayments(employeePayments); // Set raw payments for employees
-          setFilteredPayments(employeePayments); // Set filtered payments for employees
-        } else if (storedRole === "admin") {
-          // Fetch all payments for admin only
-          const allPayments = await fetchAllPayments();
-          setPayments(allPayments); // Set raw payments for admin
-          setFilteredPayments(allPayments); // Set filtered payments for admin
-        } else {
+        if (role === "employee" && user?.id) {
+          await fetchPaymentsForEmployee(user.id);
+        } else if (role === "admin") {
+          await fetchAllPayments();
+        } else if (role || user) {
           toast.error("Invalid role or user data.");
         }
       } catch (error) {
-        console.error("Error fetching payments:", error);
-        toast.error("Failed to fetch payments.");
+        console.error("Error fetching data:", error);
+        toast.error("Error fetching data. Please try again.");
       } finally {
-        setLoading(false); // Hide loader
+        setLoading(false);
       }
     };
-  
-    fetchPayments();
-  }, []); // Run this effect once when the component mounts
-  
+
+    if (role && user) {
+      fetchData();
+    }
+  }, [role, user]);
 
   const fetchAllPayments = async () => {
-    console.log("nbhdghsd")
+    console.log("nbhdghsd");
     try {
-      const response = await axios.get("https://panel.radhetowing.com/api/payment-master");
+      const response = await axios.get(
+        "https://panel.radhetowing.com/api/payment-master"
+      );
       setPayments(response.data);
       setFilteredPayments(response.data);
     } catch (error) {
@@ -99,12 +101,12 @@ const Payments = () => {
   };
 
   const fetchPaymentsForEmployee = async (employeeId) => {
-    console.log("employee")
+    console.log("employee");
     try {
       const response = await axios.get(
         `https://panel.radhetowing.com/api/payment-master/employee/${employeeId}`
       );
-      const employeePayments = response.data.data; // Assuming the response contains payments in `data.data`
+      const employeePayments = response.data.data;
       setPayments(employeePayments);
       setFilteredPayments(employeePayments);
     } catch (error) {
@@ -112,19 +114,13 @@ const Payments = () => {
       toast.error("Failed to fetch payments for the employee.");
     }
   };
-  
 
-  
-  
-  
-
-  // Fetch members from the API
   const fetchMembers = async () => {
     try {
       const response = await axios.get(
         "https://panel.radhetowing.com/api/members"
       );
-      setMembers(response.data); // Store the member data in state
+      setMembers(response.data);
     } catch (error) {
       console.error("Error fetching members:", error);
     }
@@ -136,37 +132,34 @@ const Payments = () => {
       const response = await axios.get(
         "https://panel.radhetowing.com/api/plans"
       );
-      setPlans(response.data.plans); // Store all plans in state
+      setPlans(response.data.plans);
     } catch (error) {
       console.error("Error fetching plans:", error);
     }
   };
 
-  // Fetch employees from the API
   const fetchEmployees = async () => {
     try {
       const response = await axios.get(
         "https://panel.radhetowing.com/api/employees"
       );
-      setEmployees(response.data.data); // Assuming 'data' contains the list of employees
+      setEmployees(response.data.data);
     } catch (error) {
       console.error("Error fetching employees:", error);
       toast.error("Error fetching employees. Please try again.");
     }
   };
 
-  // Fetch employees on component mount
   useEffect(() => {
     fetchAllPayments();
     fetchPlans();
-    fetchEmployees(); // Fetch all employees when the component mounts
+    fetchEmployees();
   }, []);
 
-  // Handle member change, fetch vehicles based on the selected member ID
   const handleMemberChange = async (memberId) => {
     try {
-      setVehicles([]); // Clear previous vehicles
-      setNewPayment((prev) => ({ ...prev, PM_M_id: memberId })); // Set selected member ID
+      setVehicles([]);
+      setNewPayment((prev) => ({ ...prev, PM_M_id: memberId }));
 
       const response = await axios.get(
         `https://panel.radhetowing.com/api/vehicles/member/${memberId}`
@@ -180,12 +173,11 @@ const Payments = () => {
       }
 
       const memberVehicles = response.data.data;
-      setVehicles(memberVehicles); // Update vehicles for dropdown
+      setVehicles(memberVehicles);
 
-      // If there's already a selected vehicle, make sure it's still selected
       setNewPayment((prev) => ({
         ...prev,
-        PM_V_id: editingPayment ? editingPayment.PM_V_id : "", // Retain selected vehicle ID during editing
+        PM_V_id: editingPayment ? editingPayment.PM_V_id : "",
       }));
     } catch (error) {
       console.error("Error fetching vehicles for member:", error);
@@ -193,14 +185,13 @@ const Payments = () => {
     }
   };
 
-  // Handle Plan Change: set price in amount field when a plan is selected
   const handlePlanChange = (planId) => {
     const selectedPlan = plans.find((plan) => plan.id === parseInt(planId));
     if (selectedPlan) {
       setNewPayment({
         ...newPayment,
         PM_P_id: planId,
-        PM_Amount: selectedPlan.price, // Set the plan price in the amount field
+        PM_Amount: selectedPlan.price,
       });
     }
   };
@@ -268,7 +259,7 @@ const Payments = () => {
       if (response.ok) {
         toast.success("Payment updated successfully!");
         setModalIsOpen(false);
-        fetchAllPayments(); // Refresh the payments list after save
+        fetchAllPayments();
       } else {
         throw new Error(result.message || "Error updating payment");
       }
@@ -280,13 +271,12 @@ const Payments = () => {
 
   const handleSavePayment = () => {
     if (editingPayment) {
-      handleEditPayment(); // Call edit if editing
+      handleEditPayment();
     } else {
-      handleAddPayment(); // Call add if creating new payment
+      handleAddPayment();
     }
   };
 
-  // Reset form to initial state
   const resetForm = () => {
     setNewPayment({
       PM_M_id: "",
@@ -301,14 +291,13 @@ const Payments = () => {
       PM_comment: "",
       Status: "P", // Default to 'Pending'
     });
-    setEditingPayment(null); // Reset editing state to avoid editing mode when adding a new payment
-    setVehicles([]); // Reset vehicles when form is reset
+    setEditingPayment(null);
+    setVehicles([]);
   };
 
-  // Handle opening modal for adding a new payment
   const handleOpenAddModal = () => {
-    resetForm(); // Reset form when adding new payment
-    fetchMembers(); // Fetch members when opening the modal
+    resetForm();
+    fetchMembers();
     setModalIsOpen(true);
   };
 
@@ -342,15 +331,32 @@ const Payments = () => {
   const handleSearchChange = (e) => {
     const query = e.target.value.toLowerCase();
     setSearchQuery(query);
-
-    const filtered = payments.filter((payment) =>
-      payment.member?.M_username.toLowerCase().includes(query)
-    );
-
-    setFilteredPayments(filtered); // Update the filtered payments state
+  
+    const filtered = payments.filter((payment) => {
+      const memberUsername = payment.member?.M_username?.toLowerCase() || "";
+      const vehicleNumber = payment.vehicle?.V_vihicle_number?.toLowerCase() || "";
+      const planName = payment.plan?.P_name?.toLowerCase() || "";
+      const amount = payment.PM_Amount?.toString().toLowerCase() || "";
+      const expireDate = new Date(payment.PM_expiredate)
+        .toLocaleDateString()
+        .toLowerCase();
+      const receivedBy = employees.find(
+        (emp) => emp.id === parseInt(payment.PM_payment_recived_by)
+      )?.Username?.toLowerCase() || "";
+  
+      return (
+        memberUsername.includes(query) ||
+        vehicleNumber.includes(query) ||
+        planName.includes(query) ||
+        amount.includes(query) ||
+        expireDate.includes(query) ||
+        receivedBy.includes(query)
+      );
+    });
+  
+    setFilteredPayments(filtered);
   };
-
-  // Function to open the image modal with the selected image URL
+  
   const openImageModal = (imageUrl) => {
     setSelectedImage(imageUrl);
     setImageModalIsOpen(true);
@@ -388,7 +394,7 @@ const Payments = () => {
       Header: "Expire Date",
       accessor: (row) => new Date(row.PM_expiredate).toLocaleDateString(),
     },
-     {
+    {
       Header: "Received By",
       accessor: (row) => {
         if (!employees || employees.length === 0) {
@@ -410,25 +416,19 @@ const Payments = () => {
       accessor: "PM_payment_ss_image",
       Cell: ({ row }) => {
         let imagePath = row.original.PM_payment_ss_image;
-    
+
         if (imagePath) {
-          // Ensure the base URL is consistent
           if (!imagePath.startsWith("http")) {
-            imagePath = `https://panel.radhetowing.com/${imagePath.replace(
-              /\\/g,
-              ""
-            ).replace(/\/+/g, "/")}`;
+            imagePath = `https://panel.radhetowing.com/${imagePath
+              .replace(/\\/g, "")
+              .replace(/\/+/g, "/")}`;
           }
-    
-      
-          imagePath = imagePath.replace(/\\/g, "").replace(/\/+/g, "/");
-          // console.log("imagePath",imagePath)
         }
-    
+
         return imagePath ? (
           <img
             src={imagePath}
-            alt="Imagess"
+            alt="error"
             style={{ width: "30px", height: "30px", objectFit: "cover" }}
             onClick={() => openImageModal(imagePath)}
           />
@@ -437,7 +437,6 @@ const Payments = () => {
         );
       },
     },
-    
 
     {
       Header: "Status",
@@ -449,7 +448,6 @@ const Payments = () => {
           R: { label: "Rejected", color: "gray" },
           E: { label: "Expired", color: "red" },
           U: { label: "Used", color: "Blue" },
-          
         };
 
         const status = statusMap[row.original.Status] || {
@@ -494,7 +492,7 @@ const Payments = () => {
           <FaSearch className="search-icon" />
           <input
             type="text"
-            placeholder="Search by member"
+            placeholder="Search"
             value={searchQuery}
             onChange={handleSearchChange}
           />
@@ -513,8 +511,6 @@ const Payments = () => {
         <h2>{editingPayment ? "Edit Payment" : "Add Payment"}</h2>
 
         <div className="form-payment">
-          {/* Show member's username and vehicle number in h4 when editing */}
-
           {editingPayment && (
             <div className="member-info">
               {editingPayment.member && (
@@ -539,8 +535,8 @@ const Payments = () => {
               <div className="input-payment">
                 <FaUser className="icon" />
                 <select
-                  value={newPayment.PM_M_id} // Correctly bind the selected value
-                  onChange={(e) => handleMemberChange(e.target.value)} // Handle member change
+                  value={newPayment.PM_M_id}
+                  onChange={(e) => handleMemberChange(e.target.value)}
                 >
                   <option value="">Select Member</option>
                   {members.map((member) => (
@@ -615,11 +611,11 @@ const Payments = () => {
               <div className="input-payment">
                 <FaUser className="icon" />
                 <select
-                  value={newPayment.PM_payment_recived_by} // Bind the selected value
+                  value={newPayment.PM_payment_recived_by}
                   onChange={(e) =>
                     setNewPayment({
                       ...newPayment,
-                      PM_payment_recived_by: e.target.value, // Update state on change
+                      PM_payment_recived_by: e.target.value,
                     })
                   }
                 >
@@ -644,14 +640,13 @@ const Payments = () => {
                 onChange={(e) =>
                   setNewPayment({ ...newPayment, Status: e.target.value })
                 }
-                disabled={!editingPayment} // Disable dropdown for adding new payments
+                disabled={!editingPayment}
               >
                 <option value="P">Pending</option>
                 <option value="A">Accepted</option>
                 <option value="R">Rejected</option>
                 <option value="E">Expired</option>
                 <option value="U">Used</option>
-
               </select>
             </div>
           </div>
@@ -677,13 +672,23 @@ const Payments = () => {
 
           <div className="modelbutton">
             <button onClick={handleSavePayment} className="btn-editmodel">
-              {editingPayment ? "Edit Payment" : "Add Payment"}
+              
+                {editingPayment ? (
+                  <>
+                    <FaEdit/> Edit Payment
+                  </>
+                ) : (
+                  <>
+                    <FaPlus/> Add Payment
+                  </>
+                )}
+              
             </button>
             <button
               className="btn-closemodel"
               onClick={() => setModalIsOpen(false)}
             >
-              Close
+              <MdCancel /> Close
             </button>
           </div>
         </div>
@@ -693,9 +698,18 @@ const Payments = () => {
       {showDeleteModal && (
         <div className="modal-overlay">
           <div className="modal-content">
-            <h3>Confirm Delete</h3>
+               <h3
+                         style={{
+                           display: "flex",
+                           justifyContent: "center",
+                           alignItems: "center",
+                           gap: "5px",
+                         }}
+                       >
+                         <IoWarningOutline /> Confirm Delete
+                       </h3>
             <p>
-              Are you sure you want to delete payment for{" "}
+              Are you sure you want to permanent delete payment for{" "}
               <span style={{ fontWeight: 700, color: "#ee5757" }}>
                 {deletePaymentName}
               </span>
@@ -737,28 +751,35 @@ const Payments = () => {
         </button>
       </Modal>
 
-
-  {/* Payments Table */}
-{loading ? (
-  <div className="loader-container">
-    <div className="loader"></div>
-    <p>Loading...</p>
-  </div>
-) : (
-  <TableOne
-    columns={columns}
-    data={Array.isArray(filteredPayments) 
-      ? [...filteredPayments].reverse() // Safely reverse the array
-      : []}
-    handleDelete={(payment) => triggerDeleteModal(payment)}
-    handleEdit={(payment) => {
-      setEditingPayment(payment);
-      setNewPayment(payment);
-      setModalIsOpen(true);
-    }}
-  />
-)}
-
+      {/* Payments Table */}
+      {loading ? (
+        <div className="loader-container">
+          <div className="loader"></div>
+          <p>Loading...</p>
+        </div>
+      ) : (
+        <TableOne
+          columns={columns}
+          data={
+            Array.isArray(filteredPayments)
+              ? role === "admin"
+                ? [...filteredPayments].reverse()
+                : filteredPayments
+                    .filter(
+                      (payment) =>
+                        payment.PM_payment_recived_by === user?.id.toString()
+                    )
+                    .reverse()
+              : []
+          }
+          handleDelete={(payment) => triggerDeleteModal(payment)}
+          handleEdit={(payment) => {
+            setEditingPayment(payment);
+            setNewPayment(payment);
+            setModalIsOpen(true);
+          }}
+        />
+      )}
 
       <ToastContainer />
     </div>

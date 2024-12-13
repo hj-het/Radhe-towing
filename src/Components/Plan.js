@@ -3,6 +3,8 @@ import axios from "axios";
 import Modal from "react-modal";
 import TableOne from "../Table/TableOne";
 import "./../Style/plan.css";
+import { MdCancel } from "react-icons/md";
+
 import {
   TextField,
   // MenuItem,
@@ -10,9 +12,8 @@ import {
   Autocomplete,
   Switch,
   // FormControlLabel,
-
 } from "@mui/material";
-
+import { IoWarningOutline } from "react-icons/io5";
 import {
   FaFileAlt,
   // FaDollarSign,
@@ -23,7 +24,8 @@ import {
   FaCalendarCheck,
   FaSearch,
   FaPlus,
-  FaRegCreditCard
+  FaRegCreditCard,
+  FaEdit,
 } from "react-icons/fa";
 import { MdOutlineCurrencyRupee } from "react-icons/md";
 import { toast } from "react-toastify";
@@ -214,7 +216,7 @@ const Plan = () => {
     }
   };
 
-  // Edit/update a plan
+  // Edit/Edit a plan
   const editPlan = async () => {
     const payload = {
       name: newPlan.name,
@@ -252,7 +254,7 @@ const Plan = () => {
     }
   };
 
-  // Handle save operation (either Add or Update)
+  // Handle save operation (either Add or Edit)
   const handleSave = () => {
     if (validateForm()) {
       if (editingPlan) {
@@ -297,7 +299,7 @@ const Plan = () => {
     {
       Header: "Fuel Type",
       accessor: "fuel_type",
-      Cell: ({ value }) => (Array.isArray(value) ? value.join(", ") : "N/A"), 
+      Cell: ({ value }) => (Array.isArray(value) ? value.join(", ") : "N/A"),
     },
     { Header: "Towing Limit", accessor: "num_of_towing" },
     {
@@ -344,7 +346,18 @@ const Plan = () => {
 
   return (
     <div className="plans-page">
-      <h1 style={{display:"flex",textAlign:'center',gap:'6px',alignItems:"center",fontSize:"25px"}}> <FaRegCreditCard/> Plans</h1>
+      <h1
+        style={{
+          display: "flex",
+          textAlign: "center",
+          gap: "6px",
+          alignItems: "center",
+          fontSize: "25px",
+        }}
+      >
+        {" "}
+        <FaRegCreditCard /> Plans
+      </h1>
 
       {/* Add Plan Button */}
       <div className="AddButton">
@@ -565,13 +578,21 @@ const Plan = () => {
 
           <div className="modelbutton">
             <button onClick={handleSave} className="btn-editmodel">
-              {editingPlan ? "Edit Plan" : "Add Plan"}
+              {editingPlan ? (
+                <>
+                  <FaEdit /> Edit Plan
+                </>
+              ) : (
+                <>
+                  <FaPlus /> Add Plan
+                </>
+              )}
             </button>
             <button
               className="btn-closemodel"
               onClick={() => setModalIsOpen(false)}
             >
-              Close
+              <MdCancel /> Close
             </button>
           </div>
         </div>
@@ -581,9 +602,18 @@ const Plan = () => {
       {showDeleteModal && (
         <div className="modal-overlay">
           <div className="modal-content">
-            <h3>Confirm Delete</h3>
+            <h3
+              style={{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                gap: "5px",
+              }}
+            >
+              <IoWarningOutline /> Confirm Delete
+            </h3>
             <p>
-              Are you sure you want to delete{" "}
+              Are you sure you want to permanent delete{" "}
               <span style={{ fontWeight: 700, color: "#ee5757" }}>
                 {deletePlanName}
               </span>
@@ -615,12 +645,13 @@ const Plan = () => {
           <p>Loading...</p>
         </div>
       ) : (
-      <TableOne
-        columns={columns}
-        data={filteredPlans.slice().reverse()}
-        handleDelete={(plan) => triggerDeleteModal(plan.id, `${plan.name}`)}
-        handleEdit={handleEdit}
-      />)}
+        <TableOne
+          columns={columns}
+          data={filteredPlans.slice().reverse()}
+          handleDelete={(plan) => triggerDeleteModal(plan.id, `${plan.name}`)}
+          handleEdit={handleEdit}
+        />
+      )}
     </div>
   );
 };

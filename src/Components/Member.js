@@ -21,10 +21,13 @@ import {
   FaCheckCircle,
   FaTimesCircle,
   FaUsers,
- 
 } from "react-icons/fa";
+import { IoWarningOutline } from "react-icons/io5";
 import { MdCancel } from "react-icons/md";
 import { FaUserEdit, FaUserPlus } from "react-icons/fa";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
 Modal.setAppElement("#root");
 
 const Member = () => {
@@ -108,7 +111,7 @@ const Member = () => {
         setFilteredMembers(mappedMembers);
       } catch (error) {
         console.error("Error fetching members:", error);
-      }finally {
+      } finally {
         setLoading(false); // Hide loader
       }
     };
@@ -296,18 +299,20 @@ const Member = () => {
     const errors = {};
 
     if (!newMember.username || newMember.username.length < 3) {
-      errors.username = "*Username is required Min 3 Letter";
+      errors.username =
+        "*Username is required and must be at least 3 characters";
     }
 
     if (
       !editingMember &&
       (!newMember.password || newMember.password.length < 6)
     ) {
-      errors.password = "* Password is required";
+      errors.password =
+        "*Password is required and must be at least 6 characters";
     }
 
     if (newMember.password !== newMember.password_confirmation) {
-      errors.password_confirmation = "* Passwords do not match";
+      errors.password_confirmation = "*Passwords do not match";
     }
 
     if (!newMember.first_name) {
@@ -320,7 +325,7 @@ const Member = () => {
 
     const dob = new Date(newMember.dob);
     if (!newMember.dob || isNaN(dob.getTime()) || dob >= new Date()) {
-      errors.dob = "* Date of Birth is required";
+      errors.dob = "*Invalid or missing date of birth";
     }
 
     if (!newMember.address_1) {
@@ -332,11 +337,11 @@ const Member = () => {
     }
 
     if (!/^\d{10}$/.test(newMember.contact)) {
-      errors.contact = "*Number must be 10 digits";
+      errors.contact = "*Phone number must be exactly 10 digits";
     }
 
-    if (!/^[^\s@]+@\.com$/.test(newMember.email)) {
-      errors.email = "*Email must be required";
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(newMember.email)) {
+      errors.email = "*Email is invalid";
     }
 
     if (!newMember.city_id) {
@@ -406,7 +411,7 @@ const Member = () => {
       is_active: "P",
       password_confirmation: "",
     });
-    validateForm("");
+    setErrors({}); // Clear validation errors
   };
 
   // Handle Add Member (reset form and open modal)
@@ -419,13 +424,12 @@ const Member = () => {
 
   // Handle Edit Member (populate form with member data and open modal)
   const handleEdit = (member) => {
-    console.log("Editing Member -->", member);
-    console.log("Member city_id -->", member.city);
     const selectedCity = cities.find((city) => city.name === member.city);
-    setEditingMember(member);
+    setEditingMember(member); // Mark member for editing
     setNewMember({
-      username: member.username,
-      password: member.password,
+      username: member.username || "",
+      password: "", // Keep this blank unless editing password is required
+      password_confirmation: "",
       first_name: member.first_name || "",
       last_name: member.last_name || "",
       dob: member.dob
@@ -437,15 +441,11 @@ const Member = () => {
       pincode: member.pincode || "",
       contact: member.phone || "",
       email: member.email || "",
-      profile_pic: member.profile_pic || "",
-      // is_active: member.is_active || "P",
-      password_confirmation: "",
-      // password: member.password,
+      profile_pic: member.profile_pic || null,
     });
     setModalIsOpen(true); // Open modal for editing
   };
 
-  // Handle Save (for Add and Update)
   const handleSave = async () => {
     const validationErrors = validateForm();
     setErrors(validationErrors);
@@ -501,6 +501,7 @@ const Member = () => {
           );
           setModalIsOpen(false);
           setEditingMember(null);
+          toast.success("Successfully Added Member");
         }
       } catch (error) {
         console.error("Error updating member:", error);
@@ -583,7 +584,15 @@ const Member = () => {
 
   return (
     <div className="mainhead">
-      <h1 style={{ display: "flex", textAlign: "center", gap: "6px",alignItems:"center" ,fontSize:"25px"}}>
+      <h1
+        style={{
+          display: "flex",
+          textAlign: "center",
+          gap: "6px",
+          alignItems: "center",
+          fontSize: "25px",
+        }}
+      >
         {" "}
         <FaUsers /> Members
       </h1>
@@ -599,7 +608,7 @@ const Member = () => {
           <FaSearch className="search-icon" />
           <input
             type="text"
-            placeholder="Search by name or email"
+            placeholder="Search "
             value={searchQuery}
             onChange={handleSearchChange}
           />
@@ -614,14 +623,14 @@ const Member = () => {
           <p>Loading...</p>
         </div>
       ) : (
-
-      <TableOne
-        columns={columns}
-        data={filteredMembers.slice().reverse()}
-        handleDelete={(member) => triggerDeleteModal(member.id)}
-        handleEdit={handleEdit}
-      />)}
-
+        <TableOne
+          columns={columns}
+          data={filteredMembers.slice().reverse()}
+          handleDelete={(member) => triggerDeleteModal(member.id)}
+          handleEdit={handleEdit}
+        />
+      )}
+      <ToastContainer />
       {/* Modal for Adding/Editing Member */}
       <Modal
         isOpen={modalIsOpen}
@@ -633,7 +642,7 @@ const Member = () => {
       >
         <h2>
           {editingMember ? <FaUserEdit /> : <FaUserPlus />}
-          {editingMember ? " Update Member" : " Add Member"}
+          {editingMember ? " Edit Member" : " Add Member"}
         </h2>
 
         <div className="form-member">
@@ -923,15 +932,16 @@ const Member = () => {
 
           <div className="modelbutton">
             <button onClick={handleSave} className="btn-editmodel">
-            {editingMember ? <FaUserEdit /> : <FaUserPlus />} 
-              {editingMember ? "Update Member" : "Add Member"}
+              {editingMember ? <FaUserEdit /> : <FaUserPlus />}
+              {editingMember ? "Edit Member" : "Add Member"}
             </button>
-
             <button
               className="btn-closemodel"
-              onClick={() => setModalIsOpen(false)}
+              onClick={() => {
+                setModalIsOpen(false); // Close modal
+                resetForm(); // Reset form and clear errors
+              }}
             >
-              {" "}
               <MdCancel />
               Cancel
             </button>
@@ -970,9 +980,19 @@ const Member = () => {
       {showDeleteModal && (
         <div className="modal-overlay">
           <div className="modal-content">
-            <h3>Confirm Delete</h3>
+            <h3
+              style={{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                gap: "5px",
+              }}
+            >
+              <IoWarningOutline /> Confirm Delete
+            </h3>
+
             <p>
-              Are you sure you want to delete{" "}
+              Are you sure you want to permanent delete{" "}
               <span style={{ fontWeight: 700, color: "#ee5757" }}>
                 {deleteMemberName}
               </span>

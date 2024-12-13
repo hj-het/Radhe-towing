@@ -11,9 +11,12 @@ import {
   FaLocationArrow,
   FaCommentAlt,
   FaExclamationCircle,
-  FaWrench
+  FaWrench,
+  FaEdit
   // FaClipboardCheck,
 } from "react-icons/fa";
+import { MdCancel } from "react-icons/md";
+
 import TableOne from "../Table/TableOne";
 import "./../Style/employees.css"; // Reuse employees CSS for styling
 import { ToastContainer, toast } from "react-toastify";
@@ -21,7 +24,7 @@ import "react-toastify/dist/ReactToastify.css";
 import "./../Style/service.css";
 import Autocomplete from "@mui/material/Autocomplete";
 import TextField from "@mui/material/TextField";
-
+import { IoWarningOutline } from "react-icons/io5";
 Modal.setAppElement("#root");
 
 const statusOptions = [
@@ -75,7 +78,6 @@ const Services = () => {
   const [paymentData, setPaymentData] = useState(null);
   const [completedCount, setCompletedCount] = useState(null); // State for completed count
   const [numOfTowing, setNumOfTowing] = useState(null);
-  
 
   // console.log(getCurrentDateTime()); // Output: 'dd-mm-yyyy hh:mm AM/PM'
 
@@ -115,7 +117,7 @@ const Services = () => {
     setNewService({ ...newService, member_id: memberId, vehicle_id: "" });
     setSelectedMember(memberId);
     setMemberDetails(null);
-    setCompletedCount(null); 
+    setCompletedCount(null);
     setNumOfTowing(null);
 
     if (memberId) {
@@ -314,7 +316,7 @@ const Services = () => {
     setModalIsOpen(false);
     resetForm();
     setMemberDetails(null);
-    setCompletedCount(null); 
+    setCompletedCount(null);
     setNumOfTowing(null);
   };
 
@@ -332,7 +334,7 @@ const Services = () => {
     setEditingService(null);
     setVehicles([]);
     setMemberDetails(null);
-    setCompletedCount(null); 
+    setCompletedCount(null);
     setNumOfTowing(null);
   };
 
@@ -341,7 +343,7 @@ const Services = () => {
     resetForm();
     setModalIsOpen(true);
     setMemberDetails(null);
-    setCompletedCount(null); 
+    setCompletedCount(null);
     setNumOfTowing(null);
   };
 
@@ -400,32 +402,43 @@ const Services = () => {
       return;
     }
     try {
+      // Fetch completed count data
       const completedCountResponse = await axios.get(
         `https://panel.radhetowing.com/api/towing-service-requests/completed-count/${memberId}/${vehicleId}`
       );
       setCompletedCountData(completedCountResponse.data);
 
+      // Fetch payment data for the member
       const paymentResponse = await axios.get(
         `https://panel.radhetowing.com/api/payment-master/member/${memberId}`
       );
 
-      // Filter payment data to find the record matching the selected vehicle ID
+      // Filter payment data for the selected vehicle and Status: "A"
       const matchedPaymentData = paymentResponse.data.find(
-        (payment) => payment.PM_V_id === vehicleId
+        (payment) => payment.PM_V_id === vehicleId && payment.Status === "A"
       );
 
       if (matchedPaymentData) {
         setPaymentData(matchedPaymentData);
+
+        // Extract `PM_num_of_towing` and set it as `numOfTowing`
+        setNumOfTowing(matchedPaymentData.PM_num_of_towing || 0);
       } else {
-        console.warn(
-          "No matching payment data found for the selected vehicle."
-        );
+        // Show toast message when no matching payment is found
+        toast.error("Please make payment for this service to proceed.", {
+          position: "top-right",
+        });
         setPaymentData(null);
+        setNumOfTowing(0); // Reset numOfTowing if no match is found
       }
 
+      // Open the modal to display data
       setCompletedCountModalIsOpen(true);
     } catch (error) {
       console.error("Error fetching data:", error);
+      toast.error("An error occurred while fetching data. Please try again.", {
+        position: "top-right",
+      });
     }
   };
 
@@ -483,7 +496,18 @@ const Services = () => {
 
   return (
     <div className="services-page">
-      <h1 style={{display:"flex",textAlign:'center',gap:'6px',alignItems:"center",fontSize:"25px"}}> <FaWrench/> Services</h1>
+      <h1
+        style={{
+          display: "flex",
+          textAlign: "center",
+          gap: "6px",
+          alignItems: "center",
+          fontSize: "25px",
+        }}
+      >
+        {" "}
+        <FaWrench /> Services
+      </h1>
 
       {/* Add Service Button */}
       <div className="AddButton">
@@ -667,13 +691,21 @@ const Services = () => {
 
           <div className="modelbutton">
             <button onClick={handleSave} className="btn-editmodel">
-              {editingService ? "Edit Service" : "Add Service"}
+              {editingService ? (
+                <>
+                  <FaEdit  /> Edit Service
+                </>
+              ) : (
+                <>
+                <FaPlus/> Add Service
+                </>
+              )}
             </button>
             <button
               className="btn-closemodel"
               onClick={() => setModalIsOpen(false)}
             >
-              Close
+               <MdCancel  /> Close
             </button>
           </div>
         </div>
@@ -689,7 +721,7 @@ const Services = () => {
         overlayClassName="modal-overlay"
         shouldCloseOnOverlayClick={false}
       >
-        <h2>Number of Towing Services</h2>
+        <h2 style={{ textAlign: "center" }}>Number of Towing Services</h2>
         {completedCountData && paymentData ? (
           <div className="completedCountData">
             {/* <p>
@@ -716,6 +748,15 @@ const Services = () => {
                   completedCountData.completed_count}
               </strong>{" "}
             </p>
+            <div className="Additional-charged">
+              {paymentData.PM_num_of_towing -
+                completedCountData.completed_count ===
+                0 && (
+                <p style={{ color: "red", fontWeight: "bold" }}>
+                  Additional towing will be charged!
+                </p>
+              )}
+            </div>
           </div>
         ) : (
           <p>Loading...</p>
@@ -734,9 +775,18 @@ const Services = () => {
       {showDeleteModal && (
         <div className="modal-overlay">
           <div className="modal-content">
-            <h3>Confirm Delete</h3>
+                 <h3
+                                    style={{
+                                      display: "flex",
+                                      justifyContent: "center",
+                                      alignItems: "center",
+                                      gap: "5px",
+                                    }}
+                                  >
+                                    <IoWarningOutline /> Confirm Delete
+                                  </h3>
             <p>
-              Are you sure you want to delete service for{" "}
+              Are you sure you want to permanent delete service for{" "}
               <span style={{ fontWeight: 700, color: "#ee5757" }}>
                 {deleteServiceName}
               </span>
@@ -767,33 +817,34 @@ const Services = () => {
           <p>Loading...</p>
         </div>
       ) : (
-      <TableOne
-        columns={columns}
-        data={filteredServices.slice().reverse()}
-        handleDelete={(service) => triggerDeleteModal(service)}
-        handleEdit={async (service) => {
-          console.log("service-->", service);
-          console.log("member.id", service.member.id);
-          setEditingService(service);
-          setNewService({
-            member_id: service.member.id,
-            vehicle_id: service.vehicle.id,
-            datetime: service.datetime,
-            comments: service.comments,
-            location: service.location,
-            status: service.status,
-            chargble: false,
-          });
-          setMemberDetails(null);
-          setSelectedMember(service.member.id);
-          await fetchVehiclesForMember(service.member.id);
-          setCompletedCount(null); 
-          setNumOfTowing(null);
-          setModalIsOpen(true);
-        }}
-        isServiceTable={true}
-        handleCompletedCount={handleCompletedCount}
-      /> )}
+        <TableOne
+          columns={columns}
+          data={filteredServices.slice().reverse()}
+          handleDelete={(service) => triggerDeleteModal(service)}
+          handleEdit={async (service) => {
+            console.log("service-->", service);
+            console.log("member.id", service.member.id);
+            setEditingService(service);
+            setNewService({
+              member_id: service.member.id,
+              vehicle_id: service.vehicle.id,
+              datetime: service.datetime,
+              comments: service.comments,
+              location: service.location,
+              status: service.status,
+              chargble: false,
+            });
+            setMemberDetails(null);
+            setSelectedMember(service.member.id);
+            await fetchVehiclesForMember(service.member.id);
+            setCompletedCount(null);
+            setNumOfTowing(null);
+            setModalIsOpen(true);
+          }}
+          isServiceTable={true}
+          handleCompletedCount={handleCompletedCount}
+        />
+      )}
 
       <ToastContainer />
     </div>

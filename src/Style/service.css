@@ -177,6 +177,7 @@ textarea {
   display: flex;
   justify-content: space-around;
   align-items: center;
+  flex-direction: column;
 }
 
 .completed-count {

@@ -1,48 +1,52 @@
 import React, { useState, useEffect, useRef, useContext } from "react";
-import { useNavigate } from "react-router-dom"; // For navigation
-import { AuthContext } from "../Context/AuthContext"; // Import AuthContext
-import "./header.css"; // Import your custom CSS for the header
+import { useNavigate } from "react-router-dom";
+import { AuthContext } from "../Context/AuthContext";
+import "./header.css";
 
 const Header = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const [showLogoutModal, setShowLogoutModal] = useState(false); // State for logout confirmation modal
-  const dropdownRef = useRef(null); // Ref to detect outside click
-  const { logout } = useContext(AuthContext); // Get logout function from AuthContext
-  const navigate = useNavigate(); // Hook to navigate
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const [showProfileModal, setShowProfileModal] = useState(false);
+  const dropdownRef = useRef(null);
+  const { logout } = useContext(AuthContext);
+  const navigate = useNavigate();
 
-  // Toggle the dropdown when clicking the profile picture
   const toggleDropdown = () => {
     setDropdownOpen(!dropdownOpen);
   };
 
-  const userData = JSON.parse(localStorage.getItem("user"));
-  const username = userData?.username || "Guest"; // Fallback to 'Guest' if no user is found
+  const userData = JSON.parse(localStorage.getItem("user")) || {};
+  const role = localStorage.getItem("role") || "Guest"; // Fetch role separately
+  const username = userData?.username || "Guest";
 
-  // Close the dropdown when clicking outside
   const handleClickOutside = (event) => {
     if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-      setDropdownOpen(false); // Close dropdown if clicked outside
+      setDropdownOpen(false);
     }
   };
 
-  // Handle showing the logout confirmation modal
   const handleLogoutClick = () => {
-    setShowLogoutModal(true); // Show confirmation modal
+    setShowLogoutModal(true);
   };
 
-  // Handle the actual logout process after confirmation
   const confirmLogout = () => {
-    logout(); // Call the logout function from AuthContext
-    navigate("/"); // Redirect to login page
-    setShowLogoutModal(false); // Close the modal
+    logout();
+    navigate("/");
+    setShowLogoutModal(false);
   };
 
-  // Close the modal without logging out
   const cancelLogout = () => {
-    setShowLogoutModal(false); // Close the modal
+    setShowLogoutModal(false);
   };
 
-  // Add event listener for clicks when dropdown is open
+  const handleProfileClick = () => {
+    setShowProfileModal(true);
+  };
+
+  const closeProfileModal = () => {
+    setShowProfileModal(false);
+  };
+
   useEffect(() => {
     if (dropdownOpen) {
       document.addEventListener("mousedown", handleClickOutside);
@@ -64,13 +68,9 @@ const Header = () => {
 
         <div className="header-right">
           <div className="profile-section" onClick={toggleDropdown}>
-          <span className="username">Hello  {username},</span> {/* Display username */}
+            <span className="username">Hello {username},</span>
             <img
-              src={
-                localStorage.getItem("role") === "admin"
-                  ? "/images/admin.png" 
-                  : "/images/user.png" 
-              }
+              src={role === "admin" ? "/images/admin.png" : "/images/user.png"}
               alt="Profile"
               className="profile-pic"
             />
@@ -80,10 +80,8 @@ const Header = () => {
           {dropdownOpen && (
             <div className="dropdown-menu" ref={dropdownRef}>
               <ul>
-                <li>My Profile</li>
-                <li>Change Password</li>
-                <li onClick={handleLogoutClick}>Logout</li>{" "}
-                {/* Handle logout click */}
+                <li onClick={handleProfileClick}>My Profile</li>
+                <li onClick={handleLogoutClick}>Logout</li>
               </ul>
             </div>
           )}
@@ -104,6 +102,28 @@ const Header = () => {
                 Cancel
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* My Profile Modal */}
+      {showProfileModal && (
+        <div className="modal-overlay-profile">
+          <div className="modal-content-profile">
+            <h3>My Profile</h3>
+            <ul>
+              {Object.entries(userData).map(([key, value]) => (
+                <li key={key}>
+                  <strong>{key}:</strong> {JSON.stringify(value)}
+                </li>
+              ))}
+              <li>
+                <strong>Role:</strong> {role}
+              </li>
+            </ul>
+            <button className="btn-close-profile" onClick={closeProfileModal}>
+              Close
+            </button>
           </div>
         </div>
       )}

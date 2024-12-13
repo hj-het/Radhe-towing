@@ -11,13 +11,14 @@ import {
   FaUserEdit,
   FaAddressCard,
   FaSearch,
-  
+  FaEdit,
 } from "react-icons/fa";
+import { MdCancel } from "react-icons/md";
 import TableOne from "../Table/TableOne";
 import "./../Style/vehicle.css";
 import { toast, ToastContainer } from "react-toastify";
 import { FormControlLabel, Switch } from "@mui/material"; // Import Material-UI components
-
+import { IoWarningOutline } from "react-icons/io5";
 Modal.setAppElement("#root");
 
 const Vehicles = () => {
@@ -107,7 +108,7 @@ const Vehicles = () => {
     }
   };
 
-  // Edit/update a vehicle
+  // Edit/Edit a vehicle
   const editVehicle = async () => {
     if (!validateForm()) return;
     try {
@@ -126,7 +127,7 @@ const Vehicles = () => {
         toast.success("Vehicle updated successfully!");
       }
     } catch (error) {
-      toast.error("Failed to update vehicle.");
+      toast.error("Failed to Edit vehicle.");
     }
   };
 
@@ -195,14 +196,24 @@ const Vehicles = () => {
     setSearchQuery(e.target.value.toLowerCase());
   };
 
-  const filteredVehicles = vehicles.filter(
-    (vehicle) =>
-      vehicle.vehicle_number.toLowerCase().includes(searchQuery) ||
-      vehicle.vehicle_type.toLowerCase().includes(searchQuery)
-  );
+  const filteredVehicles = vehicles.filter((vehicle) => {
+    const searchValue = searchQuery.toLowerCase();
 
-
-  
+    return (
+      (vehicle.vehicle_number &&
+        vehicle.vehicle_number.toLowerCase().includes(searchValue)) ||
+      (vehicle.vehicle_type &&
+        vehicle.vehicle_type.toLowerCase().includes(searchValue)) ||
+      (vehicle.vehicle_age &&
+        String(vehicle.vehicle_age).toLowerCase().includes(searchValue)) ||
+      (vehicle.name && vehicle.name.toLowerCase().includes(searchValue)) ||
+      (vehicle.notes && vehicle.notes.toLowerCase().includes(searchValue)) ||
+      (vehicle.amount &&
+        String(vehicle.amount).toLowerCase().includes(searchValue)) ||
+      (vehicle.is_active !== undefined &&
+        (vehicle.is_active ? "active" : "inactive").includes(searchValue))
+    );
+  });
 
   // Table columns
   const columns = [
@@ -217,17 +228,27 @@ const Vehicles = () => {
       Header: "Status",
       accessor: "is_active",
       Cell: ({ value }) => (
-        <span style={{ color: value ? "green" : "red" , fontWeight: "bold" }}>
+        <span style={{ color: value ? "green" : "red", fontWeight: "bold" }}>
           {value ? "Active" : "Inactive"}
         </span>
       ),
-    }
-    
+    },
   ];
 
   return (
     <div className="vehicles-page">
-      <h1 style={{display:"flex",textAlign:'center',gap:'6px',alignItems:"center",fontSize:"25px"}}> <FaCar/> Vehicles</h1>
+      <h1
+        style={{
+          display: "flex",
+          textAlign: "center",
+          gap: "6px",
+          alignItems: "center",
+          fontSize: "25px",
+        }}
+      >
+        {" "}
+        <FaCar /> Vehicles
+      </h1>
 
       <div className="AddButton">
         <button onClick={handleOpenAddModal} className="add-btn">
@@ -241,7 +262,7 @@ const Vehicles = () => {
           <FaSearch className="search-icon" />
           <input
             type="text"
-            placeholder="Search by Vehicle Number"
+            placeholder="Search"
             value={searchQuery}
             onChange={handleSearchChange}
           />
@@ -257,6 +278,12 @@ const Vehicles = () => {
         shouldCloseOnOverlayClick={false}
       >
         <h2>{editingVehicle ? "Edit Vehicle" : "Add Vehicle"}</h2>
+
+        {/* <h2>
+          {editingVehicle ? <FaUserEdit /> : <FaPlus />}
+          {editingVehicle ? " Edit Vehicle" : " Add Vehicle"}
+        </h2> */}
+
         <div className="form-vehicle">
           {/* Member Dropdown */}
           <div className="input-error-veh">
@@ -379,8 +406,8 @@ const Vehicles = () => {
             </div>
           </div>
 
-                {/* Active Switch - Only visible in Edit Vehicle form */}
-                {editingVehicle && (
+          {/* Active Switch - Only visible in Edit Vehicle form */}
+          {editingVehicle && (
             <FormControlLabel
               control={
                 <Switch
@@ -409,17 +436,24 @@ const Vehicles = () => {
               }
             />
           </div>
-    
 
           <div className="modelbutton">
             <button onClick={handleSave} className="btn-editmodel">
-              {editingVehicle ? "Edit Vehicle" : "Add Vehicle"}
+              {editingVehicle ? (
+                <>
+                  <FaEdit /> Edit Vehicle
+                </>
+              ) : (
+                <>
+                  <FaPlus /> Add Vehicle
+                </>
+              )}
             </button>
             <button
               className="btn-closemodel"
               onClick={() => setModalIsOpen(false)}
             >
-              Close
+              <MdCancel /> Close
             </button>
           </div>
         </div>
@@ -429,9 +463,18 @@ const Vehicles = () => {
       {showDeleteModal && (
         <div className="modal-overlay">
           <div className="modal-content">
-            <h3>Confirm Delete</h3>
+            <h3
+              style={{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                gap: "5px",
+              }}
+            >
+              <IoWarningOutline /> Confirm Delete
+            </h3>
             <p>
-              Are you sure you want to delete{" "}
+              Are you sure you want to permanent delete{" "}
               <span style={{ fontWeight: 700, color: "#ee5757" }}>
                 {deleteVehicleName}
               </span>
@@ -464,14 +507,15 @@ const Vehicles = () => {
           <p>Loading...</p>
         </div>
       ) : (
-      <TableOne
-        columns={columns}
-        data={filteredVehicles.slice().reverse()}
-        handleDelete={(vehicle) =>
-          triggerDeleteModal(vehicle.id, `${vehicle.vehicle_number}`)
-        }
-        handleEdit={handleEdit}
-      />)}
+        <TableOne
+          columns={columns}
+          data={filteredVehicles.slice().reverse()}
+          handleDelete={(vehicle) =>
+            triggerDeleteModal(vehicle.id, `${vehicle.vehicle_number}`)
+          }
+          handleEdit={handleEdit}
+        />
+      )}
     </div>
   );
 };

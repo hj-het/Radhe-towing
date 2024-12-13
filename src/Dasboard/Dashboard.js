@@ -7,7 +7,7 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-} from "recharts";
+} from "recharts"; 
 import dayjs from "dayjs";
 import { AiOutlineDashboard } from "react-icons/ai";
 import BarChartComponent from "./BarChartComponent";
@@ -192,7 +192,7 @@ const Dashboard = () => {
               <Line
                 type="monotone"
                 dataKey="currentMonth"
-                stroke="#3b82f6"
+                stroke="#F4511E"
                 strokeWidth={3}
                 name="Current Month"
               />
@@ -213,7 +213,7 @@ const Dashboard = () => {
               style={{
                 width: "20px",
                 height: "10px",
-                backgroundColor: "#3b82f6",
+                backgroundColor: "#F4511E",
                 display: "inline-block",
               }}
             ></span>

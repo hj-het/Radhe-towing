@@ -251,8 +251,8 @@ input[type="number"]::-webkit-outer-spin-button {
 /* Error text styling */
 .error-text {
   color: red;
-  font-size: 0.875rem;
-  margin-top: 5px;
+  font-size: 12px;
+  /* margin-top: 5px; */
 }
 
   

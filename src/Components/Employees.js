@@ -7,7 +7,7 @@ import "./../Style/employees.css";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import emailjs from "emailjs-com";
-
+import { MdCancel } from "react-icons/md";
 import {
   FaUser,
   FaLock,
@@ -17,9 +17,10 @@ import {
   FaEye,
   FaEyeSlash,
   FaSearch,
-  FaUserTie
+  FaUserTie,
+  FaEdit,
 } from "react-icons/fa";
-
+import { IoWarningOutline } from "react-icons/io5";
 Modal.setAppElement("#root");
 
 const Employees = () => {
@@ -37,7 +38,7 @@ const Employees = () => {
   const [newPassword, setNewPassword] = useState("");
   const [resetEmployeeId, setResetEmployeeId] = useState(null);
   const [showStatusModal, setShowStatusModal] = useState(false);
-  const [currentEmployee, setCurrentEmployee] = useState(null); 
+  const [currentEmployee, setCurrentEmployee] = useState(null);
   const [newEmployee, setNewEmployee] = useState({
     Username: "",
     Password: "",
@@ -54,7 +55,9 @@ const Employees = () => {
   const fetchEmployees = async () => {
     setLoading(true);
     try {
-      const response = await axios.get("https://panel.radhetowing.com/api/employees");
+      const response = await axios.get(
+        "https://panel.radhetowing.com/api/employees"
+      );
       const employeeData = response.data.data.map((emp) => ({
         id: emp.id,
         Username: emp.Username,
@@ -79,35 +82,35 @@ const Employees = () => {
     fetchEmployees();
   }, []);
 
- // Open the confirmation modal for status change
- const openStatusModal = (employee) => {
-  setCurrentEmployee(employee);
-  setShowStatusModal(true);
-};
+  // Open the confirmation modal for status change
+  const openStatusModal = (employee) => {
+    setCurrentEmployee(employee);
+    setShowStatusModal(true);
+  };
 
-// Confirm the status change
-const confirmStatusChange = async () => {
-  const newStatus = !currentEmployee.IsActive;
-  try {
-    const response = await axios.put(
-      `https://panel.radhetowing.com/api/employee/update-status/${currentEmployee.id}`,
-      { IsActive: newStatus }
-    );
-
-    if (response.data.success) {
-      toast.success(
-        `Employee status updated to ${newStatus ? "Active" : "Inactive"}`
+  // Confirm the status change
+  const confirmStatusChange = async () => {
+    const newStatus = !currentEmployee.IsActive;
+    try {
+      const response = await axios.put(
+        `https://panel.radhetowing.com/api/employee/Edit-status/${currentEmployee.id}`,
+        { IsActive: newStatus }
       );
-      setShowStatusModal(false); // Close the modal
-      fetchEmployees(); // Refetch the employees to get the latest status
-    } else {
-      toast.error("Failed to update status.");
+
+      if (response.data.success) {
+        toast.success(
+          `Employee status updated to ${newStatus ? "Active" : "Inactive"}`
+        );
+        setShowStatusModal(false); // Close the modal
+        fetchEmployees(); // Refetch the employees to get the latest status
+      } else {
+        toast.error("Failed to Edit status.");
+      }
+    } catch (error) {
+      console.error("Error updating status:", error);
+      toast.error("Error updating employee status.");
     }
-  } catch (error) {
-    console.error("Error updating status:", error);
-    toast.error("Error updating employee status.");
-  }
-};
+  };
 
   const validateForm = () => {
     const newErrors = {};
@@ -160,7 +163,7 @@ const confirmStatusChange = async () => {
     setShowDeleteModal(true);
   };
 
-  // Handle edit operation
+  // Handle Edit operation
   const handleEdit = (employee) => {
     setEditingEmployee(employee);
     setNewEmployee(employee);
@@ -233,7 +236,7 @@ const confirmStatusChange = async () => {
     }
   };
 
-  // Function to Edit/Update an Employee
+  // Function to Edit/Edit an Employee
   const editEmployee = async () => {
     const payload = {
       Username: newEmployee.Username,
@@ -248,7 +251,7 @@ const confirmStatusChange = async () => {
 
     try {
       const response = await axios.put(
-        `https://panel.radhetowing.com/api/employee/update/${editingEmployee.id}`,
+        `https://panel.radhetowing.com/api/employee/Edit/${editingEmployee.id}`,
         payload
       );
 
@@ -364,19 +367,28 @@ const confirmStatusChange = async () => {
     const query = e.target.value.toLowerCase();
     setSearchQuery(query);
 
-    const filtered = employees.filter(
-      (employee) =>
-        employee.FirstName.toLowerCase().includes(query) ||
-        employee.LastName.toLowerCase().includes(query) ||
-        employee.Email.toLowerCase().includes(query)
-    );
+    const filtered = employees.filter((employee) => {
+      const username = employee.Username.toLowerCase();
+      const firstName = employee.FirstName.toLowerCase();
+      const lastName = employee.LastName.toLowerCase();
+      const email = employee.Email.toLowerCase();
+      const contact = employee.Contact ? employee.Contact.toLowerCase() : "";
+      const dob = employee.DOB ? formatDate(employee.DOB).toLowerCase() : "";
+      const doj = employee.DOJ ? formatDate(employee.DOJ).toLowerCase() : "";
+
+      return (
+        username.includes(query) ||
+        firstName.includes(query) ||
+        lastName.includes(query) ||
+        email.includes(query) ||
+        contact.includes(query) ||
+        dob.includes(query) ||
+        doj.includes(query)
+      );
+    });
 
     setFilteredEmployees(filtered);
   };
-
-
-  
-  
 
   // Table columns
   const columns = [
@@ -400,13 +412,13 @@ const confirmStatusChange = async () => {
         const isActive = row.original.IsActive;
         return (
           <button
-          onClick={() => openStatusModal(row.original)}
+            onClick={() => openStatusModal(row.original)}
             style={{
               color: isActive ? "green" : "red",
               fontWeight: "bold",
               cursor: "pointer",
               border: "transparent",
-              background:"transparent",
+              background: "transparent",
             }}
           >
             {isActive ? "Active" : "Inactive"}
@@ -418,7 +430,18 @@ const confirmStatusChange = async () => {
 
   return (
     <div className="employees-page">
-      <h1 style={{display:"flex",textAlign:'center',gap:'6px',alignItems:"center",fontSize:"25px"}}>  <FaUserTie/> Employees </h1>
+      <h1
+        style={{
+          display: "flex",
+          textAlign: "center",
+          gap: "6px",
+          alignItems: "center",
+          fontSize: "25px",
+        }}
+      >
+        {" "}
+        <FaUserTie /> Employees{" "}
+      </h1>
 
       {/* Add Employee Button */}
       <div className="AddButton">
@@ -433,7 +456,7 @@ const confirmStatusChange = async () => {
           <FaSearch className="search-icon" /> {/* Search Icon */}
           <input
             type="text"
-            placeholder="Search by name or email"
+            placeholder="Search"
             value={searchQuery}
             onChange={handleSearchChange}
           />
@@ -645,14 +668,22 @@ const confirmStatusChange = async () => {
 
           <div className="modelbutton">
             <button onClick={handleSave} className="btn-editmodel">
-              {editingEmployee ? "Edit Employee" : "Add Employee"}
+              {editingEmployee ? (
+                <>
+                  <FaEdit /> Edit Employee
+                </>
+              ) : (
+                <>
+                  <FaPlus /> Add Employee
+                </>
+              )}
             </button>
 
             <button
               className="btn-closemodel"
               onClick={() => setModalIsOpen(false)}
             >
-              Close
+              <MdCancel /> Close
             </button>
           </div>
         </div>
@@ -672,7 +703,7 @@ const confirmStatusChange = async () => {
         {resetEmployeeId && (
           <>
             <p>
-              Reset password for {" "}
+              Reset password for{" "}
               <strong>
                 {
                   employees.find((employee) => employee.id === resetEmployeeId)
@@ -746,9 +777,9 @@ const confirmStatusChange = async () => {
       {showDeleteModal && (
         <div className="modal-overlay">
           <div className="modal-content">
-            <h3>Confirm Delete</h3>
+            <h3 style={{display:'flex',justifyContent:'center',alignItems:'center',gap:'5px'}}><IoWarningOutline/> Confirm Delete</h3>
             <p>
-              Are you sure you want to delete{" "}
+              Are you sure you want to permanent delete{" "}
               <span style={{ fontWeight: 700, color: "#ee5757" }}>
                 {deleteEmployeeName}
               </span>
@@ -773,8 +804,8 @@ const confirmStatusChange = async () => {
         </div>
       )}
 
-        {/* Confirmation Modal for Status Change */}
-        <Modal
+      {/* Confirmation Modal for Status Change */}
+      <Modal
         isOpen={showStatusModal}
         onRequestClose={() => setShowStatusModal(false)}
         contentLabel="Confirm Status Change"
@@ -782,7 +813,7 @@ const confirmStatusChange = async () => {
         overlayClassName="modal-overlay"
         style={{
           content: {
-            textAlign: "center", 
+            textAlign: "center",
           },
         }}
       >
@@ -793,8 +824,7 @@ const confirmStatusChange = async () => {
             <span style={{ fontWeight: "bold", color: "#ee5757" }}>
               {currentEmployee.FirstName} {currentEmployee.LastName}
             </span>{" "}
-            ?
-            {/* to {currentEmployee.is_active ? "Inactive" : "Active"}? */}
+            ?{/* to {currentEmployee.is_active ? "Inactive" : "Active"}? */}
           </p>
         )}
         <div className="modal-buttons">
@@ -822,22 +852,23 @@ const confirmStatusChange = async () => {
           <p>Loading...</p>
         </div>
       ) : (
-      <TableOne
-        columns={columns}
-        data={filteredEmployees.slice().reverse()}
-        handleDelete={(employee) =>
-          triggerDeleteModal(
-            employee.id,
-            `${employee.FirstName} ${employee.LastName}`
-          )
-        }
-        handleEdit={handleEdit}
-        handlePasswordReset={(employee) => {
-          setResetEmployeeId(employee.id);
-          setShowResetPasswordModal(true);
-        }}
-        isEmployeeTable={true} // Pass true to show the Reset Password button
-      /> )}
+        <TableOne
+          columns={columns}
+          data={filteredEmployees.slice().reverse()}
+          handleDelete={(employee) =>
+            triggerDeleteModal(
+              employee.id,
+              `${employee.FirstName} ${employee.LastName}`
+            )
+          }
+          handleEdit={handleEdit}
+          handlePasswordReset={(employee) => {
+            setResetEmployeeId(employee.id);
+            setShowResetPasswordModal(true);
+          }}
+          isEmployeeTable={true} // Pass true to show the Reset Password button
+        />
+      )}
       {/* Toast Container for notifications */}
       <ToastContainer />
     </div>

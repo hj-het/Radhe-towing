@@ -1,6 +1,6 @@
 import React from "react";
 import { useTable } from "react-table";
-import { FaEdit, FaTrashAlt, FaKey } from "react-icons/fa"; // Import the reset icon
+import { FaEdit, FaTrashAlt, FaKey } from "react-icons/fa"; 
 import { GiHook } from "react-icons/gi";
 import "./table.css";
 
@@ -20,6 +20,9 @@ const TableOne = ({
       data,
     });
 
+  // Get role from localStorage
+  const role = localStorage.getItem("role"); // Assuming role is stored as "employee" or "admin"
+
   return (
     <div className="table-container">
       <table {...getTableProps()} className="table">
@@ -38,7 +41,11 @@ const TableOne = ({
                   </th>
                 );
               })}
-              <th className="table-header">Actions</th>
+              {isServiceTable ? (
+                <th className="table-header">Action</th>
+              ) : (
+                role === "admin" && <th className="table-header">Actions</th>
+              )}
             </tr>
           ))}
         </thead>
@@ -57,14 +64,7 @@ const TableOne = ({
                 })}
                 <td className="table-cell">
                   <div className="tablebutton">
-                    {isEmployeeTable && (
-                      <button
-                        className="btn-reset"
-                        onClick={() => handlePasswordReset(row.original)}
-                      >
-                        <FaKey /> {/* Password reset icon */}
-                      </button>
-                    )}
+                    {/* This button is always visible for both admin and employee */}
                     {isServiceTable && (
                       <button
                         className="btn-reset"
@@ -79,18 +79,32 @@ const TableOne = ({
                       </button>
                     )}
 
-                    <button
-                      className="btn-edit"
-                      onClick={() => handleEdit(row.original)}
-                    >
-                      <FaEdit />
-                    </button>
-                    <button
-                      className="btn-delete"
-                      onClick={() => handleDelete(row.original)}
-                    >
-                      <FaTrashAlt />
-                    </button>
+                    {/* Only show these buttons for admin */}
+                    {role === "admin" && (
+                      <>
+                        {isEmployeeTable && (
+                          <button
+                            className="btn-reset"
+                            onClick={() => handlePasswordReset(row.original)}
+                          >
+                            <FaKey /> {/* Password reset icon */}
+                          </button>
+                        )}
+
+                        <button
+                          className="btn-edit"
+                          onClick={() => handleEdit(row.original)}
+                        >
+                          <FaEdit />
+                        </button>
+                        <button
+                          className="btn-delete"
+                          onClick={() => handleDelete(row.original)}
+                        >
+                          <FaTrashAlt />
+                        </button>
+                      </>
+                    )}
                   </div>
                 </td>
               </tr>
