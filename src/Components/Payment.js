@@ -13,7 +13,6 @@ import {
   FaImage,
   FaMoneyBillAlt,
   FaEdit,
-
 } from "react-icons/fa";
 import { MdOutlinePendingActions, MdCancel } from "react-icons/md";
 import TableOne from "../Table/TableOne";
@@ -331,19 +330,21 @@ const Payments = () => {
   const handleSearchChange = (e) => {
     const query = e.target.value.toLowerCase();
     setSearchQuery(query);
-  
+
     const filtered = payments.filter((payment) => {
       const memberUsername = payment.member?.M_username?.toLowerCase() || "";
-      const vehicleNumber = payment.vehicle?.V_vihicle_number?.toLowerCase() || "";
+      const vehicleNumber =
+        payment.vehicle?.V_vihicle_number?.toLowerCase() || "";
       const planName = payment.plan?.P_name?.toLowerCase() || "";
       const amount = payment.PM_Amount?.toString().toLowerCase() || "";
       const expireDate = new Date(payment.PM_expiredate)
         .toLocaleDateString()
         .toLowerCase();
-      const receivedBy = employees.find(
-        (emp) => emp.id === parseInt(payment.PM_payment_recived_by)
-      )?.Username?.toLowerCase() || "";
-  
+      const receivedBy =
+        employees
+          .find((emp) => emp.id === parseInt(payment.PM_payment_recived_by))
+          ?.Username?.toLowerCase() || "";
+
       return (
         memberUsername.includes(query) ||
         vehicleNumber.includes(query) ||
@@ -353,10 +354,10 @@ const Payments = () => {
         receivedBy.includes(query)
       );
     });
-  
+
     setFilteredPayments(filtered);
   };
-  
+
   const openImageModal = (imageUrl) => {
     setSelectedImage(imageUrl);
     setImageModalIsOpen(true);
@@ -541,7 +542,7 @@ const Payments = () => {
                   <option value="">Select Member</option>
                   {members.map((member) => (
                     <option key={member.id} value={member.id}>
-                      {member.username}
+                      {`${member.username} -- ${member.first_name} ${member.last_name}`}
                     </option>
                   ))}
                 </select>
@@ -672,17 +673,15 @@ const Payments = () => {
 
           <div className="modelbutton">
             <button onClick={handleSavePayment} className="btn-editmodel">
-              
-                {editingPayment ? (
-                  <>
-                    <FaEdit/> Edit Payment
-                  </>
-                ) : (
-                  <>
-                    <FaPlus/> Add Payment
-                  </>
-                )}
-              
+              {editingPayment ? (
+                <>
+                  <FaEdit /> Edit Payment
+                </>
+              ) : (
+                <>
+                  <FaPlus /> Add Payment
+                </>
+              )}
             </button>
             <button
               className="btn-closemodel"
@@ -698,16 +697,16 @@ const Payments = () => {
       {showDeleteModal && (
         <div className="modal-overlay">
           <div className="modal-content">
-               <h3
-                         style={{
-                           display: "flex",
-                           justifyContent: "center",
-                           alignItems: "center",
-                           gap: "5px",
-                         }}
-                       >
-                         <IoWarningOutline /> Confirm Delete
-                       </h3>
+            <h3
+              style={{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                gap: "5px",
+              }}
+            >
+              <IoWarningOutline /> Confirm Delete
+            </h3>
             <p>
               Are you sure you want to permanent delete payment for{" "}
               <span style={{ fontWeight: 700, color: "#ee5757" }}>

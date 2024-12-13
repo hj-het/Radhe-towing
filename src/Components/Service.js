@@ -18,7 +18,7 @@ import {
 import { MdCancel } from "react-icons/md";
 
 import TableOne from "../Table/TableOne";
-import "./../Style/employees.css"; // Reuse employees CSS for styling
+import "./../Style/employees.css"; 
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "./../Style/service.css";

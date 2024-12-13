@@ -85,7 +85,7 @@ const Login = () => {
                             <h1 className="heading">Login</h1>
                             <input
                                 type="text"
-                                placeholder="Email or Phone Number"
+                                placeholder="Enter Username"
                                 className={`input ${username ? "" : "error"}`}
                                 value={username}
                                 onChange={(e) => setUsername(e.target.value)}
