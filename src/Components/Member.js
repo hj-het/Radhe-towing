@@ -99,7 +99,7 @@ const Member = () => {
             address_1: member.address_1,
             address_2: member.address_2,
             pincode: member.pincode,
-            phone: member.contact,
+            contact: member.contact,
             email: member.email,
             city: city ? city.name : "Unknown",
             status: member.is_active,
@@ -262,7 +262,7 @@ const Member = () => {
     { Header: "Address ", accessor: "address_1" },
     // { Header: "Address 2", accessor: "address_2" },
     { Header: "Pincode", accessor: "pincode" },
-    { Header: "Phone", accessor: "phone" },
+    { Header: "Phone", accessor: "contact" },
     { Header: "Email", accessor: "email" },
     { Header: "City", accessor: "city" },
     {
@@ -288,7 +288,7 @@ const Member = () => {
           (member.last_name &&
             member.last_name.toLowerCase().includes(query)) ||
           (member.email && member.email.toLowerCase().includes(query)) ||
-          (member.phone && member.phone.includes(query))
+          (member.contact && member.contact.includes(query))
       );
       setFilteredMembers(filtered);
     }
@@ -361,11 +361,13 @@ const Member = () => {
         setMembers(members.filter((m) => m.id !== memberId));
         setFilteredMembers(filteredMembers.filter((m) => m.id !== memberId));
         setShowDeleteModal(false);
+        toast.success("Member Deleted Successfully")
       } else {
         console.error("Failed to delete member:", response);
       }
     } catch (error) {
       console.error("Error deleting member:", error);
+      toast.error("Error Deleting Member")
     }
   };
 
@@ -439,7 +441,7 @@ const Member = () => {
       address_2: member.address_2 || "",
       city_id: selectedCity ? selectedCity.id : "",
       pincode: member.pincode || "",
-      contact: member.phone || "",
+      contact: member.contact || "",
       email: member.email || "",
       profile_pic: member.profile_pic || null,
     });
@@ -450,9 +452,9 @@ const Member = () => {
     const validationErrors = validateForm();
     setErrors(validationErrors);
 
-    // if (Object.keys(validationErrors).length > 0) {
-    //   return; // Stop execution if there are validation errors
-    // }
+    if (Object.keys(validationErrors).length > 0) {
+      return; // Stop execution if there are validation errors
+    }
 
     if (editingMember) {
       // Update existing member via PUT request
@@ -541,6 +543,7 @@ const Member = () => {
         const addedCity =
           cities.find((city) => city.id === addedMember.city_id)?.name ||
           "Unknown";
+          toast.success("Successfully Added Member");
 
         // Add the newly created member to the list with the correct city name
         setMembers([

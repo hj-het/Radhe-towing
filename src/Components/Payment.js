@@ -166,7 +166,7 @@ const Payments = () => {
 
       if (!response.data.success) {
         toast.error(
-          response.data.message || "No vehicles found for this member."
+         "No vehicles found for this member."
         );
         return;
       }
@@ -180,7 +180,7 @@ const Payments = () => {
       }));
     } catch (error) {
       console.error("Error fetching vehicles for member:", error);
-      toast.error("Error fetching vehicles. Please try again.");
+      toast.error("No vehicles found for this member.");
     }
   };
 
